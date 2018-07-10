@@ -1,0 +1,9 @@
+E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Luyou\obj\Debug\NetDataAccess.Extended.Luyou.csprojResolveAssemblyReference.cache
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Luyou.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Luyou.pdb
+E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Luyou\obj\Debug\NetDataAccess.Extended.Luyou.dll
+E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Luyou\obj\Debug\NetDataAccess.Extended.Luyou.pdb

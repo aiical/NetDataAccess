@@ -1,0 +1,9 @@
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Tanyin.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Tanyin.pdb
+F:\Code\NetDataAccess2.0\NetDataAccess.Extended.Tanyin\obj\Debug\NetDataAccess.Extended.Tanyin.csprojResolveAssemblyReference.cache
+F:\Code\NetDataAccess2.0\NetDataAccess.Extended.Tanyin\obj\Debug\NetDataAccess.Extended.Tanyin.dll
+F:\Code\NetDataAccess2.0\NetDataAccess.Extended.Tanyin\obj\Debug\NetDataAccess.Extended.Tanyin.pdb

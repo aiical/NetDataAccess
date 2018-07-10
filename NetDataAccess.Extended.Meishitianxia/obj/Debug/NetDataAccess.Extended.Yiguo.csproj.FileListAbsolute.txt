@@ -1,0 +1,15 @@
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\NetDataAccess.Extended.Yiguo.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\NetDataAccess.Extended.Yiguo.pdb
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.pdb
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\x64\liblept168.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\x64\libtesseract302.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\x86\liblept168.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\x86\libtesseract302.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.csprojResolveAssemblyReference.cache
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Yiguo.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Yiguo.pdb

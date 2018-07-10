@@ -1,0 +1,9 @@
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Yinshi.dll
+E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Yinshi.pdb
+E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Yinshi\obj\Debug\NetDataAccess.Extended.Yinshi.csprojResolveAssemblyReference.cache
+E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Yinshi\obj\Debug\NetDataAccess.Extended.Yinshi.dll
+E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Yinshi\obj\Debug\NetDataAccess.Extended.Yinshi.pdb

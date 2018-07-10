@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sysConfig>
+  
+  <property name="IntervalDetailPageSave" value="50"/>
+  <property name="IntervalShowLog" value="1000"/>
+  <property name="IntervalShowStatus" value="10000"/>
+  <property name="ShowLogLevelType" value="Normal"/>
+  <property name="ShowLogMinTime" value="500"/>
+  <property name="WebPageEncoding" value="utf-8"/>
+  <property name="WebPageRequestInterval" value="400"/>
+  <property name="WebPageRequestTimeout" value="30000"/>
+  <property name="XPathSplit" value="#split#"/>
+
+  <!-- 对外提供的服务接口 -->
+  <property name="ServerIP" value=""/>
+  <!--<property name="ServerIP" value="192.168.1.12"/>-->
+  <property name="ServerPort" value="8081"/>
+  
+  <!-- 自动执行任务 -->
+  <property name="TaskMonitorInterval" value="10000"/>
+  <property name="MaxAliveTaskNum" value="1"/>
+
+  <!-- 抓取过程中，UI界面中显示错误信息 -->
+  <property name="AllowShowError" value="true"/>
+
+  <!-- 代理出现几次错误后被弃用 -->
+  <property name="ProxyAbandonErrorTime" value="1"/>
+
+  <!-- 超过NoneGotTimeout没有获取到任何页面时，系统报错，停止抓取 -->
+  <property name="NoneGotTimeout" value="20000"/>
+</sysConfig>

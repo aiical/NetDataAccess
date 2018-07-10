@@ -1,0 +1,16 @@
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\NetDataAccess.Base.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\NetDataAccess.Base.pdb
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\HtmlAgilityPack.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\ICSharpCode.SharpZipLib.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\Newtonsoft.Json.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\NPOI.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\NPOI.OOXML.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\NPOI.OpenXml4Net.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\NPOI.OpenXmlFormats.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\System.Data.SQLite.DLL
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\bin\Release\Newtonsoft.Json.xml
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\obj\Release\NetDataAccess.Base.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Base\obj\Release\NetDataAccess.Base.pdb
+E:\Code\NetDataAccess2.0\NetDataAccess.Base\obj\Release\NetDataAccess.Base.csprojResolveAssemblyReference.cache
+E:\Code\NetDataAccess2.0\NetDataAccess.Base\obj\Release\NetDataAccess.Base.dll
+E:\Code\NetDataAccess2.0\NetDataAccess.Base\obj\Release\NetDataAccess.Base.pdb

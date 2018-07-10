@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0EE621D1-4C5E-42AA-AD51-83737DAEC292}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NetDataAccess</RootNamespace>
+    <AssemblyName>NetDataAccess</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="HtmlAgilityPack, Version=1.4.6.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>C:\Program Files (x86)\Microsoft.NET\Primary Interop Assemblies\Microsoft.mshtml.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\NetDataAccess.Base\bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.98.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\sqlite-netFx20-static-binary-bundle-x64-2005-1.0.98.0\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Export\ExcelWriter.cs" />
+    <Compile Include="DB\ListSheetInDB.cs" />
+    <Compile Include="Delegate\AfterSaveHandler.cs" />
+    <Compile Include="Export\CsvWriter.cs" />
+    <Compile Include="Export\DetailWriter.cs" />
+    <Compile Include="Config\FormConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\FormConfig.Designer.cs">
+      <DependentUpon>FormConfig.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Main\FormMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Main\FormMain.Designer.cs">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Main\NDATabPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Main\Program.cs" />
+    <Compile Include="Run\NdaWebBrowser.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Edit\UserControlEditGroup.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Edit\UserControlEditGroup.Designer.cs">
+      <DependentUpon>UserControlEditGroup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Edit\UserControlEditProject.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Edit\UserControlEditProject.Designer.cs">
+      <DependentUpon>UserControlEditProject.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Delegate\BeforeTabPageCloseHandler.cs" />
+    <Compile Include="Run\UserControlRunGrabWebPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Run\UserControlRunGrabWebPage.Designer.cs">
+      <DependentUpon>UserControlRunGrabWebPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Config\FormTaskSetting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Config\FormTaskSetting.Designer.cs">
+      <DependentUpon>FormTaskSetting.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Config\FormConfig.resx">
+      <DependentUpon>FormConfig.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Main\FormMain.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Edit\UserControlEditGroup.resx">
+      <DependentUpon>UserControlEditGroup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Edit\UserControlEditProject.resx">
+      <DependentUpon>UserControlEditProject.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Run\UserControlRunGrabWebPage.resx">
+      <DependentUpon>UserControlRunGrabWebPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\FormTaskSetting.resx">
+      <DependentUpon>FormTaskSetting.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\NetDataAccess.AppAccessBase\NetDataAccess.AppAccessBase.csproj">
+      <Project>{5ffeec3a-5560-4a5a-ab6c-0017e42e0820}</Project>
+      <Name>NetDataAccess.AppAccessBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NetDataAccess.Base\NetDataAccess.Base.csproj">
+      <Project>{531136bf-0bd9-461e-8284-28770c606c87}</Project>
+      <Name>NetDataAccess.Base</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

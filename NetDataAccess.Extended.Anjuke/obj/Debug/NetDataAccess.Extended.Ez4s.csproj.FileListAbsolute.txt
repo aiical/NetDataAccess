@@ -1,0 +1,5 @@
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\NetDataAccess.Extended.Ez4s.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess\bin\Debug\Extended\NetDataAccess.Extended.Ez4s.pdb
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.csprojResolveAssemblyReference.cache
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.dll
+F:\Code\NetDataAccess\NetDataAccess\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.pdb

@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{531136BF-0BD9-461E-8284-28770C606C87}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NetDataAccess.Base</RootNamespace>
+    <AssemblyName>NetDataAccess.Base</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\NetDataAccess\bin\Debug\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>D:\Download\itextsharp-all-5.5.10\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\..\Work\pansoft\VS2005CSHARP\PanSchemaServerCode\PanSchemaServiceSolution\PanSchema\PanSchema\PanSchema\bin\Debug\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats, Version=2.1.3.1, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\NPOI 2.2.0.0\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.98.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\Download\sqlite-netFx20-static-binary-bundle-x64-2005-1.0.98.0\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Tesseract">
+      <HintPath>..\packages\Tesseract.2.4.1.0\lib\net20\Tesseract.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="websocket-sharp">
+      <HintPath>C:\Users\Administrator\Desktop\websocket-sharp-master\websocket-sharp-master\websocket-sharp\bin\Debug_Ubuntu\websocket-sharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\CommonUtil.cs" />
+    <Compile Include="Common\EmptyFileException.cs" />
+    <Compile Include="Common\FileHelper.cs" />
+    <Compile Include="Common\FileRequest.cs" />
+    <Compile Include="Common\GiveUpException.cs" />
+    <Compile Include="Common\HtmlDocumentHelper.cs" />
+    <Compile Include="Common\LogHelper.cs" />
+    <Compile Include="Common\Pdf2Txt.cs" />
+    <Compile Include="Common\SimpleOCR.cs" />
+    <Compile Include="Common\Html2Txt.cs" />
+    <Compile Include="Config\SysConfig.cs" />
+    <Compile Include="CsvHelper\ElencyCsvFile.cs" />
+    <Compile Include="CsvHelper\ElencyCsvReader.cs" />
+    <Compile Include="CsvHelper\ElencyCsvWriter.cs" />
+    <Compile Include="DataTransform\Address\AddressTransform.cs" />
+    <Compile Include="DataTransform\Address\XZQHArea.cs" />
+    <Compile Include="DataTransform\Address\XZQHMap.cs" />
+    <Compile Include="MathProcessor\PointProcessor.cs" />
+    <Compile Include="MathProcessor\PolygonProcessor.cs" />
+    <Compile Include="Server\Dama.cs" />
+    <Compile Include="Definition\IProj_XmlConfig.cs" />
+    <Compile Include="Definition\ProjectTaskAccess.cs" />
+    <Compile Include="Definition\Proj_CompleteCheck.cs" />
+    <Compile Include="Definition\Proj_CustomProgram.cs" />
+    <Compile Include="Definition\Proj_Detail_Field.cs" />
+    <Compile Include="Definition\Proj_Detail_MultiLine.cs" />
+    <Compile Include="Definition\Proj_Detail_SingleLine.cs" />
+    <Compile Include="Definition\Proj_Group.cs" />
+    <Compile Include="DB\IListSheet.cs" />
+    <Compile Include="Definition\Proj_CompleteCheckList.cs" />
+    <Compile Include="EnumTypes\SysExecuteType.cs" />
+    <Compile Include="Proxy\IProxyServer.cs" />
+    <Compile Include="Reader\TableFileReader.cs" />
+    <Compile Include="Server\MainRunningContainer.cs" />
+    <Compile Include="Server\TaskManager.cs" />
+    <Compile Include="EnumTypes\ExportType.cs" />
+    <Compile Include="EnumTypes\LogType.cs" />
+    <Compile Include="EnumTypes\Proj_DataAccessType.cs" />
+    <Compile Include="Definition\Proj_LoginPageInfo.cs" />
+    <Compile Include="Definition\Proj_Main.cs" />
+    <Compile Include="Common\SqliteHelper.cs" />
+    <Compile Include="DLL\CustomProgramBase.cs" />
+    <Compile Include="EnumTypes\DetailGrabType.cs" />
+    <Compile Include="EnumTypes\LoginLevelType.cs" />
+    <Compile Include="EnumTypes\ProcessTypeAfterLoaded.cs" />
+    <Compile Include="EnumTypes\FieldValueType.cs" />
+    <Compile Include="EnumTypes\DocumentCompleteCheckType.cs" />
+    <Compile Include="Log\RunTaskLog.cs" />
+    <Compile Include="Proxy\NdaWebProxy.cs" />
+    <Compile Include="Proxy\ProxyServer.cs" />
+    <Compile Include="Proxy\ProxyServers.cs" />
+    <Compile Include="Reader\ExcelReader.cs" />
+    <Compile Include="Reader\ITableFileReader.cs" />
+    <Compile Include="Reader\CsvReader.cs" />
+    <Compile Include="Server\HttpProcessor.cs" />
+    <Compile Include="Server\HttpServer.cs" />
+    <Compile Include="Server\NdaHttpServer.cs" />
+    <Compile Include="Server\TaskDataProcessor.cs" />
+    <Compile Include="Server\WebSocketClient.cs" />
+    <Compile Include="Task\TaskStatusType.cs" />
+    <Compile Include="Task\Task_Main.cs" />
+    <Compile Include="Task\Task_Step.cs" />
+    <Compile Include="UI\ExternalRunWebPage.cs" />
+    <Compile Include="UI\IRunWebPage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\IExternalRunWebPage.cs" />
+    <Compile Include="UserAgent\UserAgents.cs" />
+    <Compile Include="Web\GrabRequestException.cs" />
+    <Compile Include="Web\NDAWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Proxy\NoneProxyException.cs" />
+    <Compile Include="Writer\CsvWriter.cs" />
+    <Compile Include="Writer\ExcelWriter.cs" />
+    <Compile Include="Writer\XmlWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Definition\IProj_FieldConfig.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="x64\liblept168.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\libtesseract302.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\liblept168.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\libtesseract302.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
