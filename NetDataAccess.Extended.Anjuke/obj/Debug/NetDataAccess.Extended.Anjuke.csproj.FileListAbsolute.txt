@@ -7,3 +7,12 @@ E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Anjuke\obj\Debug\NetDataAccess.Extended.Anjuke.csprojResolveAssemblyReference.cache
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Anjuke\obj\Debug\NetDataAccess.Extended.Anjuke.dll
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Anjuke\obj\Debug\NetDataAccess.Extended.Anjuke.pdb
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Anjuke.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Anjuke.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Anjuke\obj\Debug\NetDataAccess.Extended.Anjuke.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.Anjuke\obj\Debug\NetDataAccess.Extended.Anjuke.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.Anjuke\obj\Debug\NetDataAccess.Extended.Anjuke.pdb

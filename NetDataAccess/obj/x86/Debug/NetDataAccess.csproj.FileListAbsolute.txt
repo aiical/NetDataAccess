@@ -36,3 +36,6 @@ E:\Code\NetDataAccess2.0\NetDataAccess\obj\x86\Debug\NetDataAccess.Config.FormTa
 E:\Code\NetDataAccess2.0\NetDataAccess\obj\x86\Debug\NetDataAccess.csproj.GenerateResource.Cache
 E:\Code\NetDataAccess2.0\NetDataAccess\bin\Debug\itextsharp.dll
 E:\Code\NetDataAccess2.0\NetDataAccess\bin\Debug\itextsharp.xml
+E:\Github\NetDataAccess\NetDataAccess\bin\Debug\NetDataAccess.exe.config
+E:\Github\NetDataAccess\NetDataAccess\obj\x86\Debug\NetDataAccess.exe
+E:\Github\NetDataAccess\NetDataAccess\obj\x86\Debug\NetDataAccess.pdb

@@ -25,3 +25,12 @@ E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Celloud\obj\Debug\NetDataAccess.Extended.Celloud.csprojResolveAssemblyReference.cache
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Celloud\obj\Debug\NetDataAccess.Extended.Celloud.dll
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Celloud\obj\Debug\NetDataAccess.Extended.Celloud.pdb
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Celloud.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Celloud.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Celloud\obj\Debug\NetDataAccess.Extended.Celloud.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.Celloud\obj\Debug\NetDataAccess.Extended.Celloud.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.Celloud\obj\Debug\NetDataAccess.Extended.Celloud.pdb

@@ -12,3 +12,17 @@ E:\Code\NetDataAccess2.0\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.pdb
 E:\Code\NetDataAccess2.0\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.csprojResolveAssemblyReference.cache
 E:\Code\NetDataAccess2.0\NetDataAccess.Base\bin\Debug\itextsharp.dll
 E:\Code\NetDataAccess2.0\NetDataAccess.Base\bin\Debug\itextsharp.xml
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\NetDataAccess.Base.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\NetDataAccess.Base.pdb
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\HtmlAgilityPack.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\itextsharp.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\Tesseract.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\itextsharp.xml
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\Tesseract.xml
+E:\Github\NetDataAccess\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.pdb

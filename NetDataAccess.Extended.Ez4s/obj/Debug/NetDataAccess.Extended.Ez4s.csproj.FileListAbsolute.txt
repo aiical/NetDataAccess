@@ -21,3 +21,12 @@ E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.csprojResolveAssemblyReference.cache
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.dll
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.pdb
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Ez4s.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Ez4s.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.Ez4s\obj\Debug\NetDataAccess.Extended.Ez4s.pdb

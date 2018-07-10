@@ -34,3 +34,7 @@
 # DB
 *.db
 *.xlsx
+*.cache
+*.pdb
+*.cache
+*.cache

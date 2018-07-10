@@ -16,3 +16,12 @@ E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Beijing\obj\Debug\NetDataAccess.Extended.Beijing.csprojResolveAssemblyReference.cache
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Beijing\obj\Debug\NetDataAccess.Extended.Beijing.dll
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Beijing\obj\Debug\NetDataAccess.Extended.Beijing.pdb
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Beijing.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Beijing.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Beijing\obj\Debug\NetDataAccess.Extended.Beijing.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.Beijing\obj\Debug\NetDataAccess.Extended.Beijing.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.Beijing\obj\Debug\NetDataAccess.Extended.Beijing.pdb

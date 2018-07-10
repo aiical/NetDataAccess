@@ -31,3 +31,5 @@ E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.csprojResolveAssemblyReference.cache
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.dll
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.Yiguo\obj\Debug\NetDataAccess.Extended.Yiguo.dll

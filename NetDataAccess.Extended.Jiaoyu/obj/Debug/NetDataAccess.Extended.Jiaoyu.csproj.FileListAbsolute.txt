@@ -7,3 +7,12 @@ E:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Jiaoyu\obj\Debug\NetDataAccess.Extended.Jiaoyu.csprojResolveAssemblyReference.cache
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Jiaoyu\obj\Debug\NetDataAccess.Extended.Jiaoyu.dll
 E:\Code\NetDataAccess2.0\NetDataAccess.Extended.Jiaoyu\obj\Debug\NetDataAccess.Extended.Jiaoyu.pdb
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Jiaoyu.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Jiaoyu.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Jiaoyu\obj\Debug\NetDataAccess.Extended.Jiaoyu.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.Jiaoyu\obj\Debug\NetDataAccess.Extended.Jiaoyu.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.Jiaoyu\obj\Debug\NetDataAccess.Extended.Jiaoyu.pdb

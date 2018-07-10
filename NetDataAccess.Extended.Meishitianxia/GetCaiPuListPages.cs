@@ -61,12 +61,19 @@ namespace NetDataAccess.Extended.Meishitianxia
                         HtmlNode caipuListNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"J_list\"]");
                         if (caipuListNode != null)
                         {
-                            FileHelper.SaveTextToFile(pageHtml, localPath);
-                            pageCount++;
+                            if (pageHtml.Contains(pageIndex.ToString() + "页"))
+                            {
+                                FileHelper.SaveTextToFile(pageHtml, localPath);
+                                pageCount++;
+                            }
+                            else
+                            {
+                                needGetNextPage = false;
+                            }
                         }
                         else
                         {
-                            needGetNextPage = true;
+                            needGetNextPage = false;
                         }
                     }
                     else
