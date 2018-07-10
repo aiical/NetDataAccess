@@ -15,7 +15,7 @@
 *.so
 *.dylib
 *.dll
-
+*.pdb
 # Fortran module files
 *.mod
 *.smod
@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# DB
+*.db
+*.xlsx
