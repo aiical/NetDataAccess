@@ -109,6 +109,7 @@ namespace NetDataAccess.Extended.Pilot
             resultColumnDic.Add("p_last_name", 1); 
             resultColumnDic.Add("certificate", 2);
             resultColumnDic.Add("date_of_issue", 3);
+            resultColumnDic.Add("p_unique_id", 4);
             string resultFilePath = Path.Combine(exportDir, "飞行员认证信息详情.xlsx");
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
             Dictionary<string, string> urlDic = new Dictionary<string, string>();
@@ -116,6 +117,7 @@ namespace NetDataAccess.Extended.Pilot
             {
                 Dictionary<string, string> row = listSheet.GetRow(i);
                 string detailUrl = row["detailPageUrl"];
+                string p_unique_id = row["p_unique_id"];
                 bool giveUp = "Y".Equals(row[SysConfig.GiveUpGrabFieldName]);
                 if (!giveUp)
                 { 
@@ -125,49 +127,67 @@ namespace NetDataAccess.Extended.Pilot
                     {
                         HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
                         htmlDoc.Load(localFilePath, Encoding.GetEncoding("utf-8"));
-                        
+
                         String firstName = row["p_first_name"].Trim();
                         String lastName = row["p_last_name"].Trim();
                         string fullName = CommonUtil.StringArrayToString((firstName + " " + lastName).Split(new string[] { }, StringSplitOptions.RemoveEmptyEntries), " ");
 
                         int fullMatchNameCount = 0;
                         HtmlNodeCollection linkNodes = htmlDoc.DocumentNode.SelectNodes("//a[starts-with(@id, 'ctl00_content_ctl01_drAirmenList_ctl')]");
-                        foreach (HtmlNode linkNode in linkNodes)
+                        try
                         {
-                            string[] nameParts = CommonUtil.HtmlDecode(linkNode.InnerText.Trim()).Trim().Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                            for (int j = 0; j < nameParts.Length; j++)
+                            foreach (HtmlNode linkNode in linkNodes)
                             {
-                                nameParts[j] = nameParts[j].Trim();
+                                string[] nameParts = CommonUtil.HtmlDecode(linkNode.InnerText.Trim()).Trim().Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                                for (int j = 0; j < nameParts.Length; j++)
+                                {
+                                    nameParts[j] = nameParts[j].Trim();
+                                }
+                                string fullNameInPage = CommonUtil.StringArrayToString(nameParts, " ");
+                                if (fullNameInPage == fullName)
+                                {
+                                    fullMatchNameCount++;
+                                }
                             }
-                            string fullNameInPage = CommonUtil.StringArrayToString(nameParts, " ");
-                            if (fullNameInPage == fullName)
-                            {
-                                fullMatchNameCount++;
-                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
                         }
 
                         if (fullMatchNameCount == 1)
                         {
                             HtmlNodeCollection infoNodes = htmlDoc.DocumentNode.SelectNodes("//div[starts-with(@id, 'TabBody')]/label[@class='Cert_Info']");
-                            for (int j = 0; j < infoNodes.Count; j++)
+                            try
                             {
-                                HtmlNode infoNode = infoNodes[j];
-                                string text = CommonUtil.HtmlDecode(infoNode.InnerText.Trim());
-                                if (text.Contains("Certificate:") && text.Contains("Date of Issue:"))
+                                if (infoNodes != null)
                                 {
-                                    int certStartIndex = text.IndexOf("Certificate:") + 12;
-                                    int certEndIndex = text.IndexOf("Date of Issue:");
-                                    int dateStartIndex = certEndIndex + 14;
-                                    string certificate = text.Substring(certStartIndex, certEndIndex - certStartIndex).Trim();
-                                    string date_of_issue = text.Substring(dateStartIndex).Trim();
+                                    for (int j = 0; j < infoNodes.Count; j++)
+                                    {
+                                        HtmlNode infoNode = infoNodes[j];
+                                        string text = CommonUtil.HtmlDecode(infoNode.InnerText.Trim());
+                                        if (text.Contains("Certificate:") && text.Contains("Date of Issue:"))
+                                        {
+                                            int certStartIndex = text.IndexOf("Certificate:") + 12;
+                                            int certEndIndex = text.IndexOf("Date of Issue:");
+                                            int dateStartIndex = certEndIndex + 14;
+                                            string certificate = text.Substring(certStartIndex, certEndIndex - certStartIndex).Trim();
+                                            string date_of_issue = text.Substring(dateStartIndex).Trim();
 
-                                    Dictionary<string, string> f2vs = new Dictionary<string, string>();
-                                    f2vs.Add("p_first_name", firstName);
-                                    f2vs.Add("p_last_name", lastName);
-                                    f2vs.Add("certificate", certificate);
-                                    f2vs.Add("date_of_issue", date_of_issue);
-                                    resultEW.AddRow(f2vs);
+                                            Dictionary<string, string> f2vs = new Dictionary<string, string>();
+                                            f2vs.Add("p_first_name", firstName);
+                                            f2vs.Add("p_last_name", lastName);
+                                            f2vs.Add("certificate", certificate);
+                                            f2vs.Add("date_of_issue", date_of_issue);
+                                            f2vs.Add("p_unique_id", p_unique_id);
+                                            resultEW.AddRow(f2vs);
+                                        }
+                                    }
                                 }
+                            }
+                            catch (Exception ex)
+                            {
+                                throw ex;
                             }
                         }
                     }
@@ -207,7 +227,7 @@ namespace NetDataAccess.Extended.Pilot
                 String localFilePath = this.RunPage.GetFilePath(pageUrl, pageSourceDir);
                 string threadId = Thread.CurrentThread.ManagedThreadId.ToString();
                 _WebPageSucceeds[threadId] = false;
-                BeginGetPilotInfo(threadId, pageUrl, firstName, lastName, "", "", "", "", fullName, state, "", localFilePath);
+                BeginGetPilotInfo(threadId, pageUrl, firstName, lastName, "", "", "", "", fullName, "", "", localFilePath);
             }
             catch (Exception ex)
             {

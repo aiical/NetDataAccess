@@ -38,3 +38,7 @@
 *.pdb
 *.cache
 *.cache
+*.cache
+*.tmp
+*.pdb
+*.pdb

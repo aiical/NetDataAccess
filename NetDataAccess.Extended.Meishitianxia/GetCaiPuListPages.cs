@@ -61,7 +61,10 @@ namespace NetDataAccess.Extended.Meishitianxia
                         HtmlNode caipuListNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"J_list\"]");
                         if (caipuListNode != null)
                         {
-                            if (pageHtml.Contains(pageIndex.ToString() + "页"))
+                            HtmlNode nowPageNode = htmlDoc.DocumentNode.SelectSingleNode("//a[@class=\"now_page\"]");
+                            string nowPageIndex = CommonUtil.HtmlDecode(nowPageNode.InnerText).Trim();
+
+                            if (pageIndex.ToString() == nowPageIndex)
                             {
                                 FileHelper.SaveTextToFile(pageHtml, localPath);
                                 pageCount++;
@@ -233,6 +236,8 @@ namespace NetDataAccess.Extended.Meishitianxia
                     string url = subRow["url"];
                     if (!urlDic.ContainsKey(url))
                     {
+                        urlDic.Add(url, null);
+
                         Dictionary<string, string> mapRow = new Dictionary<string, string>();
                         mapRow.Add("detailPageUrl", url);
                         mapRow.Add("detailPageName", url);
