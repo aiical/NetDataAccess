@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GongGao\SplitGongGaoCsv.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GongGao\GetHuShenGuPiaoList.cs" />
     <Compile Include="GongGao\GetHuShenGongGaoFirstListPage.cs" />

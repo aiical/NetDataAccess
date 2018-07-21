@@ -98,6 +98,7 @@
     <Compile Include="Common\SimpleOCR.cs" />
     <Compile Include="Common\Html2Txt.cs" />
     <Compile Include="Config\SysConfig.cs" />
+    <Compile Include="CsvHelper\CsvSpliter.cs" />
     <Compile Include="CsvHelper\ElencyCsvFile.cs" />
     <Compile Include="CsvHelper\ElencyCsvReader.cs" />
     <Compile Include="CsvHelper\ElencyCsvWriter.cs" />

@@ -75,6 +75,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetDataAccess.Extended.Tong
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetDataAccess.Extended.Meishitianxia", "NetDataAccess.Extended.Meishitianxia\NetDataAccess.Extended.Meishitianxia.csproj", "{54895DCC-88CD-4922-A175-21ACAFE3EE4F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetDataAccess.Extended.Eleme", "NetDataAccess.Extended.Eleme\NetDataAccess.Extended.Eleme.csproj", "{89105AF5-DB77-47CB-BED1-50CD085F1BE0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -455,6 +457,16 @@ Global
 		{54895DCC-88CD-4922-A175-21ACAFE3EE4F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{54895DCC-88CD-4922-A175-21ACAFE3EE4F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{54895DCC-88CD-4922-A175-21ACAFE3EE4F}.Release|x86.ActiveCfg = Release|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{89105AF5-DB77-47CB-BED1-50CD085F1BE0}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

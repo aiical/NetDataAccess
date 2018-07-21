@@ -98,5 +98,20 @@ namespace NetDataAccess.Base.Reader
             }
         }
         #endregion
+
+        #region getColumnNameIndex 
+        public Dictionary<string, int> GetColumnNameToIndex()
+        {
+            
+            List<string> headers = this._CsvFile.Headers;
+            Dictionary<string, int> columnName2Index = new Dictionary<string, int>();
+            for (int i = 0; i < headers.Count; i++)
+            {
+                columnName2Index.Add(headers[i], i);
+            }
+            return columnName2Index;
+        }
+        #endregion
+
     }
 }
