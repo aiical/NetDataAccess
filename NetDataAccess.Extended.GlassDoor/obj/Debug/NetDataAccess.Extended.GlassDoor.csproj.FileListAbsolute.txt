@@ -1,0 +1,9 @@
+E:\Github\NetDataAccess\NetDataAccess.Extended.GlassDoor\obj\Debug\NetDataAccess.Extended.GlassDoor.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.GlassDoor.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.GlassDoor.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.GlassDoor\obj\Debug\NetDataAccess.Extended.GlassDoor.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.GlassDoor\obj\Debug\NetDataAccess.Extended.GlassDoor.pdb
