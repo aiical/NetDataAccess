@@ -71,6 +71,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetListPageUrls.cs" />
     <Compile Include="GetListPages.cs" />
+    <Compile Include="GetCompanyPages.cs" />
+    <Compile Include="GetRatingData.cs" />
+    <Compile Include="GetOverallDistributionData.cs" />
+    <Compile Include="GetTrendData.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NetDataAccess.Base\NetDataAccess.Base.csproj">

@@ -52,7 +52,7 @@ namespace NetDataAccess.Extended.GlassDoor
         {
             String exportDir = this.RunPage.GetExportDir();
             string pageSourceDir = this.RunPage.GetDetailSourceFileDir();
-            string resultFilePath = Path.Combine(exportDir, "GlassDoor_获取详情页.xlsx");
+            string resultFilePath = Path.Combine(exportDir, "GlassDoor_获取公司页.xlsx");
 
             string detailPageUrlColumnName = SysConfig.DetailPageUrlFieldName;
 
@@ -76,7 +76,7 @@ namespace NetDataAccess.Extended.GlassDoor
 
                     HtmlAgilityPack.HtmlDocument pageHtmlDoc = new HtmlAgilityPack.HtmlDocument();
                     pageHtmlDoc.LoadHtml(html);
-
+                    
                     try
                     {
                         HtmlNode eiNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"EI\"]");
@@ -100,7 +100,7 @@ namespace NetDataAccess.Extended.GlassDoor
 
                             Dictionary<string, string> resultRow = new Dictionary<string, string>();
                             resultRow.Add("detailPageUrl", detailPageUrl);
-                            resultRow.Add("detailPageName", detailPageUrl);
+                            resultRow.Add("detailPageName", companyName);
                             resultRow.Add("cookie", cookie);
                             resultRow.Add("Company_Name", companyName);
                             resultRow.Add("Page_Company_Name", pageCompanyName);
@@ -118,10 +118,11 @@ namespace NetDataAccess.Extended.GlassDoor
                                 //throw new Exception("获取公司列表页失败, url = " + url);
                                 this.RunPage.InvokeAppendLogText("(" + (i + 1).ToString() + "/" + listSheet.RowCount.ToString() + ")获取公司列表页失败, url = " + url, LogLevelType.System, true);
 
-
+                                /*
                                 Dictionary<string, string> resultRow = new Dictionary<string, string>(); 
                                 resultRow.Add("Company_Name", companyName); 
                                 resultEW.AddRow(resultRow);
+                                */
                             }
                             else
                             {
@@ -161,9 +162,11 @@ namespace NetDataAccess.Extended.GlassDoor
                                             {
                                                 reviewCount = tempReviewCount;
 
+
                                                 linkUrl = "https://www.glassdoor.com" + linkNode.GetAttributeValue("href", "");
 
                                                 page_Company_Name = tempCompanyName;
+
 
                                                 HtmlNode salaryCountNode = companyNode.SelectSingleNode("./div/a[@class=\"eiCell cell salaries\"]/span[@class=\"num h2\"]");
                                                 if (salaryCountNode != null)
@@ -215,16 +218,19 @@ namespace NetDataAccess.Extended.GlassDoor
                                     }
                                 }
 
-                                Dictionary<string, string> resultRow = new Dictionary<string, string>();
-                                resultRow.Add("detailPageUrl", linkUrl);
-                                resultRow.Add("detailPageName", linkUrl);
-                                resultRow.Add("cookie", cookie);
-                                resultRow.Add("Page_Company_Name", page_Company_Name);
-                                resultRow.Add("Company_Name", companyName);
-                                resultRow.Add("Reviews", reviewCount.ToString());
-                                resultRow.Add("Salaries", salaryCount.ToString());
-                                resultRow.Add("InterViews", interviewCount.ToString());
-                                resultEW.AddRow(resultRow);
+                                if (page_Company_Name.Length > 0)
+                                {
+                                    Dictionary<string, string> resultRow = new Dictionary<string, string>();
+                                    resultRow.Add("detailPageUrl", linkUrl);
+                                    resultRow.Add("detailPageName", companyName);
+                                    resultRow.Add("cookie", cookie);
+                                    resultRow.Add("Page_Company_Name", page_Company_Name);
+                                    resultRow.Add("Company_Name", companyName);
+                                    resultRow.Add("Reviews", reviewCount.ToString());
+                                    resultRow.Add("Salaries", salaryCount.ToString());
+                                    resultRow.Add("InterViews", interviewCount.ToString());
+                                    resultEW.AddRow(resultRow);
+                                }
                             }
                         }
                     }
