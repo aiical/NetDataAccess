@@ -25,7 +25,7 @@ namespace NetDataAccess.Extended.GlassDoor
     {
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            //this.GetCompanyInfos(listSheet);
+            this.GetCompanyInfos(listSheet);
             this.GetRatingPageUrls(listSheet);
             this.GetOverallDistributionPageUrls(listSheet);
             this.GetTrendPageUrls(listSheet);
@@ -33,7 +33,7 @@ namespace NetDataAccess.Extended.GlassDoor
         }
 
         private ExcelWriter GetCompanInfoExcelWriter(string destFilePath)
-        { 
+        {
 
             Dictionary<string, int> columnDic = CommonUtil.InitStringIndexDic(new string[]{ 
                     "Company_Name", 
@@ -59,7 +59,20 @@ namespace NetDataAccess.Extended.GlassDoor
                     "CEOName", 
                     "CEORatings"});
 
-            ExcelWriter ew = new ExcelWriter(destFilePath, "List", columnDic);
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+
+            columnFormats.Add("ReviewCount", "#0");
+            columnFormats.Add("JobCount", "#0");
+            columnFormats.Add("SalaryCount", "#0");
+            columnFormats.Add("InterViewCount", "#0");
+            columnFormats.Add("BenefitCount", "#0");
+            columnFormats.Add("PhotoCount", "#0");
+            columnFormats.Add("RatingNum", "#0.00");
+            columnFormats.Add("RecommenToAFriend", "#0.00");
+            columnFormats.Add("ApproveOfCEO", "#0.00");
+            columnFormats.Add("CEORatings", "#0");
+
+            ExcelWriter ew = new ExcelWriter(destFilePath, "List", columnDic, columnFormats);
             return ew;
         }
 
@@ -111,12 +124,12 @@ namespace NetDataAccess.Extended.GlassDoor
                             JObject infoJo = JObject.Parse(jsonText);
 
                             string employerId = infoJo.GetValue("employerId").ToString();
-                            string reviewCount = infoJo.GetValue("reviewCount").ToString();
-                            string jobCount = infoJo.GetValue("jobCount").ToString();
-                            string salaryCount = infoJo.GetValue("salaryCount").ToString();
-                            string interviewCount = infoJo.GetValue("interviewCount").ToString();
-                            string benefitCount = infoJo.GetValue("benefitCount").ToString();
-                            string photoCount = infoJo.GetValue("photoCount").ToString();
+                            string reviewCountStr = infoJo.GetValue("reviewCount").ToString();
+                            string jobCountStr = infoJo.GetValue("jobCount").ToString();
+                            string salaryCountStr = infoJo.GetValue("salaryCount").ToString();
+                            string interviewCountStr = infoJo.GetValue("interviewCount").ToString();
+                            string benefitCountStr = infoJo.GetValue("benefitCount").ToString();
+                            string photoCountStr = infoJo.GetValue("photoCount").ToString();
 
                             string webSite = "";
                             string headquarters = "";
@@ -127,11 +140,11 @@ namespace NetDataAccess.Extended.GlassDoor
                             string revenue = "";
                             string competitors = "";
 
-                            string ratingNum = "";
-                            string recommenToAFriend = "";
-                            string approveOfCEO = "";
+                            string ratingNumStr = "";
+                            string recommenToAFriendStr = "";
+                            string approveOfCEOStr = "";
                             string ceoName = "";
-                            string ceoRatings = "";
+                            string ceoRatingsStr = "";
 
                             HtmlNodeCollection basicInfoNodes = pageHtmlDoc.DocumentNode.SelectNodes("//div[@id=\"EmpBasicInfo\"]/div/div/div[@class=\"infoEntity\"]");
 
@@ -174,27 +187,27 @@ namespace NetDataAccess.Extended.GlassDoor
                             HtmlNode ratingNumNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"ratingNum\"]");
                             if (ratingNumNode != null)
                             {
-                                ratingNum = CommonUtil.HtmlDecode(ratingNumNode.InnerText).Trim();
+                                ratingNumStr = CommonUtil.HtmlDecode(ratingNumNode.InnerText).Trim();
                             }
 
 
                             HtmlNode recommenToAFriendNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"EmpStats_Recommend\"]");
                             if (recommenToAFriendNode != null)
                             {
-                                recommenToAFriend = CommonUtil.HtmlDecode(recommenToAFriendNode.GetAttributeValue("data-percentage", "")).Trim() + "%";
+                                recommenToAFriendStr = CommonUtil.HtmlDecode(recommenToAFriendNode.GetAttributeValue("data-percentage", "")).Trim();
                             }
 
                             HtmlNode approveOfCEONode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"EmpStats_Approve\"]");
                             if (approveOfCEONode != null)
                             {
-                                approveOfCEO = CommonUtil.HtmlDecode(approveOfCEONode.GetAttributeValue("data-percentage", "")).Trim() + "%";
+                                approveOfCEOStr = CommonUtil.HtmlDecode(approveOfCEONode.GetAttributeValue("data-percentage", "")).Trim();
                             }
 
                             HtmlNodeCollection ceoNodes = pageHtmlDoc.DocumentNode.SelectNodes("//div[@class=\"empStatsBody\"]/div[@class=\"tbl gfxContainer\"]/div[last()]/div/div[@class=\"cell middle text\"]/div");
                             if (ceoNodes != null && ceoNodes.Count >= 2)
                             {
                                 ceoName = CommonUtil.HtmlDecode(ceoNodes[0].InnerText).Trim();
-                                ceoRatings = CommonUtil.HtmlDecode(ceoNodes[1].InnerText).Trim().Replace(" Ratings", "").Replace(" Rating", "");
+                                ceoRatingsStr = CommonUtil.HtmlDecode(ceoNodes[1].InnerText).Trim().Replace(" Ratings", "").Replace(" Rating", "");
                             }
                             else
                             {
@@ -202,20 +215,20 @@ namespace NetDataAccess.Extended.GlassDoor
                                 if (ceoNodes != null && ceoNodes.Count >= 2)
                                 {
                                     ceoName = CommonUtil.HtmlDecode(ceoNodes[0].InnerText).Trim();
-                                    ceoRatings = CommonUtil.HtmlDecode(ceoNodes[1].InnerText).Trim().Replace(" Ratings", "").Replace(" Rating", "");
+                                    ceoRatingsStr = CommonUtil.HtmlDecode(ceoNodes[1].InnerText).Trim().Replace(" Ratings", "").Replace(" Rating", "");
                                 }
                             }
 
-                            Dictionary<string, string> resultRow = new Dictionary<string, string>();
+                            Dictionary<string, object> resultRow = new Dictionary<string, object>();
                             resultRow.Add("Company_Name", companyName);
                             resultRow.Add("Page_Company_Name", pageCompanyName);
                             resultRow.Add("EmployerId", employerId);
-                            resultRow.Add("ReviewCount", reviewCount);
-                            resultRow.Add("JobCount", jobCount);
-                            resultRow.Add("SalaryCount", salaryCount);
-                            resultRow.Add("InterViewCount", interviewCount);
-                            resultRow.Add("BenefitCount", benefitCount);
-                            resultRow.Add("PhotoCount", photoCount);
+                            resultRow.Add("ReviewCount", reviewCountStr.Length == 0 ? null : (object)decimal.Parse(reviewCountStr));
+                            resultRow.Add("JobCount", jobCountStr.Length == 0 ? null : (object)decimal.Parse(jobCountStr));
+                            resultRow.Add("SalaryCount", salaryCountStr.Length == 0 ? null : (object)decimal.Parse(salaryCountStr));
+                            resultRow.Add("InterViewCount", interviewCountStr.Length == 0 ? null : (object)decimal.Parse(interviewCountStr));
+                            resultRow.Add("BenefitCount", benefitCountStr.Length == 0 ? null : (object)decimal.Parse(benefitCountStr));
+                            resultRow.Add("PhotoCount", photoCountStr.Length == 0 ? null : (object)decimal.Parse(photoCountStr));
                             resultRow.Add("WebSite", webSite);
                             resultRow.Add("Headquarters", headquarters);
                             resultRow.Add("Size", size);
@@ -224,11 +237,11 @@ namespace NetDataAccess.Extended.GlassDoor
                             resultRow.Add("Industry", industry);
                             resultRow.Add("Revenue", revenue);
                             resultRow.Add("Competitors", competitors);
-                            resultRow.Add("RatingNum", ratingNum);
-                            resultRow.Add("RecommenToAFriend", recommenToAFriend);
-                            resultRow.Add("ApproveOfCEO", approveOfCEO);
+                            resultRow.Add("RatingNum", ratingNumStr.Length == 0 ? null : (object)decimal.Parse(ratingNumStr));
+                            resultRow.Add("RecommenToAFriend", recommenToAFriendStr.Length == 0 ? null : (object)(decimal.Parse(recommenToAFriendStr) * (decimal)0.01));
+                            resultRow.Add("ApproveOfCEO", approveOfCEOStr.Length == 0 ? null : (object)(decimal.Parse(approveOfCEOStr) * (decimal)0.01));
                             resultRow.Add("CEOName", ceoName);
-                            resultRow.Add("CEORatings", ceoRatings);
+                            resultRow.Add("CEORatings", ceoRatingsStr.Length == 0 ? null : (object)decimal.Parse(ceoRatingsStr));
                             resultEW.AddRow(resultRow);
                         }
                         else

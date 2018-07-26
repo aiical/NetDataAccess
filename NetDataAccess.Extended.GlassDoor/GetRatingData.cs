@@ -30,16 +30,35 @@ namespace NetDataAccess.Extended.GlassDoor
         }
 
         private ExcelWriter GetRaitingInfoExcelWriter(string destFilePath)
-        { 
+        {
 
             Dictionary<string, int> columnDic = CommonUtil.InitStringIndexDic(new string[]{ 
                     "Company_Name", 
                     "Page_Company_Name",
                     "EmployerId",
-                    "ItemName",
-                    "ItemValue"});
+                    "overallRating",
+                    "ceoRating",
+                    "bizOutlook",
+                    "recommend",
+                    "compAndBenefits",
+                    "cultureAndValues",
+                    "careerOpportunities",
+                    "workLife",
+                    "seniorManagement"
+            });
 
-            ExcelWriter ew = new ExcelWriter(destFilePath, "List", columnDic);
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+            columnFormats.Add("overallRating", "#0.00");
+            columnFormats.Add("ceoRating", "#0.00");
+            columnFormats.Add("bizOutlook", "#0.00");
+            columnFormats.Add("recommend", "#0.00");
+            columnFormats.Add("compAndBenefits", "#0.00");
+            columnFormats.Add("cultureAndValues", "#0.00");
+            columnFormats.Add("careerOpportunities", "#0.00");
+            columnFormats.Add("workLife", "#0.00");
+            columnFormats.Add("seniorManagement", "#0.00");
+
+            ExcelWriter ew = new ExcelWriter(destFilePath, "List", columnDic, columnFormats);
             return ew;
         }
 
@@ -76,21 +95,70 @@ namespace NetDataAccess.Extended.GlassDoor
                         JObject infoJo = JObject.Parse(jsonText);
 
                         JArray ratingArray = infoJo.GetValue("ratings") as JArray;
+                        Nullable<decimal> overallRating = null;
+                        Nullable<decimal> ceoRating = null;
+                        Nullable<decimal> bizOutlook = null;
+                        Nullable<decimal> recommend = null;
+                        Nullable<decimal> compAndBenefits = null;
+                        Nullable<decimal> cultureAndValues = null;
+                        Nullable<decimal> careerOpportunities = null;
+                        Nullable<decimal> workLife = null;
+                        Nullable<decimal> seniorManagement = null;
+
 
                         for (int j = 0; j < ratingArray.Count; j++)
                         {
                             JObject itemJo = ratingArray[j] as JObject;
                             string itemName = itemJo.GetValue("type").ToString();
-                            string itemValue = itemJo.GetValue("value").ToString();
+                            string itemValueStr = itemJo.GetValue("value").ToString();
+                            Nullable<decimal> itemValue = itemValueStr.Length == 0 ? null : (Nullable<decimal>)decimal.Parse(itemValueStr);
 
-                            Dictionary<string, string> resultRow = new Dictionary<string, string>();
-                            resultRow.Add("Company_Name", companyName);
-                            resultRow.Add("Page_Company_Name", pageCompanyName);
-                            resultRow.Add("EmployerId", employerId);
-                            resultRow.Add("ItemName", itemName);
-                            resultRow.Add("ItemValue", itemValue);
-                            resultEW.AddRow(resultRow);
+                            switch (itemName)
+                            {
+                                case "overallRating":
+                                    overallRating = itemValue;
+                                    break;
+                                case "ceoRating":
+                                    ceoRating = itemValue;
+                                    break;
+                                case "bizOutlook":
+                                    bizOutlook = itemValue;
+                                    break;
+                                case "recommend":
+                                    recommend = itemValue;
+                                    break;
+                                case "compAndBenefits":
+                                    compAndBenefits = itemValue;
+                                    break;
+                                case "cultureAndValues":
+                                    cultureAndValues = itemValue;
+                                    break;
+                                case "careerOpportunities":
+                                    careerOpportunities = itemValue;
+                                    break;
+                                case "workLife":
+                                    workLife = itemValue;
+                                    break;
+                                case "seniorManagement":
+                                    seniorManagement = itemValue;
+                                    break;
+                            }
                         }
+
+                        Dictionary<string, object> resultRow = new Dictionary<string, object>();
+                        resultRow.Add("Company_Name", companyName);
+                        resultRow.Add("Page_Company_Name", pageCompanyName);
+                        resultRow.Add("EmployerId", employerId);
+                        resultRow.Add("overallRating", overallRating.HasValue ? (object)overallRating : null);
+                        resultRow.Add("ceoRating", ceoRating.HasValue ? (object)ceoRating : null);
+                        resultRow.Add("bizOutlook", bizOutlook.HasValue ? (object)bizOutlook : null);
+                        resultRow.Add("recommend", recommend.HasValue ? (object)recommend : null);
+                        resultRow.Add("compAndBenefits", compAndBenefits.HasValue ? (object)compAndBenefits : null);
+                        resultRow.Add("cultureAndValues", cultureAndValues.HasValue ? (object)cultureAndValues : null);
+                        resultRow.Add("careerOpportunities", careerOpportunities.HasValue ? (object)careerOpportunities : null);
+                        resultRow.Add("workLife", workLife.HasValue ? (object)workLife : null);
+                        resultRow.Add("seniorManagement", seniorManagement.HasValue ? (object)seniorManagement : null);
+                        resultEW.AddRow(resultRow);
                     }
                     catch (Exception ex)
                     {

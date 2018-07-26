@@ -42,7 +42,8 @@ namespace NetDataAccess.Extended.GlassDoor
                     "Page_Company_Name",
                     "Reviews", 
                     "Salaries", 
-                    "InterViews"});
+                    "InterViews", 
+                    "MatchType"});
 
             ExcelWriter ew = new ExcelWriter(destFilePath, "List", columnDic);
             return ew;
@@ -70,6 +71,7 @@ namespace NetDataAccess.Extended.GlassDoor
                     string url = row[detailPageUrlColumnName];
                     string companyName = row["Company_Name"];
                     string cookie = row["cookie"];
+                    string matchType = "Unmatched";
 
                     string pageFilePath = this.RunPage.GetFilePath(url, pageSourceDir);
                     string html = FileHelper.GetTextFromFile(pageFilePath);
@@ -82,6 +84,8 @@ namespace NetDataAccess.Extended.GlassDoor
                         HtmlNode eiNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"EI\"]");
                         if (eiNode != null)
                         {
+                            matchType = "Accurate";
+
                             //获取列表页时直接获取了详情页
                             HtmlNode linkNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//a[@class=\"sqLogoLink\"]");
                             HtmlNode titleNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//h1[@class=\" strong tightAll\"]");
@@ -107,6 +111,7 @@ namespace NetDataAccess.Extended.GlassDoor
                             resultRow.Add("Reviews", reviews);
                             resultRow.Add("Salaries", salaries);
                             resultRow.Add("InterViews", interviews);
+                            resultRow.Add("MatchType", matchType);
                             resultEW.AddRow(resultRow);
                         }
                         else
@@ -118,11 +123,10 @@ namespace NetDataAccess.Extended.GlassDoor
                                 //throw new Exception("获取公司列表页失败, url = " + url);
                                 this.RunPage.InvokeAppendLogText("(" + (i + 1).ToString() + "/" + listSheet.RowCount.ToString() + ")获取公司列表页失败, url = " + url, LogLevelType.System, true);
 
-                                /*
-                                Dictionary<string, string> resultRow = new Dictionary<string, string>(); 
-                                resultRow.Add("Company_Name", companyName); 
+                                Dictionary<string, string> resultRow = new Dictionary<string, string>();
+                                resultRow.Add("Company_Name", companyName);
+                                resultRow.Add("MatchType", matchType);
                                 resultEW.AddRow(resultRow);
-                                */
                             }
                             else
                             {
@@ -162,6 +166,7 @@ namespace NetDataAccess.Extended.GlassDoor
                                             {
                                                 reviewCount = tempReviewCount;
 
+                                                matchType = "PartName";
 
                                                 linkUrl = "https://www.glassdoor.com" + linkNode.GetAttributeValue("href", "");
 
@@ -218,19 +223,102 @@ namespace NetDataAccess.Extended.GlassDoor
                                     }
                                 }
 
-                                if (page_Company_Name.Length > 0)
+                                if (page_Company_Name.Length == 0)
                                 {
-                                    Dictionary<string, string> resultRow = new Dictionary<string, string>();
-                                    resultRow.Add("detailPageUrl", linkUrl);
-                                    resultRow.Add("detailPageName", companyName);
-                                    resultRow.Add("cookie", cookie);
-                                    resultRow.Add("Page_Company_Name", page_Company_Name);
-                                    resultRow.Add("Company_Name", companyName);
-                                    resultRow.Add("Reviews", reviewCount.ToString());
-                                    resultRow.Add("Salaries", salaryCount.ToString());
-                                    resultRow.Add("InterViews", interviewCount.ToString());
-                                    resultEW.AddRow(resultRow);
+                                    for (int j = 0; j < companyNodes.Count; j++)
+                                    {
+                                        HtmlNode companyNode = companyNodes[j];
+                                        HtmlNode linkNode = companyNode.SelectSingleNode("./div/div/div/a[@class=\"tightAll h2\"]");
+                                        string tempCompanyName = CommonUtil.HtmlDecode(linkNode.InnerText).Trim();
+                                        HtmlNode reviewCountNode = companyNode.SelectSingleNode("./div/a[@class=\"eiCell cell reviews\"]/span[@class=\"num h2\"]");
+                                        if (reviewCountNode != null)
+                                        {
+                                            string reviewCountText = CommonUtil.HtmlDecode(reviewCountNode.InnerText).Trim();
+                                            int tempReviewCount = 0;
+                                            if (reviewCountText == "--")
+                                            {
+                                                tempReviewCount = 0;
+                                            }
+                                            else if (reviewCountText.EndsWith("k"))
+                                            {
+                                                tempReviewCount = (int)(double.Parse(reviewCountText.Substring(0, reviewCountText.Length - 1)) * 1000);
+                                            }
+                                            else
+                                            {
+                                                tempReviewCount = int.Parse(reviewCountText);
+                                            }
+                                            if (tempReviewCount > reviewCount)
+                                            {
+                                                reviewCount = tempReviewCount;
+
+                                                matchType = "MaxValue";
+
+                                                linkUrl = "https://www.glassdoor.com" + linkNode.GetAttributeValue("href", "");
+
+                                                page_Company_Name = tempCompanyName;
+
+
+                                                HtmlNode salaryCountNode = companyNode.SelectSingleNode("./div/a[@class=\"eiCell cell salaries\"]/span[@class=\"num h2\"]");
+                                                if (salaryCountNode != null)
+                                                {
+                                                    string salaryCountText = CommonUtil.HtmlDecode(salaryCountNode.InnerText).Trim();
+                                                    if (salaryCountText == "--")
+                                                    {
+                                                        salaryCount = 0;
+                                                    }
+                                                    else if (salaryCountText.EndsWith("k"))
+                                                    {
+                                                        salaryCount = (int)(double.Parse(salaryCountText.Substring(0, salaryCountText.Length - 1)) * 1000);
+                                                    }
+                                                    else
+                                                    {
+                                                        salaryCount = int.Parse(salaryCountText);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    interviewCount = 0;
+                                                }
+
+
+                                                HtmlNode interviewCountNode = companyNode.SelectSingleNode("./div/a[@class=\"eiCell cell interviews\"]/span[@class=\"num h2\"]");
+                                                if (interviewCountNode != null)
+                                                {
+                                                    string interviewCountText = CommonUtil.HtmlDecode(interviewCountNode.InnerText).Trim();
+                                                    if (interviewCountText == "--")
+                                                    {
+                                                        interviewCount = 0;
+                                                    }
+                                                    else if (interviewCountText.EndsWith("k"))
+                                                    {
+                                                        interviewCount = (int)(double.Parse(interviewCountText.Substring(0, interviewCountText.Length - 1)) * 1000);
+                                                    }
+                                                    else
+                                                    {
+                                                        interviewCount = int.Parse(interviewCountText);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    interviewCount = 0;
+                                                }
+
+                                            }
+                                        }
+                                    }
                                 }
+
+                                Dictionary<string, string> resultRow = new Dictionary<string, string>();
+                                resultRow.Add("detailPageUrl", linkUrl);
+                                resultRow.Add("detailPageName", companyName);
+                                resultRow.Add("cookie", cookie);
+                                resultRow.Add("Page_Company_Name", page_Company_Name);
+                                resultRow.Add("Company_Name", companyName);
+                                resultRow.Add("Reviews", reviewCount.ToString());
+                                resultRow.Add("Salaries", salaryCount.ToString());
+                                resultRow.Add("InterViews", interviewCount.ToString());
+                                resultRow.Add("MatchType", matchType);
+                                resultEW.AddRow(resultRow);
                             }
                         }
                     }

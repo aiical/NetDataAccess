@@ -30,16 +30,26 @@ namespace NetDataAccess.Extended.GlassDoor
         }
 
         private ExcelWriter GetOverallDistributionInfoExcelWriter(string destFilePath)
-        { 
+        {
 
             Dictionary<string, int> columnDic = CommonUtil.InitStringIndexDic(new string[]{ 
                     "Company_Name", 
                     "Page_Company_Name",
                     "EmployerId",
-                    "ItemName",
-                    "ItemValue"});
+                    "1 Star",
+                    "2 Stars",
+                    "3 Stars",
+                    "4 Stars",
+                    "5 Stars"
+            });
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+            columnFormats.Add("1 Star", "#0");
+            columnFormats.Add("2 Stars", "#0");
+            columnFormats.Add("3 Stars", "#0");
+            columnFormats.Add("4 Stars", "#0");
+            columnFormats.Add("5 Stars", "#0");
 
-            ExcelWriter ew = new ExcelWriter(destFilePath, "List", columnDic);
+            ExcelWriter ew = new ExcelWriter(destFilePath, "List", columnDic, columnFormats);
             return ew;
         }
 
@@ -78,19 +88,49 @@ namespace NetDataAccess.Extended.GlassDoor
                         JArray labelArray = infoJo.GetValue("labels") as JArray;
                         JArray valueArray = infoJo.GetValue("values") as JArray;
 
+                        Nullable<decimal> star1 = null;
+                        Nullable<decimal> star2 = null;
+                        Nullable<decimal> star3 = null;
+                        Nullable<decimal> star4 = null;
+                        Nullable<decimal> star5 = null;
+
                         for (int j = 0; j < labelArray.Count; j++)
                         {
                             string label  = labelArray[j].ToString();
-                            string value = valueArray[j].ToString(); 
+                            string valueStr = valueArray[j].ToString();
+                            Nullable<decimal> value = valueStr.Length == 0 ? null : (Nullable<decimal>)decimal.Parse(valueStr);
 
-                            Dictionary<string, string> resultRow = new Dictionary<string, string>();
-                            resultRow.Add("Company_Name", companyName);
-                            resultRow.Add("Page_Company_Name", pageCompanyName);
-                            resultRow.Add("EmployerId", employerId);
-                            resultRow.Add("ItemName", label);
-                            resultRow.Add("ItemValue", value);
-                            resultEW.AddRow(resultRow);
+                            switch (label)
+                            {
+                                case "1 Star":
+                                    star1 = value;
+                                    break;
+                                case "2 Stars":
+                                    star2 = value;
+                                    break;
+                                case "3 Stars":
+                                    star3 = value;
+                                    break;
+                                case "4 Stars":
+                                    star4 = value;
+                                    break;
+                                case "5 Stars":
+                                    star5 = value;
+                                    break;
+                            }
+
                         }
+
+                        Dictionary<string, object> resultRow = new Dictionary<string, object>();
+                        resultRow.Add("Company_Name", companyName);
+                        resultRow.Add("Page_Company_Name", pageCompanyName);
+                        resultRow.Add("EmployerId", employerId);
+                        resultRow.Add("1 Star", star1.HasValue ? (object)star1 : null);
+                        resultRow.Add("2 Stars", star2.HasValue ? (object)star2 : null);
+                        resultRow.Add("3 Stars", star3.HasValue ? (object)star3 : null);
+                        resultRow.Add("4 Stars", star4.HasValue ? (object)star4 : null);
+                        resultRow.Add("5 Stars", star5.HasValue ? (object)star5 : null);
+                        resultEW.AddRow(resultRow);
                     }
                     catch (Exception ex)
                     {
