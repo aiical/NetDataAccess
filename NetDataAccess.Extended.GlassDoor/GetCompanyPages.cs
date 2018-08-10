@@ -29,6 +29,7 @@ namespace NetDataAccess.Extended.GlassDoor
             this.GetRatingPageUrls(listSheet);
             this.GetOverallDistributionPageUrls(listSheet);
             this.GetTrendPageUrls(listSheet);
+            this.GetReviewListPageUrls(listSheet);
             return true;
         }
 
@@ -237,11 +238,11 @@ namespace NetDataAccess.Extended.GlassDoor
                             resultRow.Add("Industry", industry);
                             resultRow.Add("Revenue", revenue);
                             resultRow.Add("Competitors", competitors);
-                            resultRow.Add("RatingNum", ratingNumStr.Length == 0 ? null : (object)decimal.Parse(ratingNumStr));
-                            resultRow.Add("RecommenToAFriend", recommenToAFriendStr.Length == 0 ? null : (object)(decimal.Parse(recommenToAFriendStr) * (decimal)0.01));
-                            resultRow.Add("ApproveOfCEO", approveOfCEOStr.Length == 0 ? null : (object)(decimal.Parse(approveOfCEOStr) * (decimal)0.01));
+                            resultRow.Add("RatingNum", ratingNumStr.Length == 0 || ratingNumStr == "N/A" ? null : (object)decimal.Parse(ratingNumStr));
+                            resultRow.Add("RecommenToAFriend", recommenToAFriendStr.Length == 0 || recommenToAFriendStr == "N/A" ? null : (decimal.Parse(recommenToAFriendStr) < 0 ? null : (object)(decimal.Parse(recommenToAFriendStr) * (decimal)0.01)));
+                            resultRow.Add("ApproveOfCEO", approveOfCEOStr.Length == 0 || approveOfCEOStr == "N/A" ? null : (decimal.Parse(approveOfCEOStr) < 0 ? null : (object)(decimal.Parse(approveOfCEOStr) * (decimal)0.01)));
                             resultRow.Add("CEOName", ceoName);
-                            resultRow.Add("CEORatings", ceoRatingsStr.Length == 0 ? null : (object)decimal.Parse(ceoRatingsStr));
+                            resultRow.Add("CEORatings", ceoRatingsStr.Length == 0 || ceoRatingsStr == "N/A" ? null : (object)decimal.Parse(ceoRatingsStr));
                             resultEW.AddRow(resultRow);
                         }
                         else
@@ -519,6 +520,131 @@ namespace NetDataAccess.Extended.GlassDoor
                             resultRow.Add("Page_Company_Name", pageCompanyName);
                             resultRow.Add("EmployerId", employerId);
                             resultEW.AddRow(resultRow);
+                        }
+                        else
+                        {
+                            throw new Exception("无法找到详情节点");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.RunPage.InvokeAppendLogText(ex.Message + ", pageUrl = " + url, LogLevelType.System, true);
+                        throw ex;
+                    }
+                }
+            }
+
+            resultEW.SaveToDisk();
+        }
+
+        private ExcelWriter GetReviewListPageUrlsExcelWriter(int fileIndex)
+        {
+            String exportDir = this.RunPage.GetExportDir();
+            string resultFilePath = Path.Combine(exportDir, "GlassDoor_Review列表页地址_" + fileIndex.ToString() + ".xlsx");
+
+            Dictionary<string, int> columnDic = CommonUtil.InitStringIndexDic(new string[]{ 
+                    "detailPageUrl",
+                    "detailPageName", 
+                    "cookie",
+                    "grabStatus", 
+                    "giveUpGrab", 
+                    "Company_Name", 
+                    "Page_Company_Name",
+                    "ReviewCount",
+                    "PageIndex"});
+
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+            columnFormats.Add("ReviewCount", "#0");
+            columnFormats.Add("PageIndex", "#0");
+
+            ExcelWriter ew = new ExcelWriter(resultFilePath, "List", columnDic, columnFormats);
+            return ew;
+        }
+
+        private void GetReviewListPageUrls(IListSheet listSheet)
+        {
+            string pageSourceDir = this.RunPage.GetDetailSourceFileDir();
+
+            string detailPageUrlColumnName = SysConfig.DetailPageUrlFieldName;
+
+            Dictionary<string, string> houseDic = new Dictionary<string, string>();
+            int fileIndex = 1;
+
+            ExcelWriter resultEW = null;
+
+            for (int i = 0; i < listSheet.RowCount; i++)
+            {
+                if (resultEW == null)
+                {
+                    resultEW = this.GetReviewListPageUrlsExcelWriter(fileIndex);
+                    fileIndex++;
+                }
+                else if (i % 100 == 0)
+                {
+                    resultEW.SaveToDisk();
+                    resultEW = this.GetReviewListPageUrlsExcelWriter(fileIndex);
+                    fileIndex++;
+                }
+
+                Dictionary<string, string> row = listSheet.GetRow(i);
+                bool giveUp = "Y".Equals(row[SysConfig.GiveUpGrabFieldName]);
+                if (!giveUp)
+                {
+                    string url = row[detailPageUrlColumnName];
+                    string companyName = row["Company_Name"];
+                    string cookie = row["cookie"];
+
+                    string pageFilePath = this.RunPage.GetFilePath(url, pageSourceDir);
+                    string html = FileHelper.GetTextFromFile(pageFilePath);
+
+                    HtmlAgilityPack.HtmlDocument pageHtmlDoc = new HtmlAgilityPack.HtmlDocument();
+                    pageHtmlDoc.LoadHtml(html);
+
+                    try
+                    {
+                        HtmlNode eiNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"EI\"]");
+                        if (eiNode != null)
+                        {
+                            //获取列表页时直接获取了详情页
+                            HtmlNode linkNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//a[@class=\"sqLogoLink\"]");
+                            HtmlNode titleNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//h1[@class=\" strong tightAll\"]");
+                            string detailPageUrl = "https://www.glassdoor.com" + linkNode.GetAttributeValue("href", "");
+                            string pageCompanyName = CommonUtil.HtmlDecode(titleNode.GetAttributeValue("data-company", ""));
+                            int beginIndex = html.IndexOf("sectionCounts");
+
+                            int jsonBeginIndex = html.IndexOf("{", beginIndex);
+                            int jsonEndIndex = html.IndexOf("}", beginIndex);
+                            string jsonText = html.Substring(jsonBeginIndex, jsonEndIndex - jsonBeginIndex + 1);
+
+                            JObject infoJo = JObject.Parse(jsonText);
+
+                            string employerId = infoJo.GetValue("employerId").ToString();
+                            string reviewCountStr = infoJo.GetValue("reviewCount").ToString();
+                            decimal reviewCout = reviewCountStr.Length == 0 || reviewCountStr == "--" ? 0 : decimal.Parse(reviewCountStr);
+                            int pageCount = reviewCout == 0 ? 0 : (int)Math.Ceiling((double)reviewCout / 10);
+
+                            if (pageCount > 0)
+                            {
+                                HtmlNode reviewLinkNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"module snug empStatsAndReview\"]/a[@class=\"moreBar\"]");
+                                string reviewUrl = reviewLinkNode.GetAttributeValue("href", "");
+                                string reviewUrlPrefix = "https://www.glassdoor.com" + reviewUrl.Substring(0, reviewUrl.Length - 4);
+
+                                for (int j = 1; j <= pageCount; j++)
+                                {
+
+                                    string reviewPageUrl = reviewUrlPrefix + "_P" + j.ToString() + ".htm?filter.defaultEmploymentStatuses=false&filter.defaultLocation=false";
+
+                                    Dictionary<string, object> resultRow = new Dictionary<string, object>();
+                                    resultRow.Add("detailPageUrl", reviewPageUrl);
+                                    resultRow.Add("detailPageName", companyName + "_" + j.ToString());
+                                    resultRow.Add("cookie", cookie);
+                                    resultRow.Add("Company_Name", companyName);
+                                    resultRow.Add("Page_Company_Name", pageCompanyName);
+                                    resultRow.Add("ReviewCount", reviewCout);
+                                    resultRow.Add("PageIndex", j);
+                                    resultEW.AddRow(resultRow);
+                                }
+                            }
                         }
                         else
                         {

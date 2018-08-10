@@ -222,11 +222,11 @@ namespace NetDataAccess.Extended.Eleme
             resultEW.SaveToDisk();
         }
 
-        private ExcelWriter CreateDetailFileWriter(int fileIndex)
+        private ExcelWriter CreateDetailFileWriter(string city)
         {
             String exportDir = this.RunPage.GetExportDir();
             string pageSourceDir = this.RunPage.GetDetailSourceFileDir();
-            string resultFilePath = Path.Combine(exportDir, "饿了么_店铺详情页_" + fileIndex.ToString() + ".xlsx");
+            string resultFilePath = Path.Combine(exportDir, "饿了么_店铺详情页_" + city + ".xlsx");
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
             resultColumnDic.Add("detailPageUrl", 0);
             resultColumnDic.Add("detailPageName", 1);
@@ -243,7 +243,6 @@ namespace NetDataAccess.Extended.Eleme
             resultColumnDic.Add("promotion_info", 12);
             //resultColumnDic.Add("searchLat", 13);
             //resultColumnDic.Add("searchLng", 14);
-            //resultColumnDic.Add("elemeCity", 15);
             resultColumnDic.Add("xShard", 13);
             resultColumnDic.Add("dataText", 14);
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
@@ -254,72 +253,70 @@ namespace NetDataAccess.Extended.Eleme
         {
             int fileIndex = 1;
 
-            ExcelWriter resultEW = null;
-            Dictionary<string, string> urlDic = new Dictionary<string, string>();
-            for (int i = 0; i < listSheet.RowCount; i++)
+            string[] citys = this.Parameters.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int c = 0; c < citys.Length; c++)
             {
-                if (resultEW == null)
+                string city = citys[c];
+                ExcelWriter resultEW = this.CreateDetailFileWriter(city);
+                Dictionary<string, string> urlDic = new Dictionary<string, string>();
+                for (int i = 0; i < listSheet.RowCount; i++)
                 {
-                    resultEW = this.CreateDetailFileWriter(fileIndex);
-                }
-                else if (resultEW.RowCount > 500000)
-                {
-                    resultEW.SaveToDisk();
-                    fileIndex++;
-                    resultEW = this.CreateDetailFileWriter(fileIndex);
-                }
 
-                Dictionary<string, string> row = listSheet.GetRow(i);
-                string detailPageUrl = row[SysConfig.DetailPageUrlFieldName];
-                string elemeCity = row["elemeCity"];
-                string searchLat = row["lat"];
-                string searchLng = row["lng"];
-
-                string sourceDir = this.RunPage.GetDetailSourceFileDir();
-                string shopsFilePath = this.RunPage.GetFilePath(detailPageUrl, sourceDir);
-
-                ExcelReader er = new ExcelReader(shopsFilePath);
-                int rowCount = er.GetRowCount();
-                for (int j = 0; j < rowCount; j++)
-                {
-                    Dictionary<string, string> subRow = er.GetFieldValues(j);
-                    string shopId = subRow["id"];
-
-                    if (!urlDic.ContainsKey(shopId))
+                    Dictionary<string, string> row = listSheet.GetRow(i);
+                    string detailPageUrl = row[SysConfig.DetailPageUrlFieldName];
+                    string elemeCity = row["elemeCity"];
+                    string searchLat = row["lat"];
+                    string searchLng = row["lng"];
+                    if (city == elemeCity)
                     {
-                        urlDic.Add(shopId, null);
+                        string sourceDir = this.RunPage.GetDetailSourceFileDir();
+                        string shopsFilePath = this.RunPage.GetFilePath(detailPageUrl, sourceDir);
 
-                        string lng = subRow["longitude"];
-                        string lat = subRow["latitude"];
+                        ExcelReader er = new ExcelReader(shopsFilePath);
+                        int rowCount = er.GetRowCount();
+                        for (int j = 0; j < rowCount; j++)
+                        {
+                            Dictionary<string, string> subRow = er.GetFieldValues(j);
+                            string shopId = subRow["id"];
 
-                        string dataText = "{\"timeout\":15000,\"requests\":{\"rst\":{\"method\":\"GET\",\"url\":\"/shopping/restaurant/" + shopId + "?extras[]=activities&extras[]=albums&extras[]=license&extras[]=identification&extras[]=qualification&terminal=h5&latitude=" + lat + "&longitude=" + lng + "\"},\"menu\":{\"method\":\"GET\",\"url\":\"/shopping/v2/menu?restaurant_id=" + shopId + "&terminal=h5\"},\"recommend\":{\"method\":\"GET\",\"url\":\"/shopping/v1/restaurants/" + shopId + "/quality_combo\"},\"redpack\":{\"method\":\"GET\",\"url\":\"/shopping/v1/restaurants/" + shopId + "/exclusive_hongbao/overview?code=0.29063060995754464&terminal=h5&latitude=" + lat + "&longitude=" + lng + "\"}}}";
-                        string xShard = "shopid=" + shopId + ";loc=" + lng + "," + lat;
+                            if (!urlDic.ContainsKey(shopId))
+                            {
+                                urlDic.Add(shopId, null);
 
-                        //string url = "https://h5.ele.me/restapi/shopping/v2/menu?restaurant_id=" + shopId + "&terminal=h5";
-                        string url = "https://h5.ele.me/restapi/batch/v2?trace=shop_detail_h5&restaurant_id=" + shopId;
-                        Dictionary<string, string> mapRow = new Dictionary<string, string>();
-                        mapRow.Add("detailPageUrl", url);
-                        mapRow.Add("detailPageName", shopId);
-                        mapRow.Add("cookie", "ubt_ssid=it9p04k4zaln5h1w85u4kde2jxafztrb_2018-07-09; _utrace=6b179566de24072a5b0ccc3373d3cd38_2018-07-09; perf_ssid=oq7z6r1oglsnviwn5dd8dn6w6drjcsue_2018-07-09");
-                        mapRow.Add("address", subRow["address"]);
-                        mapRow.Add("description", subRow["description"]);
-                        mapRow.Add("id", subRow["id"]);
-                        mapRow.Add("latitude", subRow["latitude"]);
-                        mapRow.Add("longitude", subRow["longitude"]);
-                        mapRow.Add("name", subRow["name"]);
-                        mapRow.Add("phone", subRow["phone"]);
-                        mapRow.Add("promotion_info", subRow["promotion_info"]);
-                        //mapRow.Add("searchLat", searchLat);
-                        //mapRow.Add("searchLng", searchLng);
-                        //mapRow.Add("elemeCity", elemeCity);
-                        mapRow.Add("xShard", xShard);
-                        mapRow.Add("dataText", dataText);
-                        resultEW.AddRow(mapRow);
+                                string lng = subRow["longitude"];
+                                string lat = subRow["latitude"];
+
+                                string dataText = "{\"timeout\":15000,\"requests\":{\"rst\":{\"method\":\"GET\",\"url\":\"/shopping/restaurant/" + shopId + "?extras[]=activities&extras[]=albums&extras[]=license&extras[]=identification&extras[]=qualification&terminal=h5&latitude=" + lat + "&longitude=" + lng + "\"},\"menu\":{\"method\":\"GET\",\"url\":\"/shopping/v2/menu?restaurant_id=" + shopId + "&terminal=h5\"},\"recommend\":{\"method\":\"GET\",\"url\":\"/shopping/v1/restaurants/" + shopId + "/quality_combo\"},\"redpack\":{\"method\":\"GET\",\"url\":\"/shopping/v1/restaurants/" + shopId + "/exclusive_hongbao/overview?code=0.29063060995754464&terminal=h5&latitude=" + lat + "&longitude=" + lng + "\"}}}";
+                                string xShard = "shopid=" + shopId + ";loc=" + lng + "," + lat;
+
+                                //string url = "https://h5.ele.me/restapi/shopping/v2/menu?restaurant_id=" + shopId + "&terminal=h5";
+                                string url = "https://h5.ele.me/restapi/batch/v2?trace=shop_detail_h5&restaurant_id=" + shopId;
+                                Dictionary<string, string> mapRow = new Dictionary<string, string>();
+                                mapRow.Add("detailPageUrl", url);
+                                mapRow.Add("detailPageName", shopId);
+                                mapRow.Add("cookie", "ubt_ssid=it9p04k4zaln5h1w85u4kde2jxafztrb_2018-07-09; _utrace=6b179566de24072a5b0ccc3373d3cd38_2018-07-09; perf_ssid=oq7z6r1oglsnviwn5dd8dn6w6drjcsue_2018-07-09");
+                                mapRow.Add("address", subRow["address"]);
+                                mapRow.Add("description", subRow["description"]);
+                                mapRow.Add("id", subRow["id"]);
+                                mapRow.Add("latitude", subRow["latitude"]);
+                                mapRow.Add("longitude", subRow["longitude"]);
+                                mapRow.Add("name", subRow["name"]);
+                                mapRow.Add("phone", subRow["phone"]);
+                                mapRow.Add("promotion_info", subRow["promotion_info"]);
+                                //mapRow.Add("searchLat", searchLat);
+                                //mapRow.Add("searchLng", searchLng);
+                                //mapRow.Add("elemeCity", elemeCity);
+                                mapRow.Add("xShard", xShard);
+                                mapRow.Add("dataText", dataText);
+                                resultEW.AddRow(mapRow);
+                            }
+
+                        }
                     }
                 }
+                resultEW.SaveToDisk();
             }
-            resultEW.SaveToDisk();
         }
-          
     }
 }

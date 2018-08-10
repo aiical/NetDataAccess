@@ -36,7 +36,7 @@ namespace NetDataAccess.Extended.GlassDoor
                     "Company_Name", 
                     "Page_Company_Name",
                     "EmployerId",
-                    "2018/7/22",
+                    "2018/7/29",
                     "2018/6/24",
                     "2018/5/27",
                     "2018/4/29",
@@ -62,7 +62,7 @@ namespace NetDataAccess.Extended.GlassDoor
                     "2016/8/21"
                     });
             Dictionary<string, string> columnFormats = new Dictionary<string, string>();
-            columnFormats.Add("2018/7/22", "#0.00000");
+            columnFormats.Add("2018/7/29", "#0.00000");
             columnFormats.Add("2018/6/24", "#0.00000");
             columnFormats.Add("2018/5/27", "#0.00000");
             columnFormats.Add("2018/4/29", "#0.00000");
@@ -126,7 +126,7 @@ namespace NetDataAccess.Extended.GlassDoor
                         JArray dateArray = infoJo.GetValue("dates") as JArray;
                         JArray employerRatingArray = infoJo.GetValue("employerRatings") as JArray;
 
-                        Nullable<decimal> v2018_7_22 = null;
+                        Nullable<decimal> v2018_7_29 = null;
                         Nullable<decimal> v2018_6_24 = null;
                         Nullable<decimal> v2018_5_27 = null;
                         Nullable<decimal> v2018_4_29 = null;
@@ -158,8 +158,8 @@ namespace NetDataAccess.Extended.GlassDoor
                             Nullable<decimal> employerRating = employerRatingStr.Length == 0 ? null : (Nullable<decimal>)decimal.Parse(employerRatingStr);
                             switch (date)
                             {
-                                case "2018/7/22":
-                                    v2018_7_22 = employerRating; break;
+                                case "2018/7/29":
+                                    v2018_7_29 = employerRating; break;
                                 case "2018/6/24":
                                     v2018_6_24 = employerRating; break;
                                 case "2018/5/27":
@@ -214,7 +214,7 @@ namespace NetDataAccess.Extended.GlassDoor
                         resultRow.Add("Page_Company_Name", pageCompanyName);
                         resultRow.Add("EmployerId", employerId);
 
-                        resultRow.Add("2018/7/22", v2018_7_22.HasValue ? (object)v2018_7_22 : null);
+                        resultRow.Add("2018/7/29", v2018_7_29.HasValue ? (object)v2018_7_29 : null);
                         resultRow.Add("2018/6/24", v2018_6_24.HasValue ? (object)v2018_6_24 : null);
                         resultRow.Add("2018/5/27", v2018_5_27.HasValue ? (object)v2018_5_27 : null);
                         resultRow.Add("2018/4/29", v2018_4_29.HasValue ? (object)v2018_4_29 : null);

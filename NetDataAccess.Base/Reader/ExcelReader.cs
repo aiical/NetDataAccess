@@ -47,6 +47,20 @@ namespace NetDataAccess.Base.Reader
         /// <summary>
         /// 构造函数
         /// </summary>
+        /// <param name="wookbook"></param>
+        /// <param name="sheetName"></param>
+        public ExcelReader(XSSFWorkbook wookbook, string sheetName)
+        {
+            this._Workbook = wookbook;
+            this._Sheet = this._Workbook.GetSheet(sheetName);
+            this.GetColumns();
+        }
+        #endregion
+
+        #region 构造函数
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         /// <param name="filePath"></param>
         /// <param name="sheetName"></param>
         public ExcelReader(string filePath, string sheetName)
@@ -103,7 +117,42 @@ namespace NetDataAccess.Base.Reader
                 {
                     int index = this._ColumnNameToIndex[columnName];
                     ICell cell = row.GetCell(index);
-                    string value = cell == null ? "" : cell.ToString();
+                    //string value = cell == null ? "" : cell.ToString();
+                    string value = "";
+                    if (cell != null)
+                    {
+                        switch (cell.CellType)
+                        {
+                            case CellType.Boolean:
+                                {
+                                    value = cell.BooleanCellValue ? "是" : "否";
+                                }
+                                break;
+                            case CellType.Numeric:
+                                short format = cell.CellStyle.DataFormat;
+                                if (format == 14 || format == 31 || format == 57 || format == 58 || format == 20)
+                                {
+                                    value = cell.DateCellValue.ToString("yyyy-MM-dd HH:mm:ss");
+                                }
+                                else
+                                {
+                                    value = cell.NumericCellValue.ToString();
+                                }
+                                break;
+                            case CellType.String:
+                                {
+                                    value = cell.StringCellValue;
+                                }
+                                break;
+                            case CellType.Formula:
+                                {
+                                    value = cell.StringCellValue;
+                                }
+                                break;
+                            case CellType.Blank:
+                                break;
+                        }
+                    }
                     f2vs.Add(columnName, value);
                 }
                 return f2vs;

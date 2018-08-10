@@ -112,6 +112,7 @@ namespace NetDataAccess.Extended.GlassDoor
                             string itemName = itemJo.GetValue("type").ToString();
                             string itemValueStr = itemJo.GetValue("value").ToString();
                             Nullable<decimal> itemValue = itemValueStr.Length == 0 ? null : (Nullable<decimal>)decimal.Parse(itemValueStr);
+                            itemValue = itemValue < 0 ? null : itemValue;
 
                             switch (itemName)
                             {

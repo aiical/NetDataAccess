@@ -75,6 +75,8 @@
     <Compile Include="GetRatingData.cs" />
     <Compile Include="GetOverallDistributionData.cs" />
     <Compile Include="GetTrendData.cs" />
+    <Compile Include="GetGlassDoorReviewStatisticValue.cs" />
+    <Compile Include="GetWRDSCompanyCityYearList.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NetDataAccess.Base\NetDataAccess.Base.csproj">
