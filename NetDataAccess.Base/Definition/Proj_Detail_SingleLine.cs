@@ -333,5 +333,20 @@ namespace NetDataAccess.Base.Definition
             }
         }
         #endregion 
+
+        #region WebBrowserType
+        private WebBrowserType _BrowserType = WebBrowserType.IE;
+        public WebBrowserType BrowserType
+        {
+            get
+            {
+                return this._BrowserType;
+            }
+            set
+            {
+                this._BrowserType = value;
+            }
+        }
+        #endregion
     }
 }

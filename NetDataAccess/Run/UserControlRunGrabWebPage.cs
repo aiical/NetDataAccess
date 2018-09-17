@@ -40,7 +40,8 @@ using NetDataAccess.Base.Log;
 using System.Security.Cryptography;
 using NetDataAccess.Base.Server;
 using System.Runtime.InteropServices;
-using NetDataAccess.Base.UserAgent; 
+using NetDataAccess.Base.UserAgent;
+using NetDataAccess.Base.Browser; 
 
 namespace NetDataAccess.Run
 {
@@ -242,12 +243,12 @@ namespace NetDataAccess.Run
             tabPageWebBrowser.Padding = new Padding(3);
             return tabPageWebBrowser;
         }
-        public WebBrowser GetWebBrowserByName(string tabName)
+        public IWebBrowser GetWebBrowserByName(string tabName)
         {
             if (this.tabControlMain.TabPages.ContainsKey(tabName))
             {
                 TabPage tabPageWebBrowser = this.tabControlMain.TabPages[tabName];
-                return (WebBrowser)tabPageWebBrowser.Controls[0];
+                return (IWebBrowser)tabPageWebBrowser.Controls[0];
             }
             else
             {
@@ -266,12 +267,11 @@ namespace NetDataAccess.Run
             if (this.tabControlMain.TabPages.ContainsKey(tabName))
             {
                 TabPage oldTabPage = this.tabControlMain.TabPages[tabName];
-                WebBrowser oldWebBrowser = (WebBrowser)oldTabPage.Controls[0];
+                IWebBrowser oldWebBrowser = (IWebBrowser)oldTabPage.Controls[0];
                 if (oldWebBrowser != null)
                 {
-                    oldWebBrowser.Parent.Controls.Remove(oldWebBrowser);
-                    oldWebBrowser.Navigating -= new WebBrowserNavigatingEventHandler(webBrowserMain_Navigating);
-                    oldWebBrowser.DocumentCompleted -= new WebBrowserDocumentCompletedEventHandler(webBrowserMain_DocumentCompleted);
+                    ((Control)oldWebBrowser).Parent.Controls.Remove((Control)oldWebBrowser);
+                    oldWebBrowser.DocumentLoadCompleted -= new IWebBrowserDocumentCompletedEventHandler(webBrowserMain_DocumentCompleted);
                     oldWebBrowser.Dispose();
                     oldWebBrowser = null; 
 
@@ -285,7 +285,12 @@ namespace NetDataAccess.Run
             }
         }
 
-        private NdaWebBrowser CreateWebBrowser(string tabName)
+        private IWebBrowser CreateWebBrowser(string tabName, WebBrowserType browserType)
+        {
+            return this.CreateWebBrowser(tabName, browserType, false);
+        }
+
+        private IWebBrowser CreateWebBrowser(string tabName, WebBrowserType browserType, bool doFocus)
         {
             TabPage tabPageWebBrowser = null;
             lock (tabLocker)
@@ -293,18 +298,30 @@ namespace NetDataAccess.Run
                 this.RemoveOldTabPageAndBrowser(tabName);
                 tabPageWebBrowser = CreateWebBrowserTabPage(tabName);
             }
+            if (doFocus)
+            {
+                this.tabControlMain.SelectedTab = tabPageWebBrowser;
+            }
             if (SysConfig.SysExecuteType == SysExecuteType.Test)
             {
                // this.tabControlMain.SelectedTab = tabPageWebBrowser;
             }
-            NdaWebBrowser webBrowser = new NdaWebBrowser();
+            IWebBrowser webBrowser = null;
+            switch (browserType)
+            {
+                case WebBrowserType.Chromium:
+                    webBrowser = new ChromiumRunWebBrowser();
+                    break;
+                case WebBrowserType.IE:
+                    webBrowser = new IeRunWebBrowser();
+                    break;
+            }
             webBrowser.TabName = tabName;
             webBrowser.Dock = DockStyle.Fill;
             webBrowser.ScriptErrorsSuppressed = true;
             webBrowser.AllowWebBrowserDrop = false;
-            tabPageWebBrowser.Controls.Add(webBrowser);
-            webBrowser.Navigating += new WebBrowserNavigatingEventHandler(webBrowserMain_Navigating);
-            webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webBrowserMain_DocumentCompleted);
+            tabPageWebBrowser.Controls.Add((Control)webBrowser); 
+            webBrowser.DocumentLoadCompleted += new IWebBrowserDocumentCompletedEventHandler(webBrowserMain_DocumentCompleted);
             return webBrowser;
         }
         #endregion
@@ -671,17 +688,11 @@ namespace NetDataAccess.Run
                     throw new Exception("暂未实现以" + checkType.ToString() + "方式不判断网页是否获取完成");
             }
             */
-        }
-
-        void webBrowserMain_Navigating(object sender, WebBrowserNavigatingEventArgs e)
-        {
-            NdaWebBrowser webBrowser = (NdaWebBrowser)sender;
-        } 
-        
-        void webBrowserMain_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            NdaWebBrowser webBrowser = (NdaWebBrowser)sender;
-            if (webBrowser.ReadyState == WebBrowserReadyState.Complete && !webBrowser.IsBusy)
+        }  
+        private void webBrowserMain_DocumentCompleted(IWebBrowser webBrowser)
+        { 
+            //if (webBrowser.ReadyState == WebBrowserReadyState.Complete && !webBrowser.IsBusy)
+            if(webBrowser.Loaded())
             {
                 IsCompleted[webBrowser.TabName] = true;
                 this.InvokeAppendLogText("页面加载完成, tabName = " + webBrowser.TabName, LogLevelType.System, true);
@@ -1046,7 +1057,7 @@ namespace NetDataAccess.Run
         #region 显示进度
         private DateTime _LastLogTime = DateTime.Now;
         private int hiddenCount = 0;
-        private delegate WebBrowser ShowWebPageInvokeDelegate(string url, string tabName);
+        private delegate IWebBrowser ShowWebPageInvokeDelegate(string url, string tabName, WebBrowserType browserType, bool doFocus);
         private delegate void CloseWebPageInvokeDelegate(string tabName);
         private delegate void SaveLogToFileDelegate(string msg, LogLevelType logLevel, bool immediatelyShow);
         private delegate void GrabInvokeDelegate(string msg);
@@ -1209,8 +1220,27 @@ namespace NetDataAccess.Run
         }
          */
         #endregion 
-
+        
         #region 获取浏览器HTML内容
+        private delegate string WebPageBrowserInvokeDelegate(IWebBrowser webBrowser);
+        public string InvokeGetPageHtml(IWebBrowser webBrowser)
+        {
+            string html = null;
+            try
+            {
+                html = (string)this.Invoke(new WebPageBrowserInvokeDelegate(this.GetWebBrowserHtmlContent), new object[] { webBrowser });
+            }
+            catch (Exception ex)
+            { }
+            return html;
+        }
+        private string GetWebBrowserHtmlContent(IWebBrowser webBrowser)
+        {
+            return webBrowser.GetDocumentText();
+            //return webBrowser.Document == null ? null : (webBrowser.Document.Body == null ? null : webBrowser.Document.Body.OuterHtml);
+        } 
+
+
         private delegate string WebPageInvokeDelegate(string tabName);
         public string InvokeGetPageHtml(string tabName)
         {
@@ -1225,8 +1255,9 @@ namespace NetDataAccess.Run
         }
         private string GetPageHtmlContent(string tabName)
         {
-            WebBrowser webBrowser = this.GetWebBrowserByName(tabName);
-            return webBrowser.Document == null ? null : (webBrowser.Document.Body == null ? null : webBrowser.Document.Body.OuterHtml);
+            IWebBrowser webBrowser = this.GetWebBrowserByName(tabName);
+            return webBrowser.GetDocumentText();
+            //return webBrowser.Document == null ? null : (webBrowser.Document.Body == null ? null : webBrowser.Document.Body.OuterHtml);
         }
         #endregion
 
@@ -2227,22 +2258,27 @@ namespace NetDataAccess.Run
         #region 屏蔽不友好的js，例如弹出框
         private void InvokeAvoidWebBrowserUnfriendlyJavaScript(string tabName)
         {
-            WebBrowser webBrowser = this.GetWebBrowserByName(tabName);
+            IWebBrowser webBrowser = this.GetWebBrowserByName(tabName);
             this.Invoke(new AvoidWebBrowserUnfriendlyJavaScriptDelegate(AvoidWebBrowserUnfriendlyJavaScript), new object[] { webBrowser });
         }
-        private delegate void AvoidWebBrowserUnfriendlyJavaScriptDelegate(WebBrowser webBrowser);
-        private void AvoidWebBrowserUnfriendlyJavaScript(WebBrowser webBrowser)
-        { 
+        private delegate void AvoidWebBrowserUnfriendlyJavaScriptDelegate(IWebBrowser webBrowser);
+        private void AvoidWebBrowserUnfriendlyJavaScript(IWebBrowser webBrowser)
+        {
+            webBrowser.AvoidWebBrowserUnfriendlyJavaScript();
+            /*
             HtmlElement sElement = webBrowser.Document.CreateElement("script");
             IHTMLScriptElement scriptElement = (IHTMLScriptElement)sElement.DomElement;
             scriptElement.text = "alert = function(){};confirm = function(){};";
             webBrowser.Document.Body.AppendChild(sElement); 
+             * */
         }
         #endregion
 
-        public string GetDetailHtmlByWebBrowser(string pageUrl,Dictionary<string,string> listRow, decimal intervalAfterLoaded, int timeout, Proj_CompleteCheckList completeChecks, string tabName)
+        public string GetDetailHtmlByWebBrowser(string pageUrl, Dictionary<string, string> listRow, decimal intervalAfterLoaded, int timeout, Proj_CompleteCheckList completeChecks, string tabName, WebBrowserType browserType)
         {
-            InvokeShowWebPage(pageUrl, tabName);
+            InvokeShowWebPage(pageUrl, tabName, browserType, false);
+
+            this.ExternalRunPage.WebBrowserHtml_AfterDoNavigate(pageUrl, listRow, tabName);
 
             int waitCount = 0;
             while (!this.CheckIsComplete(listRow, Proj_DataAccessType.WebBrowserHtml, completeChecks, tabName))
@@ -2422,7 +2458,8 @@ namespace NetDataAccess.Run
                 {
                     case Proj_DataAccessType.WebBrowserHtml:
                         {
-                            string webPageText = GetDetailHtmlByWebBrowser(pageUrl, listRow, intervalAfterLoaded, detailPageInfo.RequestTimeout, detailPageInfo.CompleteChecks, tabName);
+                            WebBrowserType browserType = detailPageInfo.BrowserType;
+                            string webPageText = GetDetailHtmlByWebBrowser(pageUrl, listRow, intervalAfterLoaded, detailPageInfo.RequestTimeout, detailPageInfo.CompleteChecks, tabName, browserType);
                             this.SaveFile(webPageText, localPagePath, encoding);
                         }
                         break;
@@ -3107,7 +3144,8 @@ namespace NetDataAccess.Run
                 {
                     case Proj_DataAccessType.WebBrowserHtml:
                         {
-                            string webPageText = GetDetailHtmlByWebBrowser(pageUrl, listRow, intervalAfterLoaded, detailPageInfo.RequestTimeout, detailPageInfo.CompleteChecks, tabName);
+                            WebBrowserType browserType = detailPageInfo.BrowserType;
+                            string webPageText = GetDetailHtmlByWebBrowser(pageUrl, listRow, intervalAfterLoaded, detailPageInfo.RequestTimeout, detailPageInfo.CompleteChecks, tabName, browserType);
                             this.SaveFile(webPageText, localPagePath, encoding);
                         }
                         break;
@@ -3640,13 +3678,21 @@ namespace NetDataAccess.Run
         #endregion
 
         #region 显示网页
-        public WebBrowser InvokeShowWebPage(string url, string tabName)
+        public IWebBrowser InvokeShowWebPage(string url, string tabName, WebBrowserType browserType, bool doFocus)
         {
-            return (WebBrowser)this.Invoke(new ShowWebPageInvokeDelegate(this.ShowWebPage), new string[] { url, tabName });
+            return (IWebBrowser)this.Invoke(new ShowWebPageInvokeDelegate(this.ShowWebPage), new object[] { url, tabName, browserType, doFocus });
         }
-        private WebBrowser ShowWebPage(string url, string tabName)
+        public IWebBrowser InvokeShowWebPage(string url, string tabName, WebBrowserType browserType)
         {
-            NdaWebBrowser webBrowser = this.CreateWebBrowser(tabName);
+            return (IWebBrowser)this.Invoke(new ShowWebPageInvokeDelegate(this.ShowWebPage), new object[] { url, tabName, browserType, false });
+        }
+        private IWebBrowser ShowWebPage(string url, string tabName, WebBrowserType browserType)
+        {
+            return this.ShowWebPage(url, tabName, browserType, false);
+        }
+        private IWebBrowser ShowWebPage(string url, string tabName, WebBrowserType browserType, bool doFocus)
+        {
+            IWebBrowser webBrowser = this.CreateWebBrowser(tabName, browserType, doFocus);
 
             /*
             if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
@@ -3675,6 +3721,21 @@ namespace NetDataAccess.Run
         }
         #endregion
 
+        #region 关闭网页
+        private delegate void ShowTabPageInvokeDelegate(string tabName);
+        public void ShowTabPage(string tabName)
+        {
+            this.Invoke(new ShowTabPageInvokeDelegate(this.ShowTabPageMethod), new string[] { tabName });
+        }
+        private void ShowTabPageMethod(string tabName)
+        {
+            lock (tabLocker)
+            {
+                this.tabControlMain.SelectedTab = this.tabControlMain.TabPages[tabName];
+            }
+        }
+        #endregion
+
         #region 显示网页
         private delegate void ScrollWebPageInvokeDelegate(int toY, string tabName);
         private void InvokeScrollWebPage(int toY, string tabName)
@@ -3683,12 +3744,14 @@ namespace NetDataAccess.Run
         }
         private void ScrollWebPage(int toY, string tabName)
         {
-            WebBrowser webBrowser = this.GetWebBrowserByName(tabName);
-            webBrowser.Document.Window.ScrollTo(0, toY);
+            IWebBrowser webBrowser = this.GetWebBrowserByName(tabName);
+            //webBrowser.Document.Window.ScrollTo(0, toY);
+            webBrowser.ScrollTo(0, toY);
         }
         #endregion
 
         #region 获取网页高度
+        /*
         private delegate int GetWebPageHeightInvokeDelegate(string tabName);
         private int InvokeGetWebPageHeight(string tabName)
         {
@@ -3696,9 +3759,10 @@ namespace NetDataAccess.Run
         }
         private int GetWebPageHeight(string tabName)
         {
-            WebBrowser webBrowser = this.GetWebBrowserByName(tabName);
+            IWebBrowser webBrowser = this.GetWebBrowserByName(tabName);
             return webBrowser.Document.Body.OffsetRectangle.Bottom;
         }
+         * */
         #endregion
 
         #region 关闭
@@ -3797,7 +3861,7 @@ namespace NetDataAccess.Run
             if (this.Project.LoginPageInfoObject != null)
             {
                 Proj_LoginPageInfo loginObj = (Proj_LoginPageInfo)this.Project.LoginPageInfoObject;
-                this.ShowWebPage(loginObj.LoginUrl, "login");
+                this.ShowWebPage(loginObj.LoginUrl, "login", SysConfig.BrowserType, false);
             }
         }
         #endregion 
@@ -3810,9 +3874,10 @@ namespace NetDataAccess.Run
         }
         private void SetControlValueById(string id, string attributeName, string attributeValue, string tabName)
         {
-            WebBrowser webBrowser = this.GetWebBrowserByName(tabName);
-            HtmlElement element = webBrowser.Document.GetElementById(id);
-            element.SetAttribute(attributeName, attributeValue);
+            IWebBrowser webBrowser = this.GetWebBrowserByName(tabName);
+            webBrowser.SetControlValueById(id, attributeName, attributeValue);
+            //HtmlElement element = webBrowser.Document.GetElementById(id);
+            //element.SetAttribute(attributeName, attributeValue);
         }
         #endregion
 
@@ -3855,9 +3920,13 @@ namespace NetDataAccess.Run
         #endregion 
 
         #region 显示网页
-        public WebBrowser ShowWebPage(string pageUrl, string tabName, int webRequestTimeout, bool goonWhenTimeout)
+        public IWebBrowser ShowWebPage(string pageUrl, string tabName, int webRequestTimeout, bool goonWhenTimeout, WebBrowserType browserType)
         {
-            WebBrowser webBrowser = this.InvokeShowWebPage(pageUrl, tabName);
+            return ShowWebPage(pageUrl, tabName, webRequestTimeout, goonWhenTimeout, browserType, false);
+        }
+        public IWebBrowser ShowWebPage(string pageUrl, string tabName, int webRequestTimeout, bool goonWhenTimeout, WebBrowserType browserType, bool doFocus)
+        {
+            IWebBrowser webBrowser = this.InvokeShowWebPage(pageUrl, tabName, browserType, doFocus);
             int waitCount = 0;
             while (!this.CheckIsComplete(tabName))
             {
@@ -3883,13 +3952,15 @@ namespace NetDataAccess.Run
         #endregion 
 
         #region 向网页中增加JavaScript代码，例如函数等，方便后续网页与爬取工具交互
-        public void InvokeAddScriptMethod(WebBrowser webBrowser, string scriptMethodCode, object objectForScripting)
+        public void InvokeAddScriptMethod(IWebBrowser webBrowser, string scriptMethodCode)
         {
-            webBrowser.Invoke(new AddScriptMethodDelegate(AddScriptMethod), new object[] { webBrowser, scriptMethodCode , objectForScripting});
+            webBrowser.Invoke(new AddScriptMethodDelegate(AddScriptMethod), new object[] { webBrowser, scriptMethodCode});
         }
-        private delegate void AddScriptMethodDelegate(WebBrowser webBrowser, string scriptMethodCode, object objectForScripting);
-        private void AddScriptMethod(WebBrowser webBrowser, string scriptMethodCode, object objectForScripting)
+        private delegate void AddScriptMethodDelegate(IWebBrowser webBrowser, string scriptMethodCode);
+        private void AddScriptMethod(IWebBrowser webBrowser, string scriptMethodCode)
         {
+            webBrowser.AddScriptMethod(scriptMethodCode);
+            /*
             if (objectForScripting == null)
             {
                 webBrowser.ObjectForScripting = this;
@@ -3902,47 +3973,50 @@ namespace NetDataAccess.Run
             IHTMLScriptElement scriptElement = (IHTMLScriptElement)sElement.DomElement;
             scriptElement.text = scriptMethodCode;
             webBrowser.Document.Body.AppendChild(sElement);
+             */
         }
         #endregion
 
         #region 调用网页JavaScript脚本
-        public object InvokeDoScriptMethod(WebBrowser webBrowser, string methodName, object[] parameters)
+        public object InvokeDoScriptMethod(IWebBrowser webBrowser, string methodName, object[] parameters)
         {
             return webBrowser.Invoke(new DoScriptMethodDelegate(DoScriptMethod), new object[] { webBrowser, methodName, parameters });
         }
-        private delegate object DoScriptMethodDelegate(WebBrowser webBrowser, string methodName, object[] parameters);
-        private object DoScriptMethod(WebBrowser webBrowser, string methodName, object[] parameters)
+        private delegate object DoScriptMethodDelegate(IWebBrowser webBrowser, string methodName, object[] parameters);
+        private object DoScriptMethod(IWebBrowser webBrowser, string methodName, object[] parameters)
         {
-            return webBrowser.Document.InvokeScript(methodName, parameters);
+            //return webBrowser.Document.InvokeScript(methodName, parameters);
+            return webBrowser.DoScriptMethod(methodName, parameters);
         }
         #endregion
 
         #region 滚动页面
-        public void InvokeScrollDocumentMethod(WebBrowser webBrowser, Point toPoint)
+        public void InvokeScrollDocumentMethod(IWebBrowser webBrowser, Point toPoint)
         {
             webBrowser.Invoke(new ScrollDocumentMethodDelegate(ScrollDocumentMethod), new object[] { webBrowser, toPoint });
         }
-        private delegate void ScrollDocumentMethodDelegate(WebBrowser webBrowser, Point toPoint);
-        private void ScrollDocumentMethod(WebBrowser webBrowser, Point toPoint)
+        private delegate void ScrollDocumentMethodDelegate(IWebBrowser webBrowser, Point toPoint);
+        private void ScrollDocumentMethod(IWebBrowser webBrowser, Point toPoint)
         {
-            webBrowser.Document.Window.ScrollTo(toPoint);
+           // webBrowser.Document.Window.ScrollTo(toPoint);
+            webBrowser.ScrollTo(toPoint.X, toPoint.Y);
         }
         #endregion
 
         #region 滚动页面
-        public void InvokeWebBrowserGoBackMethod(WebBrowser webBrowser)
+        public void InvokeWebBrowserGoBackMethod(IWebBrowser webBrowser)
         {
             webBrowser.Invoke(new WebBrowserGoBackMethodDelegate(WebBrowserGoBackMethod), new object[] { webBrowser });
         }
-        private delegate void WebBrowserGoBackMethodDelegate(WebBrowser webBrowser);
-        private void WebBrowserGoBackMethod(WebBrowser webBrowser)
+        private delegate void WebBrowserGoBackMethodDelegate(IWebBrowser webBrowser);
+        private void WebBrowserGoBackMethod(IWebBrowser webBrowser)
         {
             webBrowser.GoBack();
         }
         #endregion  
          
         #region 实现了轮询的方法判断网页JavaScript里某个值是否等于checkValue。用于异步调用后等待执行结果
-        public void WaitForInvokeScript(WebBrowser webBrowser, string scriptCheckMethod, string checkValue, int invokeTimeout)
+        public void WaitForInvokeScript(IWebBrowser webBrowser, string scriptCheckMethod, string checkValue, int invokeTimeout)
         {
             //记录调用check方法返回的值
             string resultValue = null;
@@ -3967,7 +4041,7 @@ namespace NetDataAccess.Run
         #endregion
 
         #region 利用成功和失败关键词判断是否打开了需要的页面
-        public bool CheckOpenRightPage(WebBrowser webBrowser, string[] rightStrings, string[] wrongStrings, int timeout, bool andCondition)
+        public bool CheckOpenRightPage(IWebBrowser webBrowser, string[] rightStrings, string[] wrongStrings, int timeout, bool andCondition)
         {
             bool matchRight = false;
             bool matchWrong = false;
@@ -4000,7 +4074,7 @@ namespace NetDataAccess.Run
         /// <param name="timeout">超过此间隔时间，系统认为网页加载失败，会抛出异常</param>
         /// <param name="andCondition">当为true时要求所有字符串都匹配，当为false时仅匹配一个就认为网页加载成功，默认为true</param>
         /// <returns></returns>
-        public bool CheckWebBrowserContainsForComplete(WebBrowser webBrowser, string[] checkStrings, int timeout, bool andCondition)
+        public bool CheckWebBrowserContainsForComplete(IWebBrowser webBrowser, string[] checkStrings, int timeout, bool andCondition)
         {
             bool match = false;
             int waitCount = 0;
@@ -4019,16 +4093,17 @@ namespace NetDataAccess.Run
                 match = InvokeCheckWebBrowserContains(webBrowser, checkStrings, andCondition);
             }
             return match;
-        } 
+        }
 
-        public bool InvokeCheckWebBrowserContains(WebBrowser webBrowser, string[] checkStrings, bool andCondition)
+        public bool InvokeCheckWebBrowserContains(IWebBrowser webBrowser, string[] checkStrings, bool andCondition)
         {
             return (bool)webBrowser.Invoke(new CheckWebBrowserContainsMethodDelegate(CheckWebBrowserContainsMethod), new object[] { webBrowser, checkStrings, andCondition });
         }
-        private delegate bool CheckWebBrowserContainsMethodDelegate(WebBrowser webBrowser, string[] checkStrings, bool andCondition);
-        private bool CheckWebBrowserContainsMethod(WebBrowser webBrowser, string[] checkStrings, bool andCondition)
+        private delegate bool CheckWebBrowserContainsMethodDelegate(IWebBrowser webBrowser, string[] checkStrings, bool andCondition);
+        private bool CheckWebBrowserContainsMethod(IWebBrowser webBrowser, string[] checkStrings, bool andCondition)
         {
-            string html = webBrowser.Document == null ? null : (webBrowser.Document.Body == null ? null : webBrowser.Document.Body.OuterHtml);
+            //string html = webBrowser.Document == null ? null : (webBrowser.Document.Body == null ? null : webBrowser.Document.Body.OuterHtml);
+            string html = webBrowser.GetDocumentText();
             if (html != null)
             {
                 if (andCondition)
@@ -4065,7 +4140,7 @@ namespace NetDataAccess.Run
         #endregion
 
         #region 判断浏览器是否已经跳转到某个网页
-        public bool CheckWebBrowserUrl(WebBrowser webBrowser, string checkUrl, bool fullMatch, int timeout)
+        public bool CheckWebBrowserUrl(IWebBrowser webBrowser, string checkUrl, bool fullMatch, int timeout)
         {
             bool match = false;
             int waitCount = 0;
@@ -4088,14 +4163,15 @@ namespace NetDataAccess.Run
             return match;
         }
 
-        public string InvokeGetWebBrowserPageUrl(WebBrowser webBrowser) 
+        public string InvokeGetWebBrowserPageUrl(IWebBrowser webBrowser) 
         {
             return (string)webBrowser.Invoke(new GetWebBrowserPageUrlMethodDelegate(GetWebBrowserPageUrlMethod), new object[] { webBrowser });
         }
-        private delegate string GetWebBrowserPageUrlMethodDelegate(WebBrowser webBrowser);
-        private string GetWebBrowserPageUrlMethod(WebBrowser webBrowser)
+        private delegate string GetWebBrowserPageUrlMethodDelegate(IWebBrowser webBrowser);
+        private string GetWebBrowserPageUrlMethod(IWebBrowser webBrowser)
         {
-            return webBrowser.Url.AbsoluteUri;
+            //return webBrowser.Url.AbsoluteUri;
+            return webBrowser.GetWebBrowserPageUrlMethod();
         }
         #endregion
 

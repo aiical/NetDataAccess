@@ -19,6 +19,7 @@ using NetDataAccess.Base.DB;
 using System.Drawing;
 using NetDataAccess.Base.Reader;
 using NetDataAccess.Extended.Linkedin.Common;
+using NetDataAccess.Base.Browser;
 
 namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtLinkedin
 {
@@ -227,7 +228,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtLinkedin
         private string GetCurrentPageAndNextPageUrl(string listPageUrl, List<string> allListPageUrls)
         {
             string tabName = "ListPage";
-            WebBrowser webBrowser = this.RunPage.ShowWebPage(listPageUrl, tabName, SysConfig.WebPageRequestTimeout, false);
+            IeRunWebBrowser webBrowser = (IeRunWebBrowser)this.RunPage.ShowWebPage(listPageUrl, tabName, SysConfig.WebPageRequestTimeout, false, WebBrowserType.Chromium);
             string currentPageUrl = this.RunPage.InvokeGetWebBrowserPageUrl(webBrowser);
             string listPageHtml = this.RunPage.InvokeGetPageHtml(tabName);
             string localFilePath = this.RunPage.GetFilePath(currentPageUrl, this.RunPage.GetDetailSourceFileDir());
@@ -244,7 +245,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtLinkedin
                 + "}"
                 + "}";
 
-            this.RunPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode, this);
+            this.RunPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode);
             string nextPageUrl = CommonUtil.UrlDecodeSymbolAnd((string)this.RunPage.InvokeDoScriptMethod(webBrowser, "myGetNextPageUrl", null));
             if (nextPageUrl != null && nextPageUrl.Length > 0)
             {

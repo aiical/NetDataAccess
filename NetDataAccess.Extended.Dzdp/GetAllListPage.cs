@@ -51,9 +51,17 @@ namespace NetDataAccess.Extended.Dzdp
             resultColumnDic.Add("shopName", 11);
             resultColumnDic.Add("shopCode", 12);
             resultColumnDic.Add("reviewNum", 13);
+            resultColumnDic.Add("serviceRating", 14);
+            resultColumnDic.Add("environmentRating", 15);
+            resultColumnDic.Add("tasteRating", 16);
+            resultColumnDic.Add("address", 17);
+
             string resultFilePath = Path.Combine(exportDir, "大众点评获取店铺详情_" + fileIndex.ToString() + ".xlsx");
             Dictionary<string, string> resultColumnFormat = new Dictionary<string, string>();
             resultColumnFormat.Add("reviewNum", "#,##0");
+            resultColumnFormat.Add("serviceRating", "#0.0");
+            resultColumnFormat.Add("environmentRating", "#0.0");
+            resultColumnFormat.Add("tasteRating", "#0.0");
 
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, resultColumnFormat);
             return resultEW;
@@ -100,6 +108,39 @@ namespace NetDataAccess.Extended.Dzdp
                         for (int j = 0; j < allShopLinkNodes.Count; j++)
                         {
                             HtmlNode shopLinkNode = allShopLinkNodes[j];
+                            HtmlNodeCollection ratingNodes = shopLinkNode.SelectNodes("./span[@class=\"comment-list\"]/span");
+                            Nullable<decimal> serviceRating = null;
+                            Nullable<decimal> environmentRating = null;
+                            Nullable<decimal> tasteRating = null;
+
+                            if (ratingNodes != null)
+                            {
+                                foreach (HtmlNode ratingNode in ratingNodes)
+                                {
+                                    string ratingText = ratingNode.InnerText.Trim();
+                                    decimal ratingValue = decimal.Parse(ratingNode.SelectSingleNode("./b").InnerText.Trim());
+                                    if (ratingText.StartsWith("口味"))
+                                    {
+                                        tasteRating = ratingValue;
+                                    }
+                                    else if (ratingText.StartsWith("服务"))
+                                    {
+                                        serviceRating = ratingValue;
+                                    }
+                                    else if (ratingText.StartsWith("环境"))
+                                    {
+                                        environmentRating = ratingValue;
+                                    }
+                                }
+                            }
+
+                            string address = "";
+                            HtmlNode addressNode = shopLinkNode.SelectSingleNode("./div[@class=\"tag-addr\"]/span[@class=\"addr\"]");
+                            if (addressNode != null)
+                            {
+                                address = CommonUtil.HtmlDecode(addressNode.InnerText.Trim());
+                            }
+
                             HtmlNode nameNode = shopLinkNode.SelectSingleNode("./div[@class=\"tit\"]/a");
                             HtmlNode reviewNumNode = shopLinkNode.SelectSingleNode("./div[@class=\"comment\"]/a[@class=\"review-num\"]/b");
                             if (nameNode != null)
@@ -134,6 +175,10 @@ namespace NetDataAccess.Extended.Dzdp
                                     f2vs.Add("shopName", shopName);
                                     f2vs.Add("shopCode", shopCode);
                                     f2vs.Add("reviewNum", reviewNum);
+                                    f2vs.Add("serviceRating", serviceRating);
+                                    f2vs.Add("environmentRating", environmentRating);
+                                    f2vs.Add("tasteRating", tasteRating);
+                                    f2vs.Add("address", address);
                                     resultEW.AddRow(f2vs);
                                 }
                             }

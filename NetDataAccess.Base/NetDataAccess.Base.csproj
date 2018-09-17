@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -35,6 +35,15 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CefSharp">
+      <HintPath>..\..\..\Code\OCRTool\TestChromium\bin\Debug\CefSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp.Core">
+      <HintPath>..\..\..\Code\OCRTool\TestChromium\bin\Debug\CefSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp.WinForms">
+      <HintPath>..\..\..\Code\OCRTool\TestChromium\bin\Debug\CefSharp.WinForms.dll</HintPath>
+    </Reference>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\NetDataAccess\bin\Debug\HtmlAgilityPack.dll</HintPath>
     </Reference>
@@ -47,6 +56,9 @@
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\..\..\Work\pansoft\VS2005CSHARP\PanSchemaServerCode\PanSchemaServiceSolution\PanSchema\PanSchema\PanSchema\bin\Debug\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -87,6 +99,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Browser\IeRunWebBrowser.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Browser\IWebBrowser.cs" />
+    <Compile Include="Browser\ChromiumRunWebBrowser.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Common\CommonUtil.cs" />
     <Compile Include="Common\EmptyFileException.cs" />
     <Compile Include="Common\FileHelper.cs" />
@@ -105,6 +124,7 @@
     <Compile Include="DataTransform\Address\AddressTransform.cs" />
     <Compile Include="DataTransform\Address\XZQHArea.cs" />
     <Compile Include="DataTransform\Address\XZQHMap.cs" />
+    <Compile Include="EnumTypes\WebBrowserType.cs" />
     <Compile Include="MathProcessor\PointProcessor.cs" />
     <Compile Include="MathProcessor\PolygonProcessor.cs" />
     <Compile Include="Server\Dama.cs" />

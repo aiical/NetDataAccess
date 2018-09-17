@@ -265,7 +265,8 @@ namespace NetDataAccess.Base.Definition
                                 detailObj.Encoding = rootElement.Attributes["Encoding"] == null ? SysConfig.WebPageEncoding : rootElement.Attributes["Encoding"].Value;
                                 detailObj.XRequestedWith = rootElement.Attributes["XRequestedWith"] == null ? "" : rootElement.Attributes["XRequestedWith"].Value;
                                 detailObj.IntervalProxyRequest = rootElement.Attributes["IntervalProxyRequest"] == null ? detailObj.IntervalProxyRequest : int.Parse(rootElement.Attributes["IntervalProxyRequest"].Value);
-                                
+                                detailObj.BrowserType = rootElement.Attributes["BrowserType"] == null ? WebBrowserType.IE : (WebBrowserType)Enum.Parse(typeof(WebBrowserType), rootElement.Attributes["BrowserType"].Value);
+                                   
                                 XmlNode completeCheckListNode = rootElement.SelectSingleNode("CompleteChecks") == null ? null : rootElement.SelectSingleNode("CompleteChecks");
                                 if (completeCheckListNode != null)
                                 {
@@ -321,7 +322,8 @@ namespace NetDataAccess.Base.Definition
                                 detailObj.Encoding = rootElement.Attributes["Encoding"] == null ? SysConfig.WebPageEncoding : rootElement.Attributes["Encoding"].Value;
                                 detailObj.XRequestedWith = rootElement.Attributes["XRequestedWith"] == null ? "" : rootElement.Attributes["XRequestedWith"].Value;
                                 detailObj.IntervalProxyRequest = rootElement.Attributes["IntervalProxyRequest"] == null ? detailObj.IntervalProxyRequest : int.Parse(rootElement.Attributes["IntervalProxyRequest"].Value);
-                                
+                                detailObj.BrowserType = rootElement.Attributes["BrowserType"] == null ? WebBrowserType.IE : (WebBrowserType)Enum.Parse(typeof(WebBrowserType), rootElement.Attributes["BrowserType"].Value);
+                             
                                 XmlNode completeCheckListNode = rootElement.SelectSingleNode("CompleteChecks") == null ? null : rootElement.SelectSingleNode("CompleteChecks");
                                 if (completeCheckListNode != null)
                                 {

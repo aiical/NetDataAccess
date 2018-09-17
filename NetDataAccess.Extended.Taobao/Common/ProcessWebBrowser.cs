@@ -1,4 +1,5 @@
-﻿using NetDataAccess.Base.UI;
+﻿using NetDataAccess.Base.Browser;
+using NetDataAccess.Base.UI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -25,7 +26,7 @@ namespace NetDataAccess.Extended.Taobao.Common
             ShellExecute(IntPtr.Zero, "open", "rundll32.exe", " InetCpl.cpl,ClearMyTracksByProcess 2", "", WebBrowserShowCommands.SHOW_NO_GUI);
         }
 
-        public static void AutoScroll(IRunWebPage runPage, WebBrowser webBrowser, int toPosX, int toPosY, int maxStepLength, int minStepSleep, int maxStepSleep)
+        public static void AutoScroll(IRunWebPage runPage, IeRunWebBrowser webBrowser, int toPosX, int toPosY, int maxStepLength, int minStepSleep, int maxStepSleep)
         {
             int posX = 0;
             int posY = 0;

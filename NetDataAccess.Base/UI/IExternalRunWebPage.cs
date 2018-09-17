@@ -1,4 +1,5 @@
-﻿using NetDataAccess.Base.DB;
+﻿using NetDataAccess.Base.Browser;
+using NetDataAccess.Base.DB;
 using NetDataAccess.Base.Definition;
 using NetDataAccess.Base.Web;
 using System;
@@ -37,7 +38,7 @@ namespace NetDataAccess.Base.UI
         /// <param name="pageUrl"></param>
         /// <param name="listRow"></param>
         /// <param name="webBrowser"></param>
-        void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, WebBrowser webBrowser);
+        void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, IWebBrowser webBrowser);
 
         /// <summary>
         /// 发送请求前（通过httprequest获取页面）
@@ -111,6 +112,8 @@ namespace NetDataAccess.Base.UI
         /// <returns></returns>
         bool BeginGrabDetailPageInExternalProgram(IListSheet listSheet, Proj_Detail_SingleLine detailPageInfo);
 
+
+        void WebBrowserHtml_AfterDoNavigate(string pageUrl, Dictionary<string, string> listRow, string tabName);
     }
     
 }

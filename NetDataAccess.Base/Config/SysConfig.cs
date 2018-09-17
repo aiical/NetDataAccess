@@ -363,6 +363,21 @@ namespace NetDataAccess.Base.Config
         public static string SysFileDir = Path.Combine(Path.GetDirectoryName(Application.StartupPath), "Files");
         #endregion
 
+        #region 浏览器类型
+        private static WebBrowserType _BrowserType = WebBrowserType.IE;
+        public static WebBrowserType BrowserType
+        {
+            get
+            {
+                return _BrowserType;
+            }
+            set
+            {
+                _BrowserType = value;
+            }
+        }
+        #endregion
+
         #region 加载配置文件
         public static void LoadSysConfig()
         {
@@ -394,6 +409,11 @@ namespace NetDataAccess.Base.Config
             SysConfig.ProxyAbandonErrorTime = properties.ContainsKey("ProxyAbandonErrorTime") ? int.Parse(properties["ProxyAbandonErrorTime"]) : SysConfig.ProxyAbandonErrorTime;
             SysConfig.NoneGotTimeout = properties.ContainsKey("NoneGotTimeout") ? int.Parse(properties["NoneGotTimeout"]) : SysConfig.NoneGotTimeout;
             SysConfig.SysExecuteType = properties.ContainsKey("SysExecuteType") ? (SysExecuteType)Enum.Parse(typeof(SysExecuteType), properties["SysExecuteType"]) : SysConfig.SysExecuteType;
+            SysConfig.BrowserType = properties.ContainsKey("BrowserType") ? (WebBrowserType)Enum.Parse(typeof(WebBrowserType), properties["BrowserType"]) : SysConfig.BrowserType;
+
+            CefSharp.CefSettings settings = new CefSharp.CefSettings();
+            settings.CachePath = "c:\\nda_config\\chromium";
+            CefSharp.Cef.Initialize(settings);
         }
         #endregion
     }

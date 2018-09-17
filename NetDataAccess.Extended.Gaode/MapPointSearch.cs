@@ -218,7 +218,7 @@ namespace NetDataAccess.Extended.Gaode
         #region 显示网页
         private WebBrowser ShowWebPage(string url, string tabName)
         {
-            WebBrowser webBrowser = this.RunPage.InvokeShowWebPage(url, tabName); 
+            WebBrowser webBrowser = (WebBrowser)this.RunPage.InvokeShowWebPage(url, tabName); 
             int waitCount = 0;
             while (!this.RunPage.CheckIsComplete(tabName))
             {

@@ -124,3 +124,6 @@ E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\Castle.Core.xml
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\obj\Debug\NetDataAccess.AppAccessBase.csprojResolveAssemblyReference.cache
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\obj\Debug\NetDataAccess.AppAccessBase.dll
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\obj\Debug\NetDataAccess.AppAccessBase.pdb
+E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\CefSharp.WinForms.dll
+E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\CefSharp.dll
+E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\CefSharp.Core.dll

@@ -1,4 +1,5 @@
-﻿using NetDataAccess.Base.DB;
+﻿using NetDataAccess.Base.Browser;
+using NetDataAccess.Base.DB;
 using NetDataAccess.Base.Definition;
 using NetDataAccess.Base.Web;
 using System;
@@ -76,7 +77,7 @@ namespace NetDataAccess.Base.UI
         /// <param name="pageUrl"></param>
         /// <param name="listRow"></param>
         /// <param name="webBrowser"></param>
-        public virtual void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, WebBrowser webBrowser)
+        public virtual void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, IWebBrowser webBrowser)
         {
         }
 
@@ -124,6 +125,10 @@ namespace NetDataAccess.Base.UI
         public virtual void BeforeGrabOne(string pageUrl, Dictionary<string, string> listRow, bool existLocalFile)
         {
 
+        }
+
+        public virtual void WebBrowserHtml_AfterDoNavigate(string pageUrl, Dictionary<string, string> listRow, string tabName)
+        {
         }
 
         /// <summary>

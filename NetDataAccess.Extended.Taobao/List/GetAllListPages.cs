@@ -18,6 +18,7 @@ using NetDataAccess.Base.Writer;
 using NetDataAccess.Base.DB; 
 using NetDataAccess.Base.Reader;
 using NetDataAccess.Extended.Taobao.Common;
+using NetDataAccess.Base.Browser;
 
 namespace NetDataAccess.Extended.Taobao.List
 {
@@ -295,10 +296,10 @@ namespace NetDataAccess.Extended.Taobao.List
             }
         }
 
-        public override void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, WebBrowser webBrowser)
+        public override void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, IWebBrowser webBrowser)
         {
             //滚动到页面最下面
-            ProcessWebBrowser.AutoScroll(this.RunPage, webBrowser, 0, 5000, 1000, 1000, 1000);
+            ProcessWebBrowser.AutoScroll(this.RunPage, (IeRunWebBrowser)webBrowser, 0, 5000, 1000, 1000, 1000);
         }
         public override void CheckRequestCompleteFile(string webPageText, Dictionary<string, string> listRow)
         {

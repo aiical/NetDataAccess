@@ -18,6 +18,7 @@ using NetDataAccess.Base.Writer;
 using NetDataAccess.Base.DB; 
 using NetDataAccess.Base.Reader;
 using NetDataAccess.Extended.Taobao.Common;
+using NetDataAccess.Base.Browser;
 
 namespace NetDataAccess.Extended.Id.Google
 {
@@ -27,7 +28,7 @@ namespace NetDataAccess.Extended.Id.Google
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public class GetAllDetailPageUrls : ExternalRunWebPage
     {
-        public override void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, WebBrowser webBrowser)
+        public override void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, IWebBrowser webBrowser)
         {
             base.WebBrowserHtml_AfterPageLoaded(pageUrl, listRow, webBrowser);
             string tabName = Thread.CurrentThread.ManagedThreadId.ToString();
@@ -141,7 +142,7 @@ namespace NetDataAccess.Extended.Id.Google
             }
         }
 
-        private void GetAllItems(WebBrowser webBrowser, string tabName)
+        private void GetAllItems(IWebBrowser webBrowser, string tabName)
         {
             Thread.Sleep(3000);
             string scriptMethodCode = "function getMoreItems(){"
@@ -175,7 +176,7 @@ namespace NetDataAccess.Extended.Id.Google
         }
 
         private int lastTimeItemHeight = 0;
-        public int GetItemHeight(WebBrowser webBrowser,string tabName)
+        public int GetItemHeight(IWebBrowser webBrowser,string tabName)
         {
             int itemHeight = (int)this.RunPage.InvokeDoScriptMethod(webBrowser, "getItemHeight", null);
             return itemHeight;

@@ -1,4 +1,6 @@
-﻿using NetDataAccess.Base.Config;
+﻿using NetDataAccess.Base.Browser;
+using NetDataAccess.Base.Config;
+using NetDataAccess.Base.EnumTypes;
 using NetDataAccess.Base.Reader;
 using NetDataAccess.Base.UI;
 using System;
@@ -78,41 +80,41 @@ namespace NetDataAccess.Extended.Linkedin.Common
 
         private static void ShowLoginPageAndDoLogin(IRunWebPage runPage, string loginPageUrl, string loginSucceedCheckUrl, int timeout, string loginName, string loginPassword)
         {
-            WebBrowser wb = runPage.ShowWebPage(loginPageUrl, "login", timeout, false);
+            IWebBrowser wb = runPage.ShowWebPage(loginPageUrl, "login", timeout, false, WebBrowserType.Chromium);
             DoLoginMethod(runPage, wb, loginName, loginPassword);
             runPage.CheckWebBrowserUrl(wb, loginSucceedCheckUrl, false, timeout);
             runPage.CloseWebPage("login");
         }
 
-        public static void DoLoginMethod(IRunWebPage runPage, WebBrowser wb, string loginName, string loginPassword)
+        public static void DoLoginMethod(IRunWebPage runPage, IWebBrowser wb, string loginName, string loginPassword)
         {
             string scriptMethodCode = "function myDoLogin(loginName, loginPassword){"
                 + "document.getElementById('session_key-login').value = loginName;"
                 + "document.getElementById('session_password-login').value = loginPassword;"
                 + "document.getElementById('btn-primary').click();"
                 + "}";
-            runPage.InvokeAddScriptMethod(wb, scriptMethodCode, null);
+            runPage.InvokeAddScriptMethod(wb, scriptMethodCode);
             runPage.InvokeDoScriptMethod(wb, "myDoLogin", new object[] { loginName, loginPassword });
         }
 
         public static void ShowLogoutPageAndDoLogout(IRunWebPage runPage, string logoutPageUrl, string logoutSucceedCheckUrl, int timeout)
         {
-            WebBrowser wb = runPage.ShowWebPage(logoutPageUrl, "logout", timeout, false);
+            IWebBrowser wb = runPage.ShowWebPage(logoutPageUrl, "logout", timeout, false, WebBrowserType.Chromium);
             DoLogoutMethod(runPage, wb, logoutSucceedCheckUrl, timeout);
             runPage.CloseWebPage("logout");
         }
 
-        private static void DoLogoutMethod(IRunWebPage runPage, WebBrowser wb, string logoutSucceedCheckUrl, int timeout)
+        private static void DoLogoutMethod(IRunWebPage runPage, IWebBrowser wb, string logoutSucceedCheckUrl, int timeout)
         {
             string scriptMethodCode = "function myGetLogoutPageUrl(){"
                 + "var logoutElements = $('.account-submenu-split-link');"
                 + "return (logoutElements.length == 0) ? 'http://www.linkedin.com/logout' : $(logoutElements[0]).attr('href');"
                 + "}";
-            runPage.InvokeAddScriptMethod(wb, scriptMethodCode, null);
+            runPage.InvokeAddScriptMethod(wb, scriptMethodCode);
             string logoutPageUrl = (string)runPage.InvokeDoScriptMethod(wb, "myGetLogoutPageUrl", null);
             if (logoutPageUrl != null && logoutPageUrl.Length != 0)
             {
-                runPage.ShowWebPage(logoutPageUrl, "logout", timeout, false);
+                runPage.ShowWebPage(logoutPageUrl, "logout", timeout, false, WebBrowserType.Chromium);
             }
         }
 

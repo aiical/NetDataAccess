@@ -151,7 +151,7 @@ namespace NetDataAccess.Extended.Baidu
             if (gotLastTime)
             {
                 //加载网页
-                webBrowser = this.RunPage.GetWebBrowserByName(tabName);
+                webBrowser = (WebBrowser)this.RunPage.GetWebBrowserByName(tabName);
                 currentUrl = webBrowser.Url.ToString();
             }
             else
@@ -195,7 +195,7 @@ namespace NetDataAccess.Extended.Baidu
         #region 显示网页
         private WebBrowser ShowWebPage(string url, string tabName)
         {
-            WebBrowser webBrowser = this.RunPage.InvokeShowWebPage(url, tabName); 
+            WebBrowser webBrowser = (WebBrowser)this.RunPage.InvokeShowWebPage(url, tabName, WebBrowserType.IE); 
             int waitCount = 0;
             while (!this.RunPage.CheckIsComplete(tabName))
             {

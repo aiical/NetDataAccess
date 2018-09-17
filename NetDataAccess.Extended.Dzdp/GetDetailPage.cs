@@ -50,52 +50,59 @@ namespace NetDataAccess.Extended.Dzdp
 
         public override void CheckRequestCompleteFile(string webPageText, Dictionary<string, string> listRow)
         {
-            string shopId =  listRow["detailPageName"];
-            if (webPageText.Contains("shopId: " + shopId) && webPageText.Trim().EndsWith("</html>"))
+            if (webPageText.Length == 0)
             {
-
-                //是否包含经纬度
-                int latNameBeginIndex = webPageText.IndexOf("shopGlat:");
-                string latStr = "";
-                string lngStr = "";
-                if (latNameBeginIndex > 0)
-                {
-                    int latBeginIndex = webPageText.IndexOf("\"", latNameBeginIndex);
-                    int latEndIndex = webPageText.IndexOf("\"", latBeginIndex + 1);
-                    latStr = webPageText.Substring(latBeginIndex + 1, latEndIndex - latBeginIndex - 1);
-                }
-                int lngNameBeginIndex = webPageText.IndexOf("shopGlng:");
-                if (lngNameBeginIndex > 0)
-                {
-                    int lngBeginIndex = webPageText.IndexOf("\"", lngNameBeginIndex);
-                    int lngEndIndex = webPageText.IndexOf("\"", lngBeginIndex + 1);
-                    lngStr = webPageText.Substring(lngBeginIndex + 1, lngEndIndex - lngBeginIndex - 1);
-                }
-                if ((latStr.Length == 0 && lngStr.Length != 0) || (latStr.Length != 0 && lngStr.Length == 0))
-                {
-                    throw new Exception("经纬度缺失一个，未完全加载文件.");
-                }
-
-                //是否包含“口味、环境、服务”
-
-                if (webPageText.Contains("/g134\" itemprop=\"url\"> 茶馆 </a>")
-                    ||webPageText.Contains("/g3064\" itemprop=\"url\"> 快照摄影 </a>"))
-                {
-                    //茶馆
-                    //可以没有“口味、环境、服务”
-
-                }
-                else
-                {
-                    if (!webPageText.Contains("comment_score"))
-                    {
-                        throw new Exception("不包含评论得分，未完全加载文件.");
-                    }
-                }
+                throw new Exception("返回的文件为空");
             }
             else
             {
-                throw new Exception("不包含shopId，或者html不完整，未完全加载文件.");
+                string shopId = listRow["detailPageName"];
+                if (webPageText.Contains("shopId: \"" + shopId) && webPageText.Trim().EndsWith("</html>"))
+                {
+
+                    //是否包含经纬度
+                    int latNameBeginIndex = webPageText.IndexOf("shopGlat:");
+                    string latStr = "";
+                    string lngStr = "";
+                    if (latNameBeginIndex > 0)
+                    {
+                        int latBeginIndex = webPageText.IndexOf("\"", latNameBeginIndex);
+                        int latEndIndex = webPageText.IndexOf("\"", latBeginIndex + 1);
+                        latStr = webPageText.Substring(latBeginIndex + 1, latEndIndex - latBeginIndex - 1);
+                    }
+                    int lngNameBeginIndex = webPageText.IndexOf("shopGlng:");
+                    if (lngNameBeginIndex > 0)
+                    {
+                        int lngBeginIndex = webPageText.IndexOf("\"", lngNameBeginIndex);
+                        int lngEndIndex = webPageText.IndexOf("\"", lngBeginIndex + 1);
+                        lngStr = webPageText.Substring(lngBeginIndex + 1, lngEndIndex - lngBeginIndex - 1);
+                    }
+                    if ((latStr.Length == 0 && lngStr.Length != 0) || (latStr.Length != 0 && lngStr.Length == 0))
+                    {
+                        throw new Exception("经纬度缺失一个，未完全加载文件.");
+                    }
+
+                    //是否包含“口味、环境、服务”
+
+                    if (webPageText.Contains("/g134\" itemprop=\"url\"> 茶馆 </a>")
+                        || webPageText.Contains("/g3064\" itemprop=\"url\"> 快照摄影 </a>"))
+                    {
+                        //茶馆
+                        //可以没有“口味、环境、服务”
+
+                    }
+                    else
+                    {
+                        if (!webPageText.Contains("comment_score"))
+                        {
+                            throw new Exception("不包含评论得分，未完全加载文件.");
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception("不包含shopId，或者html不完整，未完全加载文件.");
+                }
             }
         }
 
@@ -105,30 +112,26 @@ namespace NetDataAccess.Extended.Dzdp
 
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
             resultColumnDic.Add("city", 0);
-            resultColumnDic.Add("distrctName", 1);
-            resultColumnDic.Add("shopName", 2);
-            resultColumnDic.Add("shopCode", 3);
-            resultColumnDic.Add("address", 4);
-            resultColumnDic.Add("tel", 5);
-            resultColumnDic.Add("shopType", 6);
-            resultColumnDic.Add("commentNum", 7);
-            resultColumnDic.Add("lat", 8);
-            resultColumnDic.Add("lng", 9);
-            resultColumnDic.Add("人均", 10);
-            resultColumnDic.Add("口味", 11);
-            resultColumnDic.Add("环境", 12);
-            resultColumnDic.Add("服务", 13);
+            resultColumnDic.Add("gName", 1);
+            resultColumnDic.Add("rName", 2);
+            resultColumnDic.Add("shopName", 3);
+            resultColumnDic.Add("reviewNum", 4);
+            resultColumnDic.Add("serviceRating", 5);
+            resultColumnDic.Add("environmentRating", 6);
+            resultColumnDic.Add("tasteRating", 7);
+            resultColumnDic.Add("address", 8);
+            resultColumnDic.Add("lat", 9);
+            resultColumnDic.Add("lng", 10); 
             string resultFilePath = Path.Combine(exportDir, "大众点评店铺信息.xlsx");
             Dictionary<string, string> resultColumnFormat = new Dictionary<string, string>();
             resultColumnFormat.Add("reviewNum", "#,##0");
             resultColumnFormat.Add("lat", "#,##0.000000");
             resultColumnFormat.Add("lng", "#,##0.000000");
-            resultColumnFormat.Add("人均", "#,##0.00");
-            resultColumnFormat.Add("环境", "#,##0.0");
-            resultColumnFormat.Add("口味", "#,##0.0");
-            resultColumnFormat.Add("服务", "#,##0.0");
+            resultColumnFormat.Add("serviceRating", "#,##0.00");
+            resultColumnFormat.Add("environmentRating", "#,##0.0");
+            resultColumnFormat.Add("tasteRating", "#,##0.0");
 
-            CsvWriter resultEW = new CsvWriter(resultFilePath, resultColumnDic);
+            ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic);
 
             string detailPageUrlColumnName = SysConfig.DetailPageUrlFieldName;
 
@@ -144,20 +147,8 @@ namespace NetDataAccess.Extended.Dzdp
                     {
                         string url = row[detailPageUrlColumnName];
                         string city = row["city"];
-                        string distrctName = row["rName"];
-                        string shopName = row["shopName"];
-                        string shopCode = row["shopCode"];
-                        string shopType = row["gName"];
-                        string commentNumStr = row["reviewNum"];
-                        Nullable<int> commentNum = commentNumStr == null || commentNumStr.Length == 0 ? (Nullable<int>)null : int.Parse(row["reviewNum"]);
                         Nullable<decimal> lat = null;
-                        Nullable<decimal> lng = null;
-                        string address = "";
-                        string tel = "";
-                        Nullable<decimal> renJun = null;
-                        Nullable<decimal> kouWei = null;
-                        Nullable<decimal> huanJing = null;
-                        Nullable<decimal> fuWu = null;
+                        Nullable<decimal> lng = null; 
 
 
 
@@ -192,95 +183,19 @@ namespace NetDataAccess.Extended.Dzdp
                                 }
                             }
                         }
-                        /*
-                        HtmlNode preMapScriptNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"J_midas-4\"]");
-                        if (preMapScriptNode != null)
-                        {
-                            HtmlNode mapScriptNode = preMapScriptNode.PreviousSibling;
-                            while (mapScriptNode != null && mapScriptNode.Name != "script")
-                            {
-                                mapScriptNode = mapScriptNode.PreviousSibling; 
-                            }
-                            if (mapScriptNode != null)
-                            {
-                                string scriptString = mapScriptNode.InnerText;
-                                int lngBeginIndex = scriptString.LastIndexOf("{lng:") + 5;
-                                int lngEndIndex = scriptString.LastIndexOf(",lat:");
-                                int latBeginIndex = lngEndIndex + 5;
-                                int latEndIndex = scriptString.LastIndexOf("});");
-                                lng = decimal.Parse(scriptString.Substring(lngBeginIndex, lngEndIndex - lngBeginIndex));
-                                lat = decimal.Parse(scriptString.Substring(latBeginIndex, latEndIndex - latBeginIndex));
-                            }
-                        }
-                         * */
 
-                        HtmlNode addressNode = pageHtmlDoc.DocumentNode.SelectSingleNode("//span[@itemprop=\"street-address\"]");
-                        if (addressNode != null)
-                        {
-                            address = addressNode.Attributes["title"].Value;
-                        }
-
-                        HtmlNodeCollection allTelNodes = pageHtmlDoc.DocumentNode.SelectNodes("//span[@itemprop=\"tel\"]");
-                        if (allTelNodes != null)
-                        {
-                            StringBuilder tels = new StringBuilder();
-                            foreach (HtmlNode telNode in allTelNodes)
-                            {
-                                tels.Append((tels.Length == 0 ? "" : ",") + telNode.InnerText);
-                            }
-                            tel = tels.ToString();
-                        }
-
-                        HtmlNodeCollection allBriefNodes = pageHtmlDoc.DocumentNode.SelectNodes("//div[@class=\"brief-info\"]/span");
-                        foreach (HtmlNode briefNode in allBriefNodes)
-                        {
-                            string briefText = briefNode.InnerText;
-                            if (briefText.StartsWith("人均:"))
-                            {
-                                string briefValue = briefText.Substring(3, briefText.Length - 4).Trim();
-                                renJun = briefValue.Length == 0 ? (Nullable<decimal>)null : decimal.Parse(briefValue);
-                            }
-                        }
-
-                        HtmlNodeCollection allScoreNodes = pageHtmlDoc.DocumentNode.SelectNodes("//span[@id=\"comment_score\"]/span");
-                        if (allScoreNodes != null)
-                        {
-                            foreach (HtmlNode scoreNode in allScoreNodes)
-                            {
-                                string scoreText = scoreNode.InnerText;
-                                if (scoreText.StartsWith("口味:"))
-                                {
-                                    string scoreValue = scoreText.Substring(3).Trim();
-                                    kouWei = scoreValue.Length == 0 ? (Nullable<decimal>)null : decimal.Parse(scoreValue);
-                                }
-                                else if (scoreText.StartsWith("环境:"))
-                                {
-                                    string scoreValue = scoreText.Substring(3).Trim();
-                                    huanJing = scoreValue.Length == 0 ? (Nullable<decimal>)null : decimal.Parse(scoreValue);
-                                }
-                                else if (scoreText.StartsWith("服务:"))
-                                {
-                                    string scoreValue = scoreText.Substring(3).Trim();
-                                    fuWu = scoreValue.Length == 0 ? (Nullable<decimal>)null : decimal.Parse(scoreValue);
-                                }
-                            }
-                        }
-
-                        Dictionary<string, string> f2vs = new Dictionary<string, string>();
-                        f2vs.Add("city", city);
-                        f2vs.Add("distrctName", distrctName);
-                        f2vs.Add("shopName", shopName);
-                        f2vs.Add("shopCode", shopCode);
-                        f2vs.Add("address", address);
-                        f2vs.Add("shopType", shopType);
-                        f2vs.Add("commentNum", commentNum.ToString());
-                        f2vs.Add("lat", lat.ToString());
-                        f2vs.Add("lng", lng.ToString());
-                        f2vs.Add("人均", renJun.ToString());
-                        f2vs.Add("tel", tel);
-                        f2vs.Add("口味", kouWei.ToString());
-                        f2vs.Add("服务", fuWu.ToString());
-                        f2vs.Add("环境", huanJing.ToString());
+                        Dictionary<string, object> f2vs = new Dictionary<string, object>();
+                        f2vs.Add("city", row["city"]);
+                        f2vs.Add("gName", row["gName"]);
+                        f2vs.Add("rName", row["rName"]);
+                        f2vs.Add("shopName", row["shopName"]);
+                        f2vs.Add("reviewNum", row["reviewNum"]);
+                        f2vs.Add("serviceRating", row["serviceRating"]);
+                        f2vs.Add("environmentRating", row["environmentRating"]);
+                        f2vs.Add("tasteRating", row["tasteRating"]);
+                        f2vs.Add("address", row["address"]);
+                        f2vs.Add("lat", lat);
+                        f2vs.Add("lng", lng); 
                         resultEW.AddRow(f2vs);
                     }
                     catch (Exception ex)

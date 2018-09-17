@@ -21,6 +21,14 @@ namespace NetDataAccess.Extended.Dzdp
 {
     public class GetFirstListPage : ExternalRunWebPage
     {
+        public override void WebRequestHtml_BeforeSendRequest(string pageUrl, Dictionary<string, string> listRow, Base.Web.NDAWebClient client)
+        {
+            string userAgent = this.RunPage.CurrentUserAgents.GetOneUserAgent();
+            client.Headers["User-Agent"] = userAgent;
+            //this.RunPage.InvokeAppendLogText("使用了UserAgent: " + userAgent, LogLevelType.System, true);
+        }
+
+
         private ExcelWriter GetExcelWriter(int fileIndex)
         {
             String exportDir = this.RunPage.GetExportDir();

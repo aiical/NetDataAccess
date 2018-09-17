@@ -12,7 +12,8 @@ using System.Net;
 using System.Drawing;
 using NetDataAccess.Base.UserAgent;
 using System.Threading;
-using NetDataAccess.Base.Proxy; 
+using NetDataAccess.Base.Proxy;
+using NetDataAccess.Base.Browser; 
 
 namespace NetDataAccess.Base.UI
 {
@@ -112,7 +113,9 @@ namespace NetDataAccess.Base.UI
         /// 在浏览器中显示网页
         /// </summary>
         /// <param name="url"></param>
-        WebBrowser InvokeShowWebPage(string url, string tabName);
+        IWebBrowser InvokeShowWebPage(string url, string tabName, WebBrowserType browserType, bool doFocus);
+
+        IWebBrowser InvokeShowWebPage(string url, string tabName, WebBrowserType browserType);
         #endregion
 
         #region 显示进度日志
@@ -135,7 +138,7 @@ namespace NetDataAccess.Base.UI
         /// </summary>
         /// <returns></returns>
         //WebBrowser GetWebBrowser();
-        WebBrowser GetWebBrowserByName(string tabName);
+        IWebBrowser GetWebBrowserByName(string tabName);
         #endregion
 
         #region 获取HTML内容
@@ -144,6 +147,14 @@ namespace NetDataAccess.Base.UI
         /// </summary>
         /// <returns></returns>
         string InvokeGetPageHtml(string tabName);
+        #endregion
+
+        #region 获取HTML内容
+        /// <summary>
+        /// 获取浏览器中显示的HTML
+        /// </summary>
+        /// <returns></returns>
+        string InvokeGetPageHtml(IWebBrowser webBrowser);
         #endregion
 
         #region 给控件赋值
@@ -274,7 +285,7 @@ namespace NetDataAccess.Base.UI
         /// <param name="timeout">超时时间</param>
         /// <param name="autoAbandonDisableProxy">自动放弃代理服务器</param>
         /// <returns></returns>
-        byte[] GetFileByRequest(string pageUrl, Dictionary<string,string> listRow,  bool needProxy, decimal intervalAfterLoaded, int timeout, bool autoAbandonDisableProxy, int intervalProxyRequest);
+        byte[] GetFileByRequest(string pageUrl, Dictionary<string, string> listRow, bool needProxy, decimal intervalAfterLoaded, int timeout, bool autoAbandonDisableProxy, int intervalProxyRequest);
         #endregion
 
         #region 通过WebBrowser获取网页
@@ -288,7 +299,7 @@ namespace NetDataAccess.Base.UI
         /// <param name="completeChecks">判断网页加载完毕</param> 
         /// <param name="tabName">tabName</param>
         /// <returns></returns>
-        string GetDetailHtmlByWebBrowser(string pageUrl, Dictionary<string,string> listRow, decimal intervalAfterLoaded, int timeout, Proj_CompleteCheckList completeChecks, string tabName);
+        string GetDetailHtmlByWebBrowser(string pageUrl, Dictionary<string, string> listRow, decimal intervalAfterLoaded, int timeout, Proj_CompleteCheckList completeChecks, string tabName, WebBrowserType browserType);
         #endregion
 
         #region 保存文件
@@ -309,19 +320,21 @@ namespace NetDataAccess.Base.UI
         #endregion
 
         #region 显示网页
-        WebBrowser ShowWebPage(string pageUrl, string tabName, int webRequestTimeout, bool goonWhenTimeout);
+        IWebBrowser ShowWebPage(string pageUrl, string tabName, int webRequestTimeout, bool goonWhenTimeout, WebBrowserType browserType);
+
+        IWebBrowser ShowWebPage(string pageUrl, string tabName, int webRequestTimeout, bool goonWhenTimeout, WebBrowserType browserType, bool doFocus);
         #endregion
 
         #region 向网页中增加JavaScript代码，例如函数等，方便后续网页与爬取工具交互
-        void InvokeAddScriptMethod(WebBrowser webBrowser, string scriptMethodCode, object objectForScripting);
+        void InvokeAddScriptMethod(IWebBrowser webBrowser, string scriptMethodCode);
         #endregion
 
         #region 调用网页JavaScript脚本
-        object InvokeDoScriptMethod(WebBrowser webBrowser, string methodName, object[] parameters);
+        object InvokeDoScriptMethod(IWebBrowser webBrowser, string methodName, object[] parameters);
         #endregion
 
         #region 实现了轮询的方法判断网页JavaScript里某个值是否等于checkValue。用于异步调用后等待执行结果
-        void WaitForInvokeScript(WebBrowser webBrowser, string scriptCheckMethod, string checkValue, int invokeTimeout);
+        void WaitForInvokeScript(IWebBrowser webBrowser, string scriptCheckMethod, string checkValue, int invokeTimeout);
         #endregion
 
         #region 开始执行爬取操作
@@ -333,15 +346,15 @@ namespace NetDataAccess.Base.UI
         #endregion
 
         #region 判断浏览器是否已经跳转到某个网页
-        bool CheckWebBrowserUrl(WebBrowser webBrowser, String checkUrl, bool fullMatch, int timeout);
+        bool CheckWebBrowserUrl(IWebBrowser webBrowser, String checkUrl, bool fullMatch, int timeout);
         #endregion
 
         #region 浏览器的网页地址
-        string InvokeGetWebBrowserPageUrl(WebBrowser webBrowser);
+        string InvokeGetWebBrowserPageUrl(IWebBrowser webBrowser);
         #endregion
 
         #region 利用成功和失败关键词判断是否打开了需要的页面
-        bool CheckOpenRightPage(WebBrowser webBrowser, string[] rightStrings, string[] wrongStrings, int timeout, bool andCondition);
+        bool CheckOpenRightPage(IWebBrowser webBrowser, string[] rightStrings, string[] wrongStrings, int timeout, bool andCondition);
         #endregion
 
         #region 判断浏览器当前浏览的网页，是否包含指定字符串
@@ -353,9 +366,9 @@ namespace NetDataAccess.Base.UI
         /// <param name="timeout">超过此间隔时间，系统认为网页加载失败，会抛出异常</param>
         /// <param name="andCondition">当为true时要求所有字符串都匹配，当为false时仅匹配一个就认为网页加载成功，默认为true</param>
         /// <returns></returns>
-        bool CheckWebBrowserContainsForComplete(WebBrowser webBrowser, string[] checkStrings, int timeout, bool andCondition);
+        bool CheckWebBrowserContainsForComplete(IWebBrowser webBrowser, string[] checkStrings, int timeout, bool andCondition);
 
-        bool InvokeCheckWebBrowserContains(WebBrowser webBrowser, string[] checkStrings, bool andCondition);
+        bool InvokeCheckWebBrowserContains(IWebBrowser webBrowser, string[] checkStrings, bool andCondition);
         #endregion
 
 
@@ -375,7 +388,7 @@ namespace NetDataAccess.Base.UI
         void SaveInfoToMiddleFile(string fileName, string[] fieldNames, List<Dictionary<string, string>> valuesList);
         #endregion
 
-        #region 强制重新爬取 
+        #region 强制重新爬取
         /// <summary>
         /// 强制重新爬取
         /// </summary>
@@ -383,26 +396,26 @@ namespace NetDataAccess.Base.UI
         #endregion
 
         #region 滚动页面
-        void InvokeScrollDocumentMethod(WebBrowser webBrowser, Point toPoint);
+        void InvokeScrollDocumentMethod(IWebBrowser webBrowser, Point toPoint);
         #endregion
 
         #region 滚动页面
-        void InvokeWebBrowserGoBackMethod(WebBrowser webBrowser);
+        void InvokeWebBrowserGoBackMethod(IWebBrowser webBrowser);
         #endregion
 
         #region 关闭网页
         void CloseWebPage(string tabName);
         #endregion
-        
-        #region UserAgent列表 
+
+        #region UserAgent列表
         UserAgents CurrentUserAgents { get; set; }
-        #endregion 
+        #endregion
 
         #region 下载的原文件放置的文件夹
         string GetSourceFileDir(Proj_Detail_SingleLine detailPageInfo);
         #endregion
 
-        #region 多线程抓取计数 
+        #region 多线程抓取计数
         int CompleteGrabCount { get; set; }
         int SucceedGrabCount { get; set; }
         int AllNeedGrabCount { get; set; }
@@ -422,10 +435,13 @@ namespace NetDataAccess.Base.UI
         bool GiveUpGrabPage(IListSheet listSheet, string pageUrl, int pageIndex, Exception ex);
         #endregion
 
-        #region 代理服务器列表 
+        #region 代理服务器列表
         ProxyServers CurrentProxyServers { get; }
         #endregion
 
+        #region 关闭webBrowserHtml模式下的tabPage
+        void ShowTabPage(string tabName);
+        #endregion
     }
     #endregion 
 }

@@ -19,6 +19,7 @@ using NetDataAccess.Base.DB;
 using System.Drawing;
 using NetDataAccess.Base.Reader;
 using NetDataAccess.Extended.Linkedin.Common;
+using NetDataAccess.Base.Browser;
 
 namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtGoogle
 {
@@ -94,7 +95,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtGoogle
             for (int i = 0; i < 2; i++)
             {
                 string randomUrl = GetRandomGoogleUrl();
-                this.RunPage.ShowWebPage(randomUrl, "randomPage", SysConfig.WebPageRequestTimeout, false);
+                this.RunPage.ShowWebPage(randomUrl, "randomPage", SysConfig.WebPageRequestTimeout, false, WebBrowserType.IE);
             }
         }
 
@@ -193,7 +194,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtGoogle
             ew.SaveToDisk(); 
         }
 
-        public void AutoScroll(IRunWebPage runPage, WebBrowser webBrowser, int toPos, int maxStepLength, int minStepSleep, int maxStepSleep)
+        public void AutoScroll(IRunWebPage runPage, IWebBrowser webBrowser, int toPos, int maxStepLength, int minStepSleep, int maxStepSleep)
         {
             int pos = 0;
             Random random = new Random(DateTime.Now.Millisecond);
@@ -206,7 +207,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtGoogle
             }
         }
 
-        public override void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, WebBrowser webBrowser)
+        public override void WebBrowserHtml_AfterPageLoaded(string pageUrl, Dictionary<string, string> listRow, IWebBrowser webBrowser)
         {
             ProcessWebBrowser.AutoScroll(this.RunPage, webBrowser, 3000, 500, 1000, 2000);
             if (this.RunPage.InvokeCheckWebBrowserContains(webBrowser, new string[] { "系统检测到您的计算机网络中存在异常流量" }, true))
@@ -364,7 +365,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtGoogle
             if (!File.Exists(localFilePath))
             {
                 string tabName = "ListPage";
-                WebBrowser webBrowser = this.RunPage.ShowWebPage(listPageUrl, tabName, SysConfig.WebPageRequestTimeout, false); 
+                IeRunWebBrowser webBrowser = (IeRunWebBrowser)this.RunPage.ShowWebPage(listPageUrl, tabName, SysConfig.WebPageRequestTimeout, false, WebBrowserType.IE); 
                 try
                 {
                     this.RunPage.CheckWebBrowserContainsForComplete(webBrowser, new string[] { keyWords }, SysConfig.WebPageRequestTimeout, true);
@@ -403,7 +404,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtGoogle
                     + "}"
                     + "}";
 
-                this.RunPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode, this);
+                this.RunPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode);
                 string nextPageUrl = CommonUtil.UrlDecodeSymbolAnd((string)this.RunPage.InvokeDoScriptMethod(webBrowser, "myGetNextPageUrl", null));
 
                 if (nextPageUrl != null && nextPageUrl.Length > 0)

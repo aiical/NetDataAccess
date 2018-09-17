@@ -22,6 +22,7 @@ using System.Web;
 using System.Runtime.Remoting;
 using System.Reflection;
 using System.Collections;
+using NetDataAccess.Base.Browser;
 
 namespace NetDataAccess.Extended.Pilot
 {
@@ -239,7 +240,7 @@ namespace NetDataAccess.Extended.Pilot
         private void BeginGetPilotInfo(string tabName, string pageUrl, string firstName, string lastName, string street1, string country, string med_date, string med_class, string fullName, string state, string city, string localFilePath)
         {
             string currentUrl = "";
-            WebBrowser webBrowser = null;
+            IeRunWebBrowser webBrowser = null;
 
             while (currentUrl != pageUrl)
             {
@@ -315,9 +316,9 @@ namespace NetDataAccess.Extended.Pilot
         #endregion
 
         #region 显示网页
-        private WebBrowser ShowWebPage(string url, string tabName)
+        private IeRunWebBrowser ShowWebPage(string url, string tabName)
         {
-            WebBrowser webBrowser = this.RunPage.InvokeShowWebPage(url, tabName);
+            IeRunWebBrowser webBrowser = (IeRunWebBrowser)this.RunPage.InvokeShowWebPage(url, tabName);
             int waitCount = 0;
             while (!this.RunPage.CheckIsComplete(tabName))
             {
@@ -337,12 +338,12 @@ namespace NetDataAccess.Extended.Pilot
         #endregion
 
         #region InputNameScript
-        private void InvokeInputNameScript(WebBrowser webBrowser, string firstName, string lastName, string country, string state)
+        private void InvokeInputNameScript(IeRunWebBrowser webBrowser, string firstName, string lastName, string country, string state)
         {
             webBrowser.Invoke(new InputNameScriptInvokeDelegate(InputNameScript), new object[] { webBrowser, firstName, lastName, country, state });
         }
-        private delegate void InputNameScriptInvokeDelegate(WebBrowser webBrowser, string firstName, string lastName, string country, string state);
-        private void InputNameScript(WebBrowser webBrowser, string firstName, string lastName, string country, string state)
+        private delegate void InputNameScriptInvokeDelegate(IeRunWebBrowser webBrowser, string firstName, string lastName, string country, string state);
+        private void InputNameScript(IeRunWebBrowser webBrowser, string firstName, string lastName, string country, string state)
         {
             AddCheckPageScript(webBrowser);
 
@@ -361,24 +362,24 @@ namespace NetDataAccess.Extended.Pilot
             Thread.Sleep(1000);
         }
 
-        private void InvokeClickPilotNameScript(WebBrowser webBrowser, string linkNodeId)
+        private void InvokeClickPilotNameScript(IeRunWebBrowser webBrowser, string linkNodeId)
         {
             webBrowser.Invoke(new ClickPilotNameScriptInvokeDelegate(ClickPilotNameScript), new object[] { webBrowser, linkNodeId });
         }
-        private delegate void ClickPilotNameScriptInvokeDelegate(WebBrowser webBrowser, string linkNodeId);
-        private void ClickPilotNameScript(WebBrowser webBrowser, string linkNodeId)
+        private delegate void ClickPilotNameScriptInvokeDelegate(IeRunWebBrowser webBrowser, string linkNodeId);
+        private void ClickPilotNameScript(IeRunWebBrowser webBrowser, string linkNodeId)
         {
             AddCheckPageScript(webBrowser);
             webBrowser.Document.GetElementById(linkNodeId).InvokeMember("click");
         }
 
 
-        private void InvokeAddCheckPageScript(WebBrowser webBrowser)
+        private void InvokeAddCheckPageScript(IeRunWebBrowser webBrowser)
         {
             webBrowser.Invoke(new AddCheckPageScriptInvokeDelegate(AddCheckPageScript), new object[] { webBrowser});
         }
-        private delegate void AddCheckPageScriptInvokeDelegate(WebBrowser webBrowser);
-        private void AddCheckPageScript(WebBrowser webBrowser)
+        private delegate void AddCheckPageScriptInvokeDelegate(IeRunWebBrowser webBrowser);
+        private void AddCheckPageScript(IeRunWebBrowser webBrowser)
         {
             HtmlElement sElement = webBrowser.Document.CreateElement("script");
             IHTMLScriptElement scriptElement = (IHTMLScriptElement)sElement.DomElement;
@@ -388,7 +389,7 @@ namespace NetDataAccess.Extended.Pilot
         }
         #endregion
 
-        private string GetIsOldPage(WebBrowser webBrowser)
+        private string GetIsOldPage(IeRunWebBrowser webBrowser)
         {
             try
             {
@@ -401,7 +402,7 @@ namespace NetDataAccess.Extended.Pilot
             }
         }
 
-        private void WaitGetPilotInfoPage(WebBrowser webBrowser)
+        private void WaitGetPilotInfoPage(IeRunWebBrowser webBrowser)
         {
             string isOldPage = this.GetIsOldPage(webBrowser);
             int waitCount = 0;

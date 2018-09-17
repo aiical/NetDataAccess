@@ -74,3 +74,6 @@ E:\Github\NetDataAccess\NetDataAccess\obj\x86\Debug\NetDataAccess.Edit.UserContr
 E:\Github\NetDataAccess\NetDataAccess\obj\x86\Debug\NetDataAccess.Run.UserControlRunGrabWebPage.resources
 E:\Github\NetDataAccess\NetDataAccess\obj\x86\Debug\NetDataAccess.Config.FormTaskSetting.resources
 E:\Github\NetDataAccess\NetDataAccess\obj\x86\Debug\NetDataAccess.csproj.GenerateResource.Cache
+E:\Github\NetDataAccess\NetDataAccess\bin\Debug\CefSharp.Core.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Debug\CefSharp.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Debug\CefSharp.WinForms.dll

@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using mshtml;
+using NetDataAccess.Base.Browser;
 using NetDataAccess.Base.Common;
 using NetDataAccess.Base.Config;
 using NetDataAccess.Base.EnumTypes;
@@ -315,8 +316,8 @@ namespace NetDataAccess.Extended.Linkedin.Common
         {
             return (bool)webBrowser.Invoke(new CheckIsNewVersionPersonPageJavaScriptDelegate(CheckIsNewVersionPersonPageJavaScriptMethod), new object[] { runPage, webBrowser });
         }
-        private delegate bool CheckIsNewVersionPersonPageJavaScriptDelegate(IRunWebPage runPage, WebBrowser webBrowser);
-        private static bool CheckIsNewVersionPersonPageJavaScriptMethod(IRunWebPage runPage, WebBrowser webBrowser)
+        private delegate bool CheckIsNewVersionPersonPageJavaScriptDelegate(IRunWebPage runPage, IeRunWebBrowser webBrowser);
+        private static bool CheckIsNewVersionPersonPageJavaScriptMethod(IRunWebPage runPage, IeRunWebBrowser webBrowser)
         {
             string scriptMethodCode = "function checkIsNewVersion(){"
                 + "if($ == null){"
@@ -327,18 +328,18 @@ namespace NetDataAccess.Extended.Linkedin.Common
                 + "return (allSections.length == 0) ? false : true;"
                 + "}"
                 + "}";
-            runPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode, null);
+            runPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode);
             return (bool)runPage.InvokeDoScriptMethod(webBrowser, "checkIsNewVersion", null);
         }
         #endregion
 
         #region 判断页面是否为新版的个人页面
-        private static void ExpandAllInfoInPage(IRunWebPage runPage, WebBrowser webBrowser)
+        private static void ExpandAllInfoInPage(IRunWebPage runPage, IeRunWebBrowser webBrowser)
         {
             webBrowser.Invoke(new ExpandAllInfoInPageJavaScriptDelegate(ExpandAllInfoInPageJavaScriptMethod), new object[] { runPage, webBrowser });
         }
-        private delegate void ExpandAllInfoInPageJavaScriptDelegate(IRunWebPage runPage, WebBrowser webBrowser);
-        private static void ExpandAllInfoInPageJavaScriptMethod(IRunWebPage runPage, WebBrowser webBrowser)
+        private delegate void ExpandAllInfoInPageJavaScriptDelegate(IRunWebPage runPage, IeRunWebBrowser webBrowser);
+        private static void ExpandAllInfoInPageJavaScriptMethod(IRunWebPage runPage, IeRunWebBrowser webBrowser)
         {
             string scriptMethodCode = "function expanAllInfo(){"
                 //联系方式，个人信息
@@ -360,7 +361,7 @@ namespace NetDataAccess.Extended.Linkedin.Common
                 //工作经历 查看说明  
                 + "setTimeout(function(){ $('button:contains(\"查看说明\")').click(); }, 1800);"
                 + "}";
-            runPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode, null);
+            runPage.InvokeAddScriptMethod(webBrowser, scriptMethodCode);
             runPage.InvokeDoScriptMethod(webBrowser, "expanAllInfo", null);
         }
         #endregion
@@ -374,7 +375,7 @@ namespace NetDataAccess.Extended.Linkedin.Common
                 string localPersonFilePath = runPage.GetFilePath(personUrl, runPage.GetDetailSourceFileDir());
                 if (mustDownloadNow || !File.Exists(localPersonFilePath))
                 {
-                    WebBrowser webBrowser = runPage.ShowWebPage(personUrl, tabName, SysConfig.WebPageRequestTimeout, false);
+                    IeRunWebBrowser webBrowser = (IeRunWebBrowser)runPage.ShowWebPage(personUrl, tabName, SysConfig.WebPageRequestTimeout, false, WebBrowserType.Chromium);
 
                     if (loginName != null && loginName != null)
                     {
@@ -438,7 +439,7 @@ namespace NetDataAccess.Extended.Linkedin.Common
                 string localPersonFilePath = runPage.GetFilePath(personInfoId, runPage.GetDetailSourceFileDir());
                 if (!File.Exists(localPersonFilePath))
                 {
-                    WebBrowser webBrowser = runPage.ShowWebPage(personPageUrl, tabName, SysConfig.WebPageRequestTimeout, false);
+                    IeRunWebBrowser webBrowser = (IeRunWebBrowser)runPage.ShowWebPage(personPageUrl, tabName, SysConfig.WebPageRequestTimeout, false, WebBrowserType.Chromium);
 
                     LoginLinkedin.DoLoginMethod(runPage, webBrowser, loginName, loginPassword);
 
