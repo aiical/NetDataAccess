@@ -14,21 +14,31 @@ namespace NetDataAccess.Base.Browser
     public class ChromiumRunWebBrowser : ChromiumWebBrowser,IWebBrowser
     {
         public ChromiumRunWebBrowser():
-            //base("about:blank")
-        base("http://www.baidu.com")
+            base("about:blank")
+        //base("http://www.baidu.com")
         {
             this.FrameLoadEnd += ChromiumRunWebBrowser_FrameLoadEnd; 
         } 
         private bool _FrameLoaded = false;
-         
+
         private void ChromiumRunWebBrowser_FrameLoadEnd(object sender, CefSharp.FrameLoadEndEventArgs e)
         {
-            _FrameLoaded = true;
-            if (DocumentLoadCompleted != null)
+            if (this.Address == "about:blank")
             {
-                DocumentLoadCompleted(this);
+                if (this._TargetUrl.Length != 0)
+                {
+                    this._BlankLoaded = true;
+                    this.Load(this._TargetUrl);
+                }
             }
-        } 
+            else{
+                _FrameLoaded = true;
+                if (DocumentLoadCompleted != null)
+                {
+                    DocumentLoadCompleted(this);
+                }
+            }
+        }
 
         private string _TabName = "";
         public string TabName
@@ -53,12 +63,18 @@ namespace NetDataAccess.Base.Browser
 
         public bool Loaded()
         {
-            return _FrameLoaded ;
+            return _FrameLoaded;
         }
+        private bool _BlankLoaded = false;
+        private string _TargetUrl = "";
 
         public void Navigate(string url)
-        { 
-            this.Load(url);
+        {
+            _TargetUrl = url;
+            if (this._BlankLoaded)
+            {
+                this.Load(url);
+            }
         }
 
         public IWebBrowserDocumentCompletedEventHandler DocumentLoadCompleted { get; set; }

@@ -1,0 +1,9 @@
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Renkou.dll
+F:\Code\NetDataAccess2.0\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Renkou.pdb
+F:\Code\NetDataAccess2.0\NetDataAccess.Extended.Renkou\obj\Debug\NetDataAccess.Extended.Renkou.csprojResolveAssemblyReference.cache
+F:\Code\NetDataAccess2.0\NetDataAccess.Extended.Renkou\obj\Debug\NetDataAccess.Extended.Renkou.dll
+F:\Code\NetDataAccess2.0\NetDataAccess.Extended.Renkou\obj\Debug\NetDataAccess.Extended.Renkou.pdb

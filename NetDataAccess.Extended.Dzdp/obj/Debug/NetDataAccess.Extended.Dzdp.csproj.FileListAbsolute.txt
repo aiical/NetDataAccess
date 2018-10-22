@@ -34,3 +34,12 @@ J:\002001_NDA_大众点评\NetDataAccess\bin\Files\Extended\NetDataAccess.Extend
 J:\002001_NDA_大众点评\NetDataAccess.Extended.Dzdp\obj\Debug\NetDataAccess.Extended.Dzdp.csprojResolveAssemblyReference.cache
 J:\002001_NDA_大众点评\NetDataAccess.Extended.Dzdp\obj\Debug\NetDataAccess.Extended.Dzdp.dll
 J:\002001_NDA_大众点评\NetDataAccess.Extended.Dzdp\obj\Debug\NetDataAccess.Extended.Dzdp.pdb
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Dzdp.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Dzdp.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Dzdp\obj\Debug\NetDataAccess.Extended.Dzdp.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.Dzdp\obj\Debug\NetDataAccess.Extended.Dzdp.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.Dzdp\obj\Debug\NetDataAccess.Extended.Dzdp.pdb

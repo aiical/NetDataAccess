@@ -36,7 +36,7 @@ namespace NetDataAccess.Base.Browser
 
         public bool Loaded()
         {
-            return !this.IsBusy && this.ReadyState == WebBrowserReadyState.Complete;
+            return true;//return !this.IsBusy && this.ReadyState == WebBrowserReadyState.Complete;
         }
 
         public string GetDocumentText()
