@@ -21,6 +21,11 @@ namespace NetDataAccess.Base.Browser
         } 
         private bool _FrameLoaded = false;
 
+        public new void Load(string url)
+        { 
+            base.Load(url);
+        }
+
         private void ChromiumRunWebBrowser_FrameLoadEnd(object sender, CefSharp.FrameLoadEndEventArgs e)
         {
             if (this.Address == "about:blank")

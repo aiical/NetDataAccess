@@ -9,6 +9,19 @@ namespace NetDataAccess.Base.Web
 {
     public class NDAWebClient : WebClient
     {
+        private CookieContainer _CookieContainer = null;
+        public CookieContainer CookieContainer
+        {
+            get
+            {
+                return _CookieContainer;
+            }
+            set
+            {
+                _CookieContainer = value;
+            }
+        }
+
         private ProxyServer _ProxyServer = null;
         public ProxyServer ProxyServer
         {
@@ -57,6 +70,10 @@ namespace NetDataAccess.Base.Web
         protected override WebRequest GetWebRequest(Uri address)
         {
             WebRequest wq = base.GetWebRequest(address);
+            if (this.CookieContainer != null)
+            {
+                ((HttpWebRequest)wq).CookieContainer = this.CookieContainer;
+            }
             wq.Timeout = this.Timeout;
             return wq;
         }

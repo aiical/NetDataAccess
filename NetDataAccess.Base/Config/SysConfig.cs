@@ -413,6 +413,7 @@ namespace NetDataAccess.Base.Config
 
             CefSharp.CefSettings settings = new CefSharp.CefSettings();
             settings.CachePath = "c:\\nda_config\\chromium";
+            settings.PersistSessionCookies = true;
             CefSharp.Cef.Initialize(settings);
         }
         #endregion

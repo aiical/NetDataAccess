@@ -77,11 +77,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\BlockedException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScienceDirect\GetAllQiKanListPage.cs" />
     <Compile Include="ScienceDirect\GetAllLunWenListPage.cs" />
     <Compile Include="ScienceDirect\GetAllLunWenDetailPage.cs" />
     <Compile Include="EBSCO\GetAllQiKanPage.cs" />
+    <Compile Include="ScienceDirect\GetAllLunWenPdfUrls.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NetDataAccess.AppAccessBase\NetDataAccess.AppAccessBase.csproj">

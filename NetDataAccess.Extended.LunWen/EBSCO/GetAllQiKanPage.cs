@@ -11,6 +11,7 @@ using NetDataAccess.Base.Writer;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,36 +25,112 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
     {
         public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
         {
-            string pageName = listRow[SysConfig.DetailPageNameFieldName];
-            string pageUrl = listRow["pageUrl"];
-            string keywords = listRow["keywords"];
-            string moreKeywordStr = listRow["moreKeywords"];
-            string[] morekeyWords = moreKeywordStr.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-            List<string> moreKeyWordList = new List<string>(morekeyWords);
-
-            IWebBrowser webBrowser = this.ShowEBSCOHostPage(pageUrl);
-            this.ClickFullTextLink(webBrowser);
-
-            this.DoSearch(webBrowser, keywords, moreKeyWordList);
-
-
-            int pageIndex = 1;
-            bool hasNextPage = true;
-
-
-            String sourceDir = this.RunPage.GetDetailSourceFileDir();
-            string sourceFilePath = this.RunPage.GetFilePath(pageUrl, sourceDir);
-            ExcelWriter sourceEW = this.GetExcelWriter(sourceFilePath);
-
-            while (hasNextPage)
+            try
             {
-                List<string> itemList = this.GetListPageItems(keywords, webBrowser);
-                this.SaveItemList(sourceEW, itemList);
-                pageIndex++;
-                hasNextPage = this.GotoNextPage(webBrowser, pageIndex, keywords);
+                string pageMarkUrl = listRow[SysConfig.DetailPageUrlFieldName];
+                string pageName = listRow[SysConfig.DetailPageNameFieldName];
+                string pageUrl = listRow["pageUrl"];
+                string keywords = listRow["keywords"];
+                string moreKeywordStr = listRow["moreKeywords"];
+                string[] morekeyWords = moreKeywordStr.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+                List<string> moreKeyWordList = new List<string>(morekeyWords);
+
+                IWebBrowser webBrowser = this.ShowEBSCOHostPage(pageUrl);
+                this.ClickFullTextLink(webBrowser);
+
+
+                String sourceDir = this.RunPage.GetDetailSourceFileDir();
+                string sourceFilePath = this.RunPage.GetFilePath(pageMarkUrl, sourceDir);
+                ExcelWriter sourceEW = this.GetExcelWriter(sourceFilePath);
+
+               int fromYear = this.DoSearch(webBrowser, keywords, moreKeyWordList);
+
+               for (int i = fromYear; i <= 2018; i++)
+               {
+
+                   string yearSourceFilePath = this.RunPage.GetFilePath(pageMarkUrl, sourceDir) + "_" + i.ToString();
+                   if (!File.Exists(yearSourceFilePath))
+                   {
+
+                       ExcelWriter yearSourceEW = this.GetExcelWriter(yearSourceFilePath);
+
+                       this.GoToYear(i, webBrowser);
+
+                       int pageIndex = 1;
+                       bool hasNextPage = true;
+
+                       while (hasNextPage)
+                       {
+                           List<string> itemList = this.GetListPageItems(keywords, webBrowser);
+                           this.SaveItemList(yearSourceEW, itemList);
+                           pageIndex++;
+                           hasNextPage = this.GotoNextPage(webBrowser, pageIndex, keywords);
+                       }
+                       yearSourceEW.SaveToDisk();
+                   }
+
+                   ExcelReader yearEr = new ExcelReader(yearSourceFilePath);
+                   int yearItemCount = yearEr.GetRowCount();
+                   for (int j = 0; j < yearItemCount; j++)
+                   {
+                       Dictionary<string, string> yearRow = yearEr.GetFieldValues(j);
+                       sourceEW.AddRow(yearRow);
+                   }
+                   yearEr.Close();
+               }
+
+                sourceEW.SaveToDisk();
             }
-            sourceEW.SaveToDisk();
-        } 
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void GoToYear(int year, IWebBrowser webBrowser)
+        {
+            string showSetYearWinScriptCode = "document.getElementById('ctl00_ctl00_Column1_Column1_ctl00_searchOptionsLink').click()";
+            this.RunPage.InvokeAddScriptMethod(webBrowser, showSetYearWinScriptCode);
+            Thread.Sleep(2000);
+
+            int interval = 4000;
+            int waitingTimeout = 30000;
+            int totalWaiting = 0;
+            string html = "";
+            while (!html.Contains("重新设置") && waitingTimeout >= totalWaiting)
+            {
+                totalWaiting += interval;
+                Thread.Sleep(interval);
+                html = this.RunPage.InvokeGetPageHtml(webBrowser);
+            }
+            if (totalWaiting > waitingTimeout)
+            {
+                throw new Exception("打开筛选年份窗口失败, year = " + year.ToString());
+            }
+
+            string setScriptCode = "document.getElementsByName('common_DT1_FromYear')[1].value = " + year.ToString() + ";"
+                                    + "document.getElementsByName('common_DT1_ToYear')[1].value = " + year.ToString() + ";";
+            this.RunPage.InvokeAddScriptMethod(webBrowser, setScriptCode);
+            Thread.Sleep(1000);
+
+            string gotoYearScriptCode = "document.getElementById('ctrlLimiters_SubmitButtonTop').click()";
+            this.RunPage.InvokeAddScriptMethod(webBrowser, gotoYearScriptCode);
+            Thread.Sleep(2000);
+            this.RunPage.ShowTabPage("EBSCOHost");
+
+              
+            totalWaiting = 0; 
+            while (!html.Contains(year.ToString() + "0101-" + year.ToString() + "1231") && waitingTimeout >= totalWaiting)
+            {
+                totalWaiting += interval;
+                Thread.Sleep(interval);
+                html = this.RunPage.InvokeGetPageHtml(webBrowser);
+            }
+            if (totalWaiting > waitingTimeout)
+            {
+                throw new Exception("筛选年份失败, year = " + year.ToString());
+            }
+        }
 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
@@ -92,7 +169,8 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             try
             {
                 string tabName = "EBSCOHost";
-                IWebBrowser webBrowser = this.RunPage.ShowWebPage(pageUrl, tabName, 30000, false, WebBrowserType.Chromium, true); 
+                IWebBrowser webBrowser = this.RunPage.ShowWebPage(pageUrl, tabName, 30000, false, WebBrowserType.Chromium, true);
+                this.RunPage.ShowTabPage("EBSCOHost");
 
                 if (!webBrowser.Loaded())
                 {
@@ -110,7 +188,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
         {
             string scriptCode = "document.getElementsByClassName('profileBodyBold')[1].click();";
             this.RunPage.InvokeAddScriptMethod(webBrowser, scriptCode);
-            int interval = 2000;
+            int interval = 4000;
             int waitingTimeout = 30000;
             int totalWaiting = 0;
             string html = "";
@@ -129,14 +207,14 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             Thread.Sleep(5000);
         }
 
-        private void DoSearch(IWebBrowser webBrowser, string keywords, List<string> moreKeywordList)
+        private int DoSearch(IWebBrowser webBrowser, string keywords, List<string> moreKeywordList)
         {
             string scriptCode = "document.getElementById('common_SO').click();"
                                 + "document.getElementById('common_SO').value='" + keywords + "';"
-                                +"document.getElementById('common_FT').click();"
+                                + "document.getElementById('common_FT').click();"
                                 + "document.getElementById('common_RV').click();";
             this.RunPage.InvokeAddScriptMethod(webBrowser, scriptCode);
-            int interval = 2000;
+            int interval = 4000;
             int waitingTimeout = 30000;
             int totalWaiting = 0;
             string html = "";
@@ -158,21 +236,29 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
 
             if (moreKeywordList != null && moreKeywordList.Count > 0)
             {
+                this.RunPage.InvokeScrollDocumentMethod(webBrowser, new Point(500, 500));
+                Thread.Sleep(4000);
 
-                string scriptACode = "document.getElementById('multiSelectCluster_JournalTrigger').click();"
-                                     + "var moreLinkNodes = document.getElementsByClassName('panelShowMore evt-select-mulitple');"
+                string scriptACode = "document.getElementById('multiSelectCluster_JournalTrigger').click();";
+                this.RunPage.InvokeAddScriptMethod(webBrowser, scriptACode);
+                Thread.Sleep(4000);
+
+                this.RunPage.InvokeScrollDocumentMethod(webBrowser, new Point(500, 700));
+                Thread.Sleep(5000);
+                totalWaiting = 0;
+
+                string scriptMoreCode = "var moreLinkNodes = document.getElementsByClassName('panelShowMore evt-select-mulitple');"
                                      + "var targetLinkNode = null;"
                                      + "for(var i=0;i<moreLinkNodes.length;i++){"
-                                     + "  var moreLinkNode = moreLinkNodes[i];" 
+                                     + "  var moreLinkNode = moreLinkNodes[i];"
                                      + "  if(moreLinkNode.parentElement.parentElement.getAttribute('id') == 'multiSelectCluster_JournalContent'){"
                                      + "    targetLinkNode = moreLinkNode;"
                                      + "    break;"
                                      + "  }"
                                      + "}"
-                                     + "alert(targetLinkNode.getAttribute('class'));"
-                                     + "targetLinkNode.focus();";
-                this.RunPage.InvokeAddScriptMethod(webBrowser, scriptACode);
-                Thread.Sleep(10000);
+                                     + "targetLinkNode.click();";
+                this.RunPage.InvokeAddScriptMethod(webBrowser, scriptMoreCode);
+                Thread.Sleep(5000);
                 totalWaiting = 0;
 
                 while (waitingTimeout >= totalWaiting)
@@ -207,12 +293,13 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                 }
                 else
                 {
-                    string scriptRefreshCode = "document.getElementByClassName('button primary-action evt-update-btn').click();";
+                    //string scriptRefreshCode = "document.getElementById('modalPanelForm').submit();";
+                    string scriptRefreshCode = "document.getElementsByClassName('button primary-action evt-update-btn')[0].click();";
                     this.RunPage.InvokeAddScriptMethod(webBrowser, scriptRefreshCode);
 
                     totalWaiting = 0;
                     html = "";
-                    while (!html.Contains("<h4 class=\"bb-heading\">出版物</h4>") && waitingTimeout >= totalWaiting)
+                    while ((html == null || !html.Contains("<h4 class=\"bb-heading\">出版物</h4>")) && waitingTimeout >= totalWaiting)
                     {
                         totalWaiting += interval;
                         Thread.Sleep(interval);
@@ -222,8 +309,19 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                     {
                         throw new Exception("更新出版物后没有刷新出来界面");
                     }
-                }                
+                }
             }
+
+            int fromYear = 2018;
+            {
+                html = this.RunPage.InvokeGetPageHtml(webBrowser);
+                HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                htmlDoc.LoadHtml(html);
+                HtmlNode fromYearNode = htmlDoc.DocumentNode.SelectSingleNode("//input[@id=\"ctl00_ctl00_Column1_Column1_ctl00_ctrlResultsDualSliderDate_txtFilterDateFrom\"]");
+                string fromYearStr = fromYearNode.GetAttributeValue("value", "");
+                fromYear = int.Parse(fromYearStr);
+            }
+            return fromYear;
         }
 
         private List<string> GetListPageItems(string keywords, IWebBrowser webBrowser)
@@ -245,6 +343,10 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
         private string GetListPageItem(string keywords, HtmlNode itemNode)
         {
             HtmlNode itemTitleNode = itemNode.SelectSingleNode("./h3/a");
+            if (itemTitleNode == null)
+            {
+                itemTitleNode = itemNode.SelectSingleNode("./div[@class=\"display-info\"]/h3/a");
+            }
             string itemTitle = CommonUtil.HtmlDecode(itemTitleNode.InnerText).Trim();
             HtmlNodeCollection displayInfoNodes = itemNode.SelectNodes("./div[@class=\"display-info\"]/span[@class=\"standard-view-style\"]");
             List<string> displayInfos = new List<string>();
@@ -271,14 +373,17 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
 
                 if (baseInfoPageUrl.Length > 0)
                 {
+                    baseInfoPageUrl = CommonUtil.UrlDecodeSymbolAnd(baseInfoPageUrl);
                     this.DownloadBaseInfoPage(baseInfoPageUrl, keywords, itemName);
                 }
                 if (htmlPageUrl.Length > 0)
                 {
+                    htmlPageUrl = CommonUtil.UrlDecodeSymbolAnd(htmlPageUrl);
                     this.DownloadHtmlPage(htmlPageUrl, keywords, itemName);
                 }
                 if (pdfPageUrl.Length > 0)
                 {
+                    pdfPageUrl = CommonUtil.UrlDecodeSymbolAnd(pdfPageUrl);
                     this.DownloadPdfPage(pdfPageUrl, keywords, itemName);
                 }
             }
@@ -292,7 +397,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             {
                 IWebBrowser webBrowser = this.RunPage.ShowWebPage(pageUrl, "baseInfo", 30000, false, WebBrowserType.Chromium, true);
 
-                int interval = 2000;
+                int interval = 4000;
                 int waitingTimeout = 30000;
                 int totalWaiting = 0;
                 string html = "";
@@ -316,7 +421,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             {
                 IWebBrowser webBrowser = this.RunPage.ShowWebPage(pageUrl, "html", 30000, false, WebBrowserType.Chromium, true);
 
-                int interval = 2000;
+                int interval = 4000;
                 int waitingTimeout = 30000;
                 int totalWaiting = 0;
                 string html = "";
@@ -335,32 +440,39 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
         }
         private void DownloadPdfPage(string pageUrl, string keywords, string itemName)
         {
-            string filePath = this.GetFilePath(keywords, itemName) + "_html";
-            if (!File.Exists(filePath))
+            try
             {
-                IWebBrowser webBrowser = this.RunPage.ShowWebPage(pageUrl, "html", 30000, false, WebBrowserType.Chromium, true);
-
-                int interval = 2000;
-                int waitingTimeout = 30000;
-                int totalWaiting = 0;
-                string html = "";
-                while (!html.Contains("plugin") && waitingTimeout >= totalWaiting)
+                string filePath = this.GetFilePath(keywords, itemName) + "_pdf";
+                if (!File.Exists(filePath))
                 {
-                    totalWaiting += interval;
-                    Thread.Sleep(interval);
-                    html = this.RunPage.InvokeGetPageHtml(webBrowser);
-                }
-                if (totalWaiting > waitingTimeout)
-                {
-                    throw new Exception("页面加载失败_html, keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl);
-                }
+                    IWebBrowser webBrowser = this.RunPage.ShowWebPage(pageUrl, "pdf", 30000, false, WebBrowserType.Chromium, true);
 
-                HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
-                htmlDoc.LoadHtml(html);
-                HtmlNode pdfFileUrlNode = htmlDoc.DocumentNode.SelectSingleNode("//embed[@id=\"plugin\"]");
-                string pdfFileUrl = pdfFileUrlNode.GetAttributeValue("href", "");
-                byte[] fileBytes = this.RunPage.GetFileByRequest(pdfFileUrl, null, false, 1000, 30000, false, 1000);
-                this.RunPage.SaveFile(fileBytes, filePath);
+                    int interval = 4000;
+                    int waitingTimeout = 30000;
+                    int totalWaiting = 0;
+                    string html = "";
+                    while (!html.Contains("plugin") && waitingTimeout >= totalWaiting)
+                    {
+                        totalWaiting += interval;
+                        Thread.Sleep(interval);
+                        html = this.RunPage.InvokeGetPageHtml(webBrowser);
+                    }
+                    if (totalWaiting > waitingTimeout)
+                    {
+                        throw new Exception("页面加载失败_html, keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl);
+                    }
+
+                    HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                    htmlDoc.LoadHtml(html);
+                    HtmlNode pdfFileUrlNode = htmlDoc.DocumentNode.SelectSingleNode("//embed[@id=\"plugin\"]");
+                    string pdfFileUrl = pdfFileUrlNode.GetAttributeValue("href", "");
+                    byte[] fileBytes = this.RunPage.GetFileByRequest(pdfFileUrl, null, false, 1000, 30000, false, 1000);
+                    this.RunPage.SaveFile(fileBytes, filePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 
@@ -423,11 +535,13 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
 
                 string scriptCode = "document.getElementById('" + nextBtnId + "').click();";
                 this.RunPage.InvokeAddScriptMethod(webBrowser, scriptCode);
-                int interval = 2000;
+                this.RunPage.ShowTabPage("EBSCOHost");
+                Thread.Sleep(5000);
+                int interval = 4000;
                 int waitingTimeout = 30000;
                 int totalWaiting = 0;
                 html = "";
-                while (!html.Contains("<li>" + pageIndex.ToString() + "</li>") && waitingTimeout >= totalWaiting)
+                while ((html == null ||!html.Contains("<li>" + pageIndex.ToString() + "</li>")) && waitingTimeout >= totalWaiting)
                 {
                     totalWaiting += interval;
                     Thread.Sleep(interval);

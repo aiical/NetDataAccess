@@ -52,134 +52,154 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            string exportDir = this.RunPage.GetExportDir();
-            string pdfUrlFilePath = Path.Combine(exportDir, "论文_ScienceDirect_论文PDF页.xlsx");
-            ExcelWriter pdfUrlWriter = this.GetExcelWriter(pdfUrlFilePath);
-             
-            string baseInfoFilePath = Path.Combine(exportDir, "论文_ScienceDirect_论文基本信息.xlsx");
-            ExcelWriter baseInfoWriter = this.GetExcelWriter(baseInfoFilePath);
-
-            for (int i = 0; i < listSheet.RowCount; i++)
+            try
             {
-                Dictionary<string, string> listRow = listSheet.GetRow(i);
-                string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
-                string prefixUrl = this.GetUrlPrefix(pageUrl);
-                String sourceDir = this.RunPage.GetDetailSourceFileDir();
-                string sourceFilePath = this.RunPage.GetFilePath(pageUrl, sourceDir);
+                string exportDir = this.RunPage.GetExportDir();
+                string pdfUrlFilePath = Path.Combine(exportDir, "论文_ScienceDirect_论文PDF地址.xlsx");
+                ExcelWriter pdfUrlWriter = this.GetDownloadPdfExcelWriter(pdfUrlFilePath);
 
-                HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+                string baseInfoFilePath = Path.Combine(exportDir, "论文_ScienceDirect_论文基本信息.xlsx");
+                ExcelWriter baseInfoWriter = this.GetExcelWriter(baseInfoFilePath);
 
-                string publication = CommonUtil.HtmlDecode(htmlDoc.DocumentNode.SelectSingleNode("//a[@class=\"publication-title-link\"]").InnerText).Trim();
-                string host = CommonUtil.HtmlDecode(htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"publication-volume u-text-center\"]/div[@class=\"text-xs\"]").InnerText).Trim();
-                string title = CommonUtil.HtmlDecode(htmlDoc.DocumentNode.SelectSingleNode("//span[@class=\"title-text\"]").InnerText).Trim();
-                HtmlNodeCollection authorNodes = htmlDoc.DocumentNode.SelectNodes("//a[@class=\"author size-m workspace-trigger\"]");
-                List<string> authorList = new List<string>();
-                for (int j = 0; j < authorNodes.Count; j++)
+                for (int i = 0; i < listSheet.RowCount; i++)
                 {
-                    authorList.Add(CommonUtil.HtmlDecode(authorNodes[j].InnerText).Trim());
-                }
-                string authors = CommonUtil.StringArrayToString(authorList.ToArray(), ", ");
+                    Dictionary<string, string> listRow = listSheet.GetRow(i);
+                    string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
+                    string prefixUrl = this.GetUrlPrefix(pageUrl);
+                    String sourceDir = this.RunPage.GetDetailSourceFileDir();
+                    string sourceFilePath = this.RunPage.GetFilePath(pageUrl, sourceDir);
 
-                HtmlNode abstractNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"abstracts\"]/div/div/p");
-                string abstracts = abstractNode == null ? "" : CommonUtil.HtmlDecode(abstractNode.InnerText).Trim();
+                    HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
 
-                List<string> referenceList = new List<string>();
-                HtmlNode referenceNode = htmlDoc.DocumentNode.SelectSingleNode("//section[@clas=\"bibliography-sec\"]/dl[@class=\"references\"]");
-                if (referenceNode != null)
-                {
-                    HtmlNodeCollection dtNodes = referenceNode.SelectNodes("./dt[@class=\"label\"]");
-                    HtmlNodeCollection ddNodes = referenceNode.SelectNodes("./dd[@class=\"reference\"]");
-                    for (int j = 0; j < dtNodes.Count; j++)
+                    HtmlNode publicationNode = htmlDoc.DocumentNode.SelectSingleNode("//a[@class=\"publication-title-link\"]");
+                    string publication = publicationNode == null ? "" : CommonUtil.HtmlDecode(publicationNode.InnerText).Trim();
+
+                    HtmlNode hostNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"publication-volume u-text-center\"]/div[@class=\"text-xs\"]");
+                    string host = hostNode == null ? "" : CommonUtil.HtmlDecode(hostNode.InnerText).Trim();
+
+                    HtmlNode titleNode = htmlDoc.DocumentNode.SelectSingleNode("//span[@class=\"title-text\"]");
+                    string title = titleNode == null ? "" : CommonUtil.HtmlDecode(titleNode.InnerText).Trim();
+
+                    HtmlNodeCollection authorNodes = htmlDoc.DocumentNode.SelectNodes("//a[@class=\"author size-m workspace-trigger\"]");
+                    List<string> authorList = new List<string>();
+                    if (authorNodes != null)
                     {
-                        HtmlNode dtNode = dtNodes[j];
-                        HtmlNode ddNode = ddNodes[j];
-                        StringBuilder ss = new StringBuilder();
-                        ss.Append("###");
-                        ss.Append(CommonUtil.HtmlDecode(dtNode.InnerText).Trim());
-
-                        HtmlNode contributionNode = ddNode.SelectSingleNode("./div[@class=\"contribution\"]");
-                        string contribution = contributionNode == null ? "" : CommonUtil.HtmlDecode(contributionNode.InnerText).Trim();
-
-                        HtmlNode refTitleNode = ddNode.SelectSingleNode("./div[@class=\"contribution\"]/string[@class=\"title\"]");
-                        string refTitle = refTitleNode == null ? "" : CommonUtil.HtmlDecode(refTitleNode.InnerText).Trim();
-
-                        string refAuthors = contribution.Replace(refTitle, "");
-
-                        ss.Append("#author#:" + refAuthors);
-                        ss.Append("#title#:" + refTitle);
-
-                        HtmlNode hostNode = ddNode.SelectSingleNode("./div[@class=\"host\"]");
-                        string refHost = hostNode == null ? "" : CommonUtil.HtmlDecode(hostNode.InnerText).Trim();
-                        ss.Append("#host#:" + refHost);
-                        referenceList.Add(ss.ToString());
-                    }
-                }
-                string references = CommonUtil.StringArrayToString(referenceList.ToArray(), "\r\n");
-
-                HtmlNode pdfDownloadNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"PdfDropDownMenu\"]/a");
-                if (pdfDownloadNode != null)
-                {
-                    string pdfUrl = prefixUrl + pdfDownloadNode.GetAttributeValue("href", "");
-                    Dictionary<string, string> pdfUrlRow = new Dictionary<string, string>();
-                    pdfUrlRow.Add("detailPageUrl", pdfUrl);
-                    pdfUrlRow.Add("detailPageName", pdfUrl);
-                    pdfUrlRow.Add("publication", publication);
-                    pdfUrlRow.Add("host", host);
-                    pdfUrlRow.Add("title", title);
-                    pdfUrlRow.Add("authors", authors);
-                    pdfUrlRow.Add("abstracts", abstracts);
-                    pdfUrlRow.Add("references", references);
-                    pdfUrlRow.Add("url", pageUrl);
-                    pdfUrlWriter.AddRow(pdfUrlRow); 
-                }
-
-                /*
-                HtmlNodeCollection allSpanNodes = htmlDoc.DocumentNode.SelectNodes("//span[@class=\"anchor-text\"]");
-                if (allSpanNodes != null)
-                {
-                    for (int j = 0; j < allSpanNodes.Count; j++)
-                    {
-                        HtmlNode spanNode = allSpanNodes[j];
-                        string spanText = CommonUtil.HtmlDecode(spanNode.InnerText).Trim();
-                        if (spanText == "Download full text in PDF")
+                        for (int j = 0; j < authorNodes.Count; j++)
                         {
+                            authorList.Add(CommonUtil.HtmlDecode(authorNodes[j].InnerText).Trim());
+                        }
+                    }
+                    string authors = CommonUtil.StringArrayToString(authorList.ToArray(), ", ");
 
-                            HtmlNode parentNode = spanNode.ParentNode;
-                            if (parentNode.Name == "a")
+                    HtmlNode abstractNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"abstracts\"]/div/div/p");
+                    string abstracts = abstractNode == null ? "" : CommonUtil.HtmlDecode(abstractNode.InnerText).Trim();
+
+                    List<string> referenceList = new List<string>();
+                    HtmlNode referenceNode = htmlDoc.DocumentNode.SelectSingleNode("//section[@clas=\"bibliography-sec\"]/dl[@class=\"references\"]");
+                    if (referenceNode != null)
+                    {
+                        HtmlNodeCollection dtNodes = referenceNode.SelectNodes("./dt[@class=\"label\"]");
+                        HtmlNodeCollection ddNodes = referenceNode.SelectNodes("./dd[@class=\"reference\"]");
+                        for (int j = 0; j < dtNodes.Count; j++)
+                        {
+                            HtmlNode dtNode = dtNodes[j];
+                            HtmlNode ddNode = ddNodes[j];
+                            StringBuilder ss = new StringBuilder();
+                            ss.Append("###");
+                            ss.Append(CommonUtil.HtmlDecode(dtNode.InnerText).Trim());
+
+                            HtmlNode contributionNode = ddNode.SelectSingleNode("./div[@class=\"contribution\"]");
+                            string contribution = contributionNode == null ? "" : CommonUtil.HtmlDecode(contributionNode.InnerText).Trim();
+
+                            HtmlNode refTitleNode = ddNode.SelectSingleNode("./div[@class=\"contribution\"]/string[@class=\"title\"]");
+                            string refTitle = refTitleNode == null ? "" : CommonUtil.HtmlDecode(refTitleNode.InnerText).Trim();
+
+                            string refAuthors = contribution.Replace(refTitle, "");
+
+                            ss.Append("#author#:" + refAuthors);
+                            ss.Append("#title#:" + refTitle);
+
+                            HtmlNode refHostNode = ddNode.SelectSingleNode("./div[@class=\"host\"]");
+                            string refHost = hostNode == null ? "" : CommonUtil.HtmlDecode(refHostNode.InnerText).Trim();
+                            ss.Append("#host#:" + refHost);
+                            referenceList.Add(ss.ToString());
+                        }
+                    }
+                    string references = CommonUtil.StringArrayToString(referenceList.ToArray(), "\r\n");
+
+                    HtmlNode pdfDownloadNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"PdfDropDownMenu\"]/a");
+                    bool hasPdf = false;
+                    if (pdfDownloadNode != null)
+                    {
+                        hasPdf = true;
+
+                        string pdfUrl = prefixUrl + pdfDownloadNode.GetAttributeValue("href", "");
+                        Dictionary<string, string> pdfUrlRow = new Dictionary<string, string>();
+                        pdfUrlRow.Add("detailPageUrl", pdfUrl);
+                        pdfUrlRow.Add("detailPageName", pdfUrl);
+                        pdfUrlRow.Add("publication", publication);
+                        pdfUrlRow.Add("host", host);
+                        pdfUrlRow.Add("title", title);
+                        pdfUrlRow.Add("authors", authors);
+                        pdfUrlRow.Add("abstracts", abstracts);
+                        pdfUrlRow.Add("refs", references);
+                        pdfUrlRow.Add("url", pageUrl);
+                        pdfUrlWriter.AddRow(pdfUrlRow);
+                    }
+
+                    /*
+                    HtmlNodeCollection allSpanNodes = htmlDoc.DocumentNode.SelectNodes("//span[@class=\"anchor-text\"]");
+                    if (allSpanNodes != null)
+                    {
+                        for (int j = 0; j < allSpanNodes.Count; j++)
+                        {
+                            HtmlNode spanNode = allSpanNodes[j];
+                            string spanText = CommonUtil.HtmlDecode(spanNode.InnerText).Trim();
+                            if (spanText == "Download full text in PDF")
                             {
-                                string pdfUrl = prefixUrl + parentNode.GetAttributeValue("href", "");
-                                Dictionary<string, string> pdfUrlRow = new Dictionary<string, string>();
-                                pdfUrlRow.Add("detailPageUrl", pdfUrl);
-                                pdfUrlRow.Add("detailPageName", pdfUrl);
-                                pdfUrlRow.Add("publication", publication);
-                                pdfUrlRow.Add("host", host);
-                                pdfUrlRow.Add("title", title);
-                                pdfUrlRow.Add("authors", authors);
-                                pdfUrlRow.Add("abstracts", abstracts);
-                                pdfUrlRow.Add("references", references);
-                                pdfUrlRow.Add("url", pageUrl);
-                                pdfUrlWriter.AddRow(pdfUrlRow);
-                                break;
+
+                                HtmlNode parentNode = spanNode.ParentNode;
+                                if (parentNode.Name == "a")
+                                {
+                                    string pdfUrl = prefixUrl + parentNode.GetAttributeValue("href", "");
+                                    Dictionary<string, string> pdfUrlRow = new Dictionary<string, string>();
+                                    pdfUrlRow.Add("detailPageUrl", pdfUrl);
+                                    pdfUrlRow.Add("detailPageName", pdfUrl);
+                                    pdfUrlRow.Add("publication", publication);
+                                    pdfUrlRow.Add("host", host);
+                                    pdfUrlRow.Add("title", title);
+                                    pdfUrlRow.Add("authors", authors);
+                                    pdfUrlRow.Add("abstracts", abstracts);
+                                    pdfUrlRow.Add("references", references);
+                                    pdfUrlRow.Add("url", pageUrl);
+                                    pdfUrlWriter.AddRow(pdfUrlRow);
+                                    break;
+                                }
                             }
                         }
                     }
+                     * */
+
+                    Dictionary<string, string> baseInfoRow = new Dictionary<string, string>();
+                    baseInfoRow.Add("publication", publication);
+                    baseInfoRow.Add("host", host);
+                    baseInfoRow.Add("title", title);
+                    baseInfoRow.Add("authors", authors);
+                    baseInfoRow.Add("abstracts", abstracts);
+                    baseInfoRow.Add("refs", references);
+                    baseInfoRow.Add("url", pageUrl);
+                    baseInfoRow.Add("hasPdf", hasPdf ? "true" : "false");
+                    baseInfoWriter.AddRow(baseInfoRow);
                 }
-                 * */
 
-                Dictionary<string, string> baseInfoRow = new Dictionary<string, string>();
-                baseInfoRow.Add("publication", publication);
-                baseInfoRow.Add("host", host);
-                baseInfoRow.Add("title", title);
-                baseInfoRow.Add("authors", authors);
-                baseInfoRow.Add("abstracts", abstracts);
-                baseInfoRow.Add("references", references);
-                baseInfoRow.Add("url", pageUrl);
-                baseInfoWriter.AddRow(baseInfoRow);
+                pdfUrlWriter.SaveToDisk();
+                baseInfoWriter.SaveToDisk();
+                return true;
             }
-
-            pdfUrlWriter.SaveToDisk();
-            baseInfoWriter.SaveToDisk();
-            return true;
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private string GetUrlPrefix(string listPageUrl)
@@ -192,13 +212,14 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
         private ExcelWriter GetExcelWriter(string filePath)
         {
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>(); 
-            resultColumnDic.Add("publication", 1);
-            resultColumnDic.Add("host", 2);
-            resultColumnDic.Add("title", 3);
-            resultColumnDic.Add("authors", 4);
-            resultColumnDic.Add("abstracts", 5);
-            resultColumnDic.Add("references", 6);
-            resultColumnDic.Add("url", 7);
+            resultColumnDic.Add("publication", 0);
+            resultColumnDic.Add("host", 1);
+            resultColumnDic.Add("title", 2);
+            resultColumnDic.Add("authors", 3);
+            resultColumnDic.Add("abstracts", 4);
+            resultColumnDic.Add("refs", 5);
+            resultColumnDic.Add("url", 6);
+            resultColumnDic.Add("hasPdf", 7);
 
             ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, null);
             return resultEW;
@@ -217,7 +238,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
             resultColumnDic.Add("title", 7);
             resultColumnDic.Add("authors", 8);
             resultColumnDic.Add("abstracts", 9);
-            resultColumnDic.Add("references", 10);
+            resultColumnDic.Add("refs", 10);
             resultColumnDic.Add("url", 11);
 
             ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, null);
