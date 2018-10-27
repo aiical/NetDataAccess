@@ -386,6 +386,8 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                     pdfPageUrl = CommonUtil.UrlDecodeSymbolAnd(pdfPageUrl);
                     this.DownloadPdfPage(pdfPageUrl, keywords, itemName);
                 }
+
+                this.RunPage.SaveFile(itemName, filePath, Encoding.UTF8);
             }
             return itemName;
         }
@@ -451,7 +453,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                     int waitingTimeout = 30000;
                     int totalWaiting = 0;
                     string html = "";
-                    while (!html.Contains("plugin") && waitingTimeout >= totalWaiting)
+                    while (!html.Contains("id=\"pdfIframe\"") && waitingTimeout >= totalWaiting)
                     {
                         totalWaiting += interval;
                         Thread.Sleep(interval);
@@ -459,14 +461,30 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                     }
                     if (totalWaiting > waitingTimeout)
                     {
-                        throw new Exception("页面加载失败_html, keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl);
+                        throw new Exception("页面加载失败_pdf, keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl);
+                    }
+
+                    totalWaiting = 0;
+                    HtmlAgilityPack.HtmlDocument contentHtmlDoc = new HtmlAgilityPack.HtmlDocument();
+                    contentHtmlDoc.LoadHtml(html);
+                    string contentPageUrl = CommonUtil.UrlDecodeSymbolAnd(contentHtmlDoc.DocumentNode.SelectSingleNode("//iframe[@id=\"pdfIframe\"]").GetAttributeValue("src", ""));
+                    IWebBrowser webBrowserContent = this.RunPage.ShowWebPage(contentPageUrl, "pdf_content", 30000, false, WebBrowserType.Chromium, true);
+                    while (!html.Contains("name=\"plugin\"") && waitingTimeout >= totalWaiting)
+                    {
+                        totalWaiting += interval;
+                        Thread.Sleep(interval);
+                        html = this.RunPage.InvokeGetPageHtml(webBrowserContent);
+                    }
+                    if (totalWaiting > waitingTimeout)
+                    {
+                        throw new Exception("页面加载失败_webBrowserContent, keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl);
                     }
 
                     HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
                     htmlDoc.LoadHtml(html);
-                    HtmlNode pdfFileUrlNode = htmlDoc.DocumentNode.SelectSingleNode("//embed[@id=\"plugin\"]");
-                    string pdfFileUrl = pdfFileUrlNode.GetAttributeValue("href", "");
-                    byte[] fileBytes = this.RunPage.GetFileByRequest(pdfFileUrl, null, false, 1000, 30000, false, 1000);
+                    HtmlNode pdfFileUrlNode = htmlDoc.DocumentNode.SelectSingleNode("//embed[@name=\"plugin\"]");
+                    string pdfFileUrl = CommonUtil.UrlDecodeSymbolAnd(pdfFileUrlNode.GetAttributeValue("src", ""));
+                    byte[] fileBytes = this.RunPage.GetFileByRequest(pdfFileUrl, null, false, 1000, 1000 * 60 * 5, false, 1000);
                     this.RunPage.SaveFile(fileBytes, filePath);
                 }
             }
