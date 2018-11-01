@@ -477,15 +477,25 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                     }
                     if (totalWaiting > waitingTimeout)
                     {
-                        throw new Exception("页面加载失败_webBrowserContent, keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl);
+                        if (html.Contains("Sorry, we are unable to retrieve the document you requested."))
+                        {
+                            this.RunPage.InvokeAppendLogText("Sorry, we are unable to retrieve the document you requested. keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl, LogLevelType.System, true);
+                        }
+                        else
+                        {
+                            throw new Exception("页面加载失败_webBrowserContent, keywords = " + keywords + ", itemName = " + itemName + ", pageUrl = " + pageUrl);
+                        }
                     }
+                    else
+                    {
 
-                    HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
-                    htmlDoc.LoadHtml(html);
-                    HtmlNode pdfFileUrlNode = htmlDoc.DocumentNode.SelectSingleNode("//embed[@name=\"plugin\"]");
-                    string pdfFileUrl = CommonUtil.UrlDecodeSymbolAnd(pdfFileUrlNode.GetAttributeValue("src", ""));
-                    byte[] fileBytes = this.RunPage.GetFileByRequest(pdfFileUrl, null, false, 1000, 1000 * 60 * 5, false, 1000);
-                    this.RunPage.SaveFile(fileBytes, filePath);
+                        HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                        htmlDoc.LoadHtml(html);
+                        HtmlNode pdfFileUrlNode = htmlDoc.DocumentNode.SelectSingleNode("//embed[@name=\"plugin\"]");
+                        string pdfFileUrl = CommonUtil.UrlDecodeSymbolAnd(pdfFileUrlNode.GetAttributeValue("src", ""));
+                        byte[] fileBytes = this.RunPage.GetFileByRequest(pdfFileUrl, null, false, 1000, 1000 * 60 * 5, false, 1000);
+                        this.RunPage.SaveFile(fileBytes, filePath);
+                    }
                 }
             }
             catch (Exception ex)

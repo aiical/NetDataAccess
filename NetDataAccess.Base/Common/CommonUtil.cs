@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -281,5 +282,16 @@ namespace NetDataAccess.Base.Common
             return url == null ? null : url.Replace("&amp;", "&");
         }
         #endregion 
+
+        #region MD5加密
+        public static string MD5Crypto(string sourceString)
+        {
+            MD5 md5 = new MD5CryptoServiceProvider();
+            byte[] result = Encoding.Default.GetBytes(sourceString);
+            byte[] output = md5.ComputeHash(result);
+            string destString = BitConverter.ToString(output);
+            return destString;
+        }
+        #endregion
     }
 }

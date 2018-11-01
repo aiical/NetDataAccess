@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0F64A834-2DD2-43E6-BE41-64EC8C793648}</ProjectGuid>
+    <ProjectGuid>{8925205D-2E26-4A24-AB0B-F943B6ADD19F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NetDataAccess.Extended.LiShi</RootNamespace>
-    <AssemblyName>NetDataAccess.Extended.LiShi</AssemblyName>
+    <RootNamespace>NetDataAccess.Extended.YiMaoShangWu</RootNamespace>
+    <AssemblyName>NetDataAccess.Extended.YiMaoShangWu</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
@@ -77,11 +77,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaiDuBaiKe\GetChaoDaiPages.cs" />
     <Compile Include="BaiDuBaiKe\GetBaiKePages.cs" />
-    <Compile Include="LiShiZhiJia\GetAllRenWuListPageUrls.cs" />
-    <Compile Include="LiShiZhiJia\GetAllRenWuListPages.cs" />
-    <Compile Include="LiShiZhiJia\GetAllRenWuDetailPages.cs" />
+    <Compile Include="BaiDuBaiKe\GetInitKeyWordPages.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
