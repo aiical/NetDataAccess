@@ -129,7 +129,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
         { 
             String exportDir = this.RunPage.GetExportDir();
             string partDir = CommonUtil.MD5Crypto(fromItemTitle + "_" + fromItemId).Substring(0, 4);
-            string resultFilePath = Path.Combine(exportDir, partDir + "/百度百科_词条关联_" + fromItemTitle + "_" + fromItemId + ".xlsx");
+            string resultFilePath = Path.Combine(exportDir, partDir + "/百度百科_词条关联_" + CommonUtil.ProcessFileName(fromItemTitle, "_") + "_" + fromItemId + ".xlsx");
             if (!File.Exists(resultFilePath))
             {
                 Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();

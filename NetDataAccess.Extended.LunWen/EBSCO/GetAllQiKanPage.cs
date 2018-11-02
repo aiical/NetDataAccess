@@ -48,7 +48,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                for (int i = fromYear; i <= 2018; i++)
                {
 
-                   string yearSourceFilePath = this.RunPage.GetFilePath(pageMarkUrl, sourceDir) + "_" + i.ToString();
+                   string yearSourceFilePath = this.RunPage.GetFilePath(pageName, sourceDir) + "_" + i.ToString();
                    if (!File.Exists(yearSourceFilePath))
                    {
 
@@ -97,7 +97,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             int waitingTimeout = 30000;
             int totalWaiting = 0;
             string html = "";
-            while (!html.Contains("重新设置") && waitingTimeout >= totalWaiting)
+            while ((html == null || !html.Contains("重新设置")) && waitingTimeout >= totalWaiting)
             {
                 totalWaiting += interval;
                 Thread.Sleep(interval);
@@ -120,7 +120,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
 
               
             totalWaiting = 0; 
-            while (!html.Contains(year.ToString() + "0101-" + year.ToString() + "1231") && waitingTimeout >= totalWaiting)
+            while ((html == null || !html.Contains(year.ToString() + "0101-" + year.ToString() + "1231")) && waitingTimeout >= totalWaiting)
             {
                 totalWaiting += interval;
                 Thread.Sleep(interval);
@@ -135,7 +135,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
         public override bool AfterAllGrab(IListSheet listSheet)
         {
             string exportDir = this.RunPage.GetExportDir();
-            string exportFilePath = Path.Combine(exportDir, "论文_ScienceDirect_论文列表页.xlsx");
+            string exportFilePath = Path.Combine(exportDir, "论文_EBSCO_论文列表页.xlsx");
             ExcelWriter resultWriter = this.GetExcelWriter(exportFilePath);
 
             for (int i = 0; i < listSheet.RowCount; i++)
@@ -192,7 +192,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             int waitingTimeout = 30000;
             int totalWaiting = 0;
             string html = "";
-            while (!html.Contains("学术（同行评审）期刊") && waitingTimeout >= totalWaiting)
+            while ((html == null || !html.Contains("学术（同行评审）期刊")) && waitingTimeout >= totalWaiting)
             {
                 totalWaiting += interval;
                 Thread.Sleep(interval);
@@ -223,7 +223,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             string scriptSubmitCode = "document.getElementById('ctl00_ctl00_MainContentArea_MainContentArea_ctrlLimiters_btnSearch').click()";
             this.RunPage.InvokeAddScriptMethod(webBrowser, scriptSubmitCode);
 
-            while (!html.Contains("下一个") && waitingTimeout >= totalWaiting)
+            while ((html == null || !html.Contains("下一个")) && waitingTimeout >= totalWaiting)
             {
                 totalWaiting += interval;
                 Thread.Sleep(interval);
@@ -247,29 +247,16 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                 Thread.Sleep(5000);
                 totalWaiting = 0;
 
-                string scriptMoreCode = "var moreLinkNodes = document.getElementsByClassName('panelShowMore evt-select-mulitple');"
-                                     + "var targetLinkNode = null;"
-                                     + "for(var i=0;i<moreLinkNodes.length;i++){"
-                                     + "  var moreLinkNode = moreLinkNodes[i];"
-                                     + "  if(moreLinkNode.parentElement.parentElement.getAttribute('id') == 'multiSelectCluster_JournalContent'){"
-                                     + "    targetLinkNode = moreLinkNode;"
-                                     + "    break;"
-                                     + "  }"
-                                     + "}"
-                                     + "targetLinkNode.click();";
-                this.RunPage.InvokeAddScriptMethod(webBrowser, scriptMoreCode);
-                Thread.Sleep(5000);
-                totalWaiting = 0;
-
-                while (waitingTimeout >= totalWaiting)
+                html = this.RunPage.InvokeGetPageHtml(webBrowser);
+                HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                htmlDoc.LoadHtml(html);
+                HtmlNode aMoreNode = htmlDoc.DocumentNode.SelectSingleNode("//a[@id=\"multiSelectCluster_JournalTrigger\"]").ParentNode.SelectSingleNode("./div[@id=\"multiSelectCluster_JournalContent\"]/div[@class=\"controls\"]/a[@class=\"panelShowMore evt-select-mulitple\"]");
+                if (aMoreNode == null)
                 {
-                    totalWaiting += interval;
-                    Thread.Sleep(interval);
-                    html = this.RunPage.InvokeGetPageHtml(webBrowser);
-                    HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
-                    htmlDoc.LoadHtml(html);
-                    HtmlNodeCollection jNodes = htmlDoc.DocumentNode.SelectNodes("//table[@class=\"limiter-table\"]/tbody/tr/td[@class=\"lim-select\"]/input");
-                    HtmlNodeCollection jLabels = htmlDoc.DocumentNode.SelectNodes("//table[@class=\"limiter-table\"]/tbody/tr/td[@class=\"lim-name\"]/label");
+                    //只能是第一个关键词有效了
+                    string moreKeyword = moreKeywordList[0];
+                    HtmlNodeCollection jNodes = htmlDoc.DocumentNode.SelectNodes("//div[@id=\"multiSelectCluster_JournalContent\"]/ul/li/input");
+                    HtmlNodeCollection jLabels = htmlDoc.DocumentNode.SelectNodes("//div[@id=\"multiSelectCluster_JournalContent\"]/ul/li/label");
                     if (jNodes != null)
                     {
                         for (int i = 0; i < jNodes.Count; i++)
@@ -282,33 +269,74 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                             {
                                 string scriptJCode = "document.getElementById('" + jId + "').click();";
                                 this.RunPage.InvokeAddScriptMethod(webBrowser, scriptJCode);
+                                break;
                             }
-                        }
-                        break;
+                        } 
                     }
-                }
-                if (totalWaiting > waitingTimeout)
-                {
-                    throw new Exception("弹出选择出版物窗口超时");
                 }
                 else
                 {
-                    //string scriptRefreshCode = "document.getElementById('modalPanelForm').submit();";
-                    string scriptRefreshCode = "document.getElementsByClassName('button primary-action evt-update-btn')[0].click();";
-                    this.RunPage.InvokeAddScriptMethod(webBrowser, scriptRefreshCode);
-
+                    string scriptMoreCode = "var moreLinkNodes = document.getElementsByClassName('panelShowMore evt-select-mulitple');"
+                                         + "var targetLinkNode = null;"
+                                         + "for(var i=0;i<moreLinkNodes.length;i++){"
+                                         + "  var moreLinkNode = moreLinkNodes[i];"
+                                         + "  if(moreLinkNode.parentElement.parentElement.getAttribute('id') == 'multiSelectCluster_JournalContent'){"
+                                         + "    targetLinkNode = moreLinkNode;"
+                                         + "    break;"
+                                         + "  }"
+                                         + "}"
+                                         + "targetLinkNode.click();";
+                    this.RunPage.InvokeAddScriptMethod(webBrowser, scriptMoreCode);
+                    Thread.Sleep(5000);
                     totalWaiting = 0;
-                    html = "";
-                    while ((html == null || !html.Contains("<h4 class=\"bb-heading\">出版物</h4>")) && waitingTimeout >= totalWaiting)
+
+                    while (waitingTimeout >= totalWaiting)
                     {
                         totalWaiting += interval;
                         Thread.Sleep(interval);
                         html = this.RunPage.InvokeGetPageHtml(webBrowser);
+                        htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                        htmlDoc.LoadHtml(html);
+                        HtmlNodeCollection jNodes = htmlDoc.DocumentNode.SelectNodes("//table[@class=\"limiter-table\"]/tbody/tr/td[@class=\"lim-select\"]/input");
+                        HtmlNodeCollection jLabels = htmlDoc.DocumentNode.SelectNodes("//table[@class=\"limiter-table\"]/tbody/tr/td[@class=\"lim-name\"]/label");
+                        if (jNodes != null)
+                        {
+                            for (int i = 0; i < jNodes.Count; i++)
+                            {
+                                HtmlNode jNode = jNodes[i];
+                                HtmlNode jLabel = jLabels[i];
+                                string jId = jNode.GetAttributeValue("id", "");
+                                string jName = CommonUtil.HtmlDecode(jLabel.InnerText).Trim().ToLower();
+                                if (moreKeywordList.Contains(jName))
+                                {
+                                    string scriptJCode = "document.getElementById('" + jId + "').click();";
+                                    this.RunPage.InvokeAddScriptMethod(webBrowser, scriptJCode);
+                                }
+                            }
+                            break;
+                        }
                     }
                     if (totalWaiting > waitingTimeout)
                     {
-                        throw new Exception("更新出版物后没有刷新出来界面");
+                        throw new Exception("弹出选择出版物窗口超时");
                     }
+
+                    //string scriptRefreshCode = "document.getElementById('modalPanelForm').submit();";
+                    string scriptRefreshCode = "document.getElementsByClassName('button primary-action evt-update-btn')[0].click();";
+                    this.RunPage.InvokeAddScriptMethod(webBrowser, scriptRefreshCode);
+                }
+
+                totalWaiting = 0;
+                html = "";
+                while ((html == null || !html.Contains("<h4 class=\"bb-heading\">出版物</h4>")) && waitingTimeout >= totalWaiting)
+                {
+                    totalWaiting += interval;
+                    Thread.Sleep(interval);
+                    html = this.RunPage.InvokeGetPageHtml(webBrowser);
+                }
+                if (totalWaiting > waitingTimeout)
+                {
+                    throw new Exception("更新出版物后没有刷新出来界面");
                 }
             }
 
@@ -403,7 +431,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                 int waitingTimeout = 30000;
                 int totalWaiting = 0;
                 string html = "";
-                while (!html.Contains("详细记录") && waitingTimeout >= totalWaiting)
+                while ((html == null || !html.Contains("详细记录") ) && waitingTimeout >= totalWaiting)
                 {
                     totalWaiting += interval;
                     Thread.Sleep(interval);
@@ -427,7 +455,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                 int waitingTimeout = 30000;
                 int totalWaiting = 0;
                 string html = "";
-                while (!html.Contains("HTML 全文") && waitingTimeout >= totalWaiting)
+                while ((html == null || !html.Contains("HTML 全文")) && waitingTimeout >= totalWaiting)
                 {
                     totalWaiting += interval;
                     Thread.Sleep(interval);
@@ -453,7 +481,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                     int waitingTimeout = 30000;
                     int totalWaiting = 0;
                     string html = "";
-                    while (!html.Contains("id=\"pdfIframe\"") && waitingTimeout >= totalWaiting)
+                    while ((html == null || !html.Contains("id=\"pdfIframe\"")) && waitingTimeout >= totalWaiting)
                     {
                         totalWaiting += interval;
                         Thread.Sleep(interval);
@@ -469,7 +497,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                     contentHtmlDoc.LoadHtml(html);
                     string contentPageUrl = CommonUtil.UrlDecodeSymbolAnd(contentHtmlDoc.DocumentNode.SelectSingleNode("//iframe[@id=\"pdfIframe\"]").GetAttributeValue("src", ""));
                     IWebBrowser webBrowserContent = this.RunPage.ShowWebPage(contentPageUrl, "pdf_content", 30000, false, WebBrowserType.Chromium, true);
-                    while (!html.Contains("name=\"plugin\"") && waitingTimeout >= totalWaiting)
+                    while ((html == null || !html.Contains("name=\"plugin\"")) && waitingTimeout >= totalWaiting)
                     {
                         totalWaiting += interval;
                         Thread.Sleep(interval);
@@ -513,7 +541,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                 Directory.CreateDirectory(sourceDirPath);
             }
 
-            string dirPath = Path.Combine(sourceDirPath, keywords);
+            string dirPath = this.RunPage.GetFilePath(keywords, sourceDirPath);
             if (!Directory.Exists(dirPath))
             {
                 Directory.CreateDirectory(dirPath);
