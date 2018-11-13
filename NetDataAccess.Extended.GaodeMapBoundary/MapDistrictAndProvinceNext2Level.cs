@@ -52,7 +52,7 @@ namespace NetDataAccess.Extended.GaodeMapBoundary
             return base.BeforeAllGrab();
         }
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             string code = listRow["code"];
             string detailPageUrl = listRow["detailPageUrl"]; 

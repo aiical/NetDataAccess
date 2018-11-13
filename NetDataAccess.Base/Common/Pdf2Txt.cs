@@ -1,4 +1,5 @@
-﻿using iTextSharp.text.pdf;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using System;
 using System.Collections.Generic;
@@ -39,8 +40,17 @@ namespace NetDataAccess.Base.Common
                         int pageCount = reader.NumberOfPages;
                         for (int i = 1; i <= pageCount; i++)
                         {
-                            String content = PdfTextExtractor.GetTextFromPage(reader, i);
-                            s.Append(content == null ? "" : content.Replace("\n", "").Replace("\r", ""));
+                            try
+                            {
+                                MyTexExStrat strategy = new MyTexExStrat();
+                                PdfTextExtractor.GetTextFromPage(reader, i, strategy);
+                                string content = strategy.GetFullText();
+                                s.Append(content);
+                            }
+                            catch (Exception ex)
+                            {
+                                throw ex;
+                            }
                         }
                     }
 

@@ -38,11 +38,31 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
             }
         }
 
+        private void AddToMoreExcelWriter(ref int pageIndex, ref ExcelWriter moreItemEW, Dictionary<string, string> moreItemRow, ref int rowCount)
+        {
+            rowCount++;
+            if (moreItemEW == null || rowCount >= 50000)
+            {
+                if (moreItemEW != null)
+                {
+                    moreItemEW.SaveToDisk();
+                }
+                pageIndex++;
+                moreItemEW = this.CreateMoreItemWriter(pageIndex);
+                rowCount = 0;
+            }
+            moreItemEW.AddRow(moreItemRow);
+        }
+
         private void GetRelatedItemPageUrls(IListSheet listSheet)
         {
-            ExcelWriter moreItemEW = this.CreateMoreItemWriter();
+            string sourceDir = this.RunPage.GetDetailSourceFileDir();
+
+            int rowCount = 0;
+            ExcelWriter moreItemEW = null;
 
             Dictionary<string, bool> itemMaps = new Dictionary<string, bool>();
+            int pageIndex = 0;
 
             for (int i = 0; i < listSheet.RowCount; i++)
             {
@@ -56,7 +76,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                 moreItemRow.Add("detailPageName", fromItemUrl);
                 moreItemRow.Add("itemId", listRow["itemId"]);
                 moreItemRow.Add("itemName", listRow["itemName"]);
-                moreItemEW.AddRow(moreItemRow);
+                this.AddToMoreExcelWriter(ref pageIndex, ref moreItemEW, moreItemRow, ref rowCount);
             }
 
             for (int i = 0; i < listSheet.RowCount; i++)
@@ -68,41 +88,58 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                 {
                     try
                     {
-                        HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
-
-                        HtmlNode titleNode = htmlDoc.DocumentNode.SelectSingleNode("//dd[@class=\"lemmaWgt-lemmaTitle-title\"]/h1");
-                        string fromItemName = CommonUtil.HtmlDecode(titleNode.InnerText).Trim();
-
-                        HtmlNode itemBaseInfoNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"lemmaWgt-promotion-rightPreciseAd\"]");
-                        string fromItemId = itemBaseInfoNode.GetAttributeValue("data-lemmaid", "");
-                        string fromItemTitle = itemBaseInfoNode.GetAttributeValue("data-lemmatitle", "");
-
-                        HtmlNodeCollection aNodes = htmlDoc.DocumentNode.SelectNodes("//a");
-                        for (int j = 0; j < aNodes.Count; j++)
+                        string localFilePath = this.RunPage.GetFilePath(fromItemUrl, sourceDir);
+                        string html = FileHelper.GetTextFromFile(localFilePath, Encoding.UTF8);
+                        if (!html.Contains("您所访问的页面不存在"))
                         {
-                            HtmlNode aNode = aNodes[j];
-                            string toItemUrl = aNode.GetAttributeValue("href", "");
-                            string toItemId = aNode.GetAttributeValue("data-lemmaid", "");
-                            string toItemName = CommonUtil.HtmlDecode(aNode.InnerText).Trim();
-                            string toItemFullUrl = "https://baike.baidu.com" + toItemUrl;
-                            if (toItemUrl.StartsWith("/item/") && !itemMaps.ContainsKey(toItemFullUrl) && this.IsInMainContent(aNode))
+                            HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                            htmlDoc.LoadHtml(html);
+                            HtmlNode titleNode = htmlDoc.DocumentNode.SelectSingleNode("//dd[@class=\"lemmaWgt-lemmaTitle-title\"]/h1");
+                            if (titleNode == null)
                             {
-                                itemMaps.Add(toItemFullUrl, true);
-
-                                Dictionary<string, string> moreItemRow = new Dictionary<string, string>();
-                                moreItemRow.Add("detailPageUrl", toItemFullUrl);
-                                moreItemRow.Add("detailPageName", toItemFullUrl);
-                                moreItemRow.Add("itemId", toItemId);
-                                moreItemRow.Add("itemName", toItemName);
-
-                                moreItemEW.AddRow(moreItemRow);
+                                this.RunPage.InvokeAppendLogText("此词条不存在,百度没有收录, pageUrl = " + fromItemUrl, LogLevelType.Error, true);
                             }
-                        }
+                            else
+                            {
+                                string fromItemName = CommonUtil.HtmlDecode(titleNode.InnerText).Trim();
 
-                        this.GenerateRelatedItemFile(fromItemId, fromItemName, fromItemTitle, fromItemUrl, aNodes);
+                                HtmlNode itemBaseInfoNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"lemmaWgt-promotion-rightPreciseAd\"]");
+                                string fromItemId = itemBaseInfoNode.GetAttributeValue("data-lemmaid", "");
+                                string fromItemTitle = itemBaseInfoNode.GetAttributeValue("data-lemmatitle", "");
+
+                                HtmlNodeCollection aNodes = htmlDoc.DocumentNode.SelectNodes("//a");
+                                for (int j = 0; j < aNodes.Count; j++)
+                                {
+                                    HtmlNode aNode = aNodes[j];
+                                    string toItemUrl = aNode.GetAttributeValue("href", "");
+                                    string toItemId = aNode.GetAttributeValue("data-lemmaid", "");
+                                    string toItemName = CommonUtil.HtmlDecode(aNode.InnerText).Trim();
+                                    string toItemFullUrl = "https://baike.baidu.com" + toItemUrl;
+                                    if (toItemUrl.StartsWith("/item/") && !itemMaps.ContainsKey(toItemFullUrl) && this.IsInMainContent(aNode))
+                                    {
+                                        itemMaps.Add(toItemFullUrl, true);
+
+                                        Dictionary<string, string> moreItemRow = new Dictionary<string, string>();
+                                        moreItemRow.Add("detailPageUrl", toItemFullUrl);
+                                        moreItemRow.Add("detailPageName", toItemFullUrl);
+                                        moreItemRow.Add("itemId", toItemId);
+                                        moreItemRow.Add("itemName", toItemName);
+
+                                        this.AddToMoreExcelWriter(ref pageIndex, ref moreItemEW, moreItemRow, ref rowCount);
+                                    }
+                                }
+                                this.GenerateRelatedItemFile(fromItemId, fromItemName, fromItemTitle, fromItemUrl, aNodes);
+                            }
+
+                        }
+                        else
+                        {
+                            this.RunPage.InvokeAppendLogText("放弃解析此页, 所访问的页面不存在, pageUrl = " + fromItemUrl, LogLevelType.Error, true);
+                        }
                     }
                     catch (Exception ex)
                     {
+                        this.RunPage.InvokeAppendLogText(ex.Message + ". 解析出错， pageUrl = " + fromItemUrl, LogLevelType.Error, true);
                         throw ex;
                     }
                 }
@@ -170,10 +207,10 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
             }
         }
 
-        private ExcelWriter CreateMoreItemWriter()
+        private ExcelWriter CreateMoreItemWriter(int pageIndex)
         {
             String exportDir = this.RunPage.GetExportDir();
-            string resultFilePath = Path.Combine(exportDir, "百度百科_词条_详情页.xlsx");
+            string resultFilePath = Path.Combine(exportDir, "百度百科_词条_详情页_" + pageIndex.ToString() + ".xlsx");
 
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
             resultColumnDic.Add("detailPageUrl", 0);

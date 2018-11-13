@@ -486,7 +486,7 @@ namespace NetDataAccess.Extended.Linkedin.KeyWordsSearchAtLinkedinApp
             }
         }
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
 
             string keyWords = listRow["keyWords"];

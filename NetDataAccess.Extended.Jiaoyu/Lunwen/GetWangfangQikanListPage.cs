@@ -25,8 +25,8 @@ namespace NetDataAccess.Extended.Jiaoyu.Lunwen
         {
             try
             {
-                //this.GetPeriodicalInfo(listSheet);
-                //this.GetPeriodicalPerioIssueInfo(listSheet);
+                this.GetPeriodicalInfo(listSheet);
+                this.GetPeriodicalPerioIssueInfo(listSheet);
                 this.GetAllPerioFirstIndexPageUrls(listSheet);
             }
             catch (Exception ex)

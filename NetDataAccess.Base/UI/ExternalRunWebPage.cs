@@ -135,7 +135,7 @@ namespace NetDataAccess.Base.UI
         /// 通过其它方式获取数据
         /// </summary>
         /// <param name="listRow"></param>
-        public virtual void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public virtual void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
         }
 

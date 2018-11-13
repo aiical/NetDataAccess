@@ -1,0 +1,9 @@
+E:\Github\NetDataAccess\NetDataAccess.Extended.Keywords\obj\Debug\NetDataAccess.Extended.Keywords.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Keywords.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.Keywords.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.Keywords\obj\Debug\NetDataAccess.Extended.Keywords.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.Keywords\obj\Debug\NetDataAccess.Extended.Keywords.pdb

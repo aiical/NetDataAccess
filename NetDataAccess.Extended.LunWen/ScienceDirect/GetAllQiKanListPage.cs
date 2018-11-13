@@ -22,7 +22,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public class GetAllQiKanListPage : ExternalRunWebPage
     {
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
             int pageIndex = 0;

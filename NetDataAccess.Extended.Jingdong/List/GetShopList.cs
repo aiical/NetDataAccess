@@ -69,7 +69,7 @@ namespace NetDataAccess.Extended.Jingdong.List
         }
         #endregion
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             string keyword = listRow["keyword"]; 
             string keywordShopFilePath = this.GetKeywordShopFilePath(keyword);

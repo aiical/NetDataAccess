@@ -90,7 +90,7 @@ namespace NetDataAccess.Extended.Taobao.List
         }
         #endregion
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             string shopWebPageUrl = listRow["店铺网址"];
             string shopName = listRow["店铺名"];

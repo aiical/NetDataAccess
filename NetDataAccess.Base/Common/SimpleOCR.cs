@@ -85,6 +85,23 @@ namespace NetDataAccess.Base.Common
         }
         #endregion
 
+        #region 识别多行文字
+        public static string OCRMultiLine(Bitmap bmp, string tessractData, string language, Dictionary<string, string> variables)
+        { 
+            TesseractEngine test = new TesseractEngine(tessractData, language, EngineMode.Default);
+            foreach (string key in variables.Keys)
+            {
+                string value = variables[key];
+                test.SetVariable(key, value);
+            }
+
+            Graphics graph = Graphics.FromImage(bmp);
+            Page page = test.Process(bmp, pageSegMode: PageSegMode.SingleBlock);
+            string txt = page.GetText();
+            return txt;
+        }
+        #endregion
+
         #region 转化成图片
         public static Bitmap ToBmp(byte[] sourceData)
         {

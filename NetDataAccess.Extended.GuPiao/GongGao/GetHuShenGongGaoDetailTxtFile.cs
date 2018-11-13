@@ -46,10 +46,10 @@ namespace NetDataAccess.Extended.GuPiao
             return base.BeforeAllGrab();
         }
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             string pageSourceDir = this.RunPage.GetDetailSourceFileDir();
-            base.GetDataByOtherAcessType(listRow);
+            base.GetDataByOtherAccessType(listRow);
             string detailUrl = listRow["detailPageUrl"];
             string adjunctType = listRow["adjunctType"].ToLower().Trim();
             string destFilePath = this.RunPage.GetFilePath(detailUrl, pageSourceDir);

@@ -61,7 +61,6 @@ E:\Github\NetDataAccess\NetDataAccess\bin\Debug\System.Data.SQLite.pdb
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\System.Data.SQLite.xml
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\appium-dotnet-driver.pdb
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\WebDriver.xml
-E:\Github\NetDataAccess\NetDataAccess\bin\Debug\itextsharp.xml
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\Tesseract.xml
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\WebDriver.Support.xml
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\Castle.Core.xml

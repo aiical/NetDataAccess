@@ -1540,7 +1540,7 @@ namespace NetDataAccess.Run
         #region 通过其它方式获取数据
         public void GetDataByOtherAcessType(Dictionary<string, string> listRow)
         {
-            this.ExternalRunPage.GetDataByOtherAcessType(listRow);
+            this.ExternalRunPage.GetDataByOtherAccessType(listRow);
         }
         #endregion
 

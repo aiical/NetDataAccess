@@ -23,7 +23,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public class GetAllQiKanPage : ExternalRunWebPage
     {
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             try
             {

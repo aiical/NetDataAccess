@@ -117,7 +117,6 @@ E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\NetDataAccess.Base
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\appium-dotnet-driver.pdb
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\Newtonsoft.Json.xml
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\WebDriver.xml
-E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\itextsharp.xml
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\Tesseract.xml
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\WebDriver.Support.xml
 E:\Github\NetDataAccess\NetDataAccess.AppAccessBase\bin\Debug\Castle.Core.xml

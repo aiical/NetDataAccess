@@ -1,0 +1,9 @@
+E:\Github\NetDataAccess\NetDataAccess.Extended.LunWen\obj\Debug\NetDataAccess.Extended.LunWen.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.LunWen.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.LunWen.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.LunWen\obj\Debug\NetDataAccess.Extended.LunWen.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.LunWen\obj\Debug\NetDataAccess.Extended.LunWen.pdb

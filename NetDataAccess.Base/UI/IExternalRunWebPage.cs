@@ -78,7 +78,7 @@ namespace NetDataAccess.Base.UI
         /// 通过其它方式获取数据
         /// </summary>
         /// <param name="listRow"></param>
-        void GetDataByOtherAcessType(Dictionary<string, string> listRow);
+        void GetDataByOtherAccessType(Dictionary<string, string> listRow);
 
         /// <summary>
         /// 是否需要抓取

@@ -51,8 +51,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>E:\Download\NPOI 2.2.0.0\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="itextsharp">
-      <HintPath>D:\Download\itextsharp-all-5.5.10\itextsharp.dll</HintPath>
+    <Reference Include="itextsharp, Version=5.5.10.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Download\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\..\..\Work\pansoft\VS2005CSHARP\PanSchemaServerCode\PanSchemaServiceSolution\PanSchema\PanSchema\PanSchema\bin\Debug\log4net.dll</HintPath>
@@ -113,7 +114,9 @@
     <Compile Include="Common\GiveUpException.cs" />
     <Compile Include="Common\HtmlDocumentHelper.cs" />
     <Compile Include="Common\LogHelper.cs" />
+    <Compile Include="Common\MyTexExStrat.cs" />
     <Compile Include="Common\Pdf2Txt.cs" />
+    <Compile Include="Common\PdfSpliter.cs" />
     <Compile Include="Common\SimpleOCR.cs" />
     <Compile Include="Common\Html2Txt.cs" />
     <Compile Include="Config\SysConfig.cs" />

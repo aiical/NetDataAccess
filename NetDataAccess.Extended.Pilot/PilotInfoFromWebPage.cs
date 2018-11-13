@@ -205,13 +205,13 @@ namespace NetDataAccess.Extended.Pilot
 
         private Dictionary<string, bool> _WebPageSucceeds = new Dictionary<string, bool>();
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             try
             {
                 string pageSourceDir = this.RunPage.GetDetailSourceFileDir();
 
-                base.GetDataByOtherAcessType(listRow);
+                base.GetDataByOtherAccessType(listRow);
                 String pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
                 String firstName = listRow["p_first_name"].Trim();
                 String lastName = listRow["p_last_name"].Trim();

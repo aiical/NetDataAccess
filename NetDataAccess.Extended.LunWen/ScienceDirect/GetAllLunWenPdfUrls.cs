@@ -98,8 +98,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
         }
 
         public override bool AfterAllGrab(IListSheet listSheet)
-        {
-            /*
+        { 
             try
             {
                 string sourceDir = this.RunPage.GetDetailSourceFileDir();
@@ -109,27 +108,62 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
 
                 for (int i = 0; i < listSheet.RowCount; i++)
                 {
+                    this.RunPage.InvokeAppendLogText("已转换" + i.ToString() + "/" + listSheet.RowCount.ToString(), LogLevelType.System, true);
+
                     Dictionary<string, string> listRow = listSheet.GetRow(i);
                     string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
 
                     try
                     {
+                        string textFileDir = this.RunPage.GetReadFilePath(pageUrl, exportDir);
+                        string fullTextFilePath = Path.Combine(textFileDir, "allText.txt");
+                        if (!File.Exists(fullTextFilePath))
+                        {
+                            HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+                            HtmlNode linkNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"redirect-message\"]/p/a");
+                            string pdfUrl = linkNode.GetAttributeValue("href", "");
+                            string pdfFilePath = this.RunPage.GetFilePath(pdfUrl, sourceDir);
+                            if (!Directory.Exists(textFileDir))
+                            {
+                                Directory.CreateDirectory(textFileDir);
+                            }
+                            string[] pdfPartFilePaths = PdfSpliter.ExtractPages(pdfFilePath, textFileDir);
+                            StringBuilder fullText = new StringBuilder();
+                            for (int j = 0; j < pdfPartFilePaths.Length; j++)
+                            {
+                                string pdfPartFilePath = pdfPartFilePaths[j];
+                                string textPartFilePath = Path.Combine(textFileDir, (j + 1).ToString() + ".txt");
+                                try
+                                {
+                                    Pdf2Txt.Pdf2TxtByITextSharp(pdfPartFilePath, textPartFilePath, true);
 
-                        HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
-
-                        HtmlNode linkNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@id=\"redirect-message\"]/p/a");
-                        string pdfUrl = linkNode.GetAttributeValue("href", "");
+                                    string text = FileHelper.GetTextFromFile(textPartFilePath, Encoding.UTF8);
+                                    fullText.Append(text);
+                                }
+                                catch (Exception pdf2TxtEx)
+                                {
+                                    if (pdf2TxtEx.Message.Contains("System.FormatException"))
+                                    {
+                                        this.RunPage.InvokeAppendLogText("转换txt失败, pdfPartFilePath = " + pdfPartFilePath, LogLevelType.Error, true);
+                                    }
+                                    else
+                                    {
+                                        throw pdf2TxtEx;
+                                    }
+                                }
+                            }
+                            FileHelper.SaveTextToFile(fullText.ToString(), fullTextFilePath, Encoding.UTF8);
+                        }                        
 
                         Dictionary<string, string> pdfUrlRow = new Dictionary<string, string>();
-                        pdfUrlRow.Add("detailPageUrl", pdfUrl);
-                        pdfUrlRow.Add("detailPageName", pdfUrl);
                         pdfUrlRow.Add("publication", listRow["publication"]);
                         pdfUrlRow.Add("host", listRow["host"]);
                         pdfUrlRow.Add("title", listRow["title"]);
                         pdfUrlRow.Add("authors", listRow["authors"]);
                         pdfUrlRow.Add("abstracts", listRow["abstracts"]);
                         pdfUrlRow.Add("refs", listRow["refs"]);
-                        pdfUrlRow.Add("url", listRow["url"]);
+                        pdfUrlRow.Add("pageUrl", pageUrl); 
+                        pdfUrlRow.Add("txtUrl", fullTextFilePath);
                         pdfUrlWriter.AddRow(pdfUrlRow);
                     }
                     catch (Exception ex)
@@ -146,26 +180,21 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
             catch (Exception ex)
             {
                 throw ex;
-            }
-             */
+            } 
             return true;
         }
 
         private ExcelWriter GetDownloadPdfExcelWriter(string filePath)
         {
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
-            resultColumnDic.Add("detailPageUrl", 0);
-            resultColumnDic.Add("detailPageName", 1);
-            resultColumnDic.Add("cookie", 2);
-            resultColumnDic.Add("grabStatus", 3);
-            resultColumnDic.Add("giveUpGrab", 4);
-            resultColumnDic.Add("publication", 5);
-            resultColumnDic.Add("host", 6);
-            resultColumnDic.Add("title", 7);
-            resultColumnDic.Add("authors", 8);
-            resultColumnDic.Add("abstracts", 9);
-            resultColumnDic.Add("refs", 10);
-            resultColumnDic.Add("url", 11);
+            resultColumnDic.Add("publication", 0);
+            resultColumnDic.Add("host", 1);
+            resultColumnDic.Add("title", 2);
+            resultColumnDic.Add("authors", 3);
+            resultColumnDic.Add("abstracts", 4);
+            resultColumnDic.Add("refs", 5);
+            resultColumnDic.Add("pageUrl", 6);
+            resultColumnDic.Add("txtUrl", 7);
 
             ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, null);
             return resultEW;

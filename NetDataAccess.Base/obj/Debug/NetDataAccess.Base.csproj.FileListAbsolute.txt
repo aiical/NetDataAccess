@@ -21,7 +21,6 @@ E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\NetDataAccess.Base.pdb
 E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\HtmlAgilityPack.dll
 E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\itextsharp.dll
 E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\Tesseract.dll
-E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\itextsharp.xml
 E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\Tesseract.xml
 E:\Github\NetDataAccess\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.csprojResolveAssemblyReference.cache
 E:\Github\NetDataAccess\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.dll

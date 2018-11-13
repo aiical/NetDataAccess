@@ -34,7 +34,7 @@ namespace NetDataAccess.Extended.Jianzhu.QGJZSCJGGGFWPT
             return base.BeforeAllGrab();
         }
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             try
             {

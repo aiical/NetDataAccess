@@ -29,7 +29,7 @@ namespace NetDataAccess.Extended.Meishitianxia
             return true;
         }
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         {
             string detailPageUrl = listRow[SysConfig.DetailPageUrlFieldName];
             string category = listRow["category"];

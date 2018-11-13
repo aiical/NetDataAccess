@@ -43,7 +43,7 @@ namespace NetDataAccess.Extended.Translate.EnglishToChinese
             return base.BeforeAllGrab();
         }
 
-        public override void GetDataByOtherAcessType(Dictionary<string, string> listRow)
+        public override void GetDataByOtherAccessType(Dictionary<string, string> listRow)
         { 
             string pageSourceDir = this.RunPage.GetDetailSourceFileDir();
             string fromNameStr = listRow["fromName"]; 
