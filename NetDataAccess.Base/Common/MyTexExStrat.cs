@@ -41,12 +41,12 @@ namespace NetDataAccess.Base.Common
         { 
             DocumentFont font = renderInfo.GetFont();
             byte[] bytes = font.ConvertToBytes(renderInfo.GetText());
-            PdfDictionary dict = font.FontDictionary;
-            PdfDictionary encoding = dict.GetAsDict(PdfName.ENCODING);
             StringBuilder partStr = new StringBuilder();
-            if (encoding != null)
+            //PdfDictionary dict = font.FontDictionary;
+            //PdfDictionary encoding = dict.GetAsDict(PdfName.ENCODING);
+            //if (encoding != null)
             {
-                string renderTxt = renderInfo.GetText();
+                string renderTxt = renderInfo.GetText(); 
                 foreach (char c in renderTxt)
                 {
                     string name = c.ToString();
@@ -95,39 +95,46 @@ namespace NetDataAccess.Base.Common
                 }
                  */
             }
-            else
-            {
-                partStr.Append(renderInfo.GetText());
-            }
+            //else
+            //{
+            //    partStr.Append(renderInfo.GetText());
+            //} 
 
-            if (partStr.ToString().Contains("Keyword"))
+            if (partStr.ToString().Trim().Length > 0)
             {
-            }
-                
-            LineSegment segment = renderInfo.GetAscentLine();
-            Vector startPoint = segment.GetStartPoint();
-            if (LastEndPoint != null)
-            {
-                int charCount = partStr.Length;
-                float singleWidth = segment.GetEndPoint().Subtract(segment.GetStartPoint()).Length / (float)charCount;
-                string[] pStartStrs = startPoint.ToString().Split(new string[]{","}, StringSplitOptions.RemoveEmptyEntries);
-                string[] pLastEndStrs = LastEndPoint.ToString().Split(new string[]{","}, StringSplitOptions.RemoveEmptyEntries);
-                if (Math.Abs(float.Parse(pStartStrs[1]) - float.Parse(pLastEndStrs[1])) > renderInfo.GetSingleSpaceWidth())
+                LineSegment segment = renderInfo.GetAscentLine();
+                Vector startPoint = segment.GetStartPoint();
+                if (LastEndPoint != null)
                 {
-                    TextBuilder.Append("\r\n");
-                }
-                else
-                {
-                    Vector spanVector = startPoint.Subtract(LastEndPoint);
-                    float span = spanVector.Length;
-                    if (span > singleWidth / 2f)
+                    int charCount = partStr.Length;
+                    float singleWidth = renderInfo.GetSingleSpaceWidth();// segment.GetEndPoint().Subtract(segment.GetStartPoint()).Length / (float)charCount;
+                    string[] pStartStrs = startPoint.ToString().Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] pLastEndStrs = LastEndPoint.ToString().Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    float verticalSpan = Math.Abs(float.Parse(pStartStrs[1]) - float.Parse(pLastEndStrs[1]));
+                    if (verticalSpan > renderInfo.GetSingleSpaceWidth())
                     {
-                        TextBuilder.Append(" ");
+                        if (verticalSpan > 4 * renderInfo.GetSingleSpaceWidth())
+                        {
+                            TextBuilder.Append("\r\n\r\n");
+                        }
+                        else
+                        {
+                            TextBuilder.Append("\r\n");
+                        }
+                    }
+                    else
+                    {
+                        Vector spanVector = startPoint.Subtract(LastEndPoint);
+                        float span = spanVector.Length;
+                        if (span > singleWidth / 2f)
+                        {
+                            TextBuilder.Append(" ");
+                        }
                     }
                 }
+                TextBuilder.Append(partStr.ToString());
+                LastEndPoint = segment.GetEndPoint();
             }
-            TextBuilder.Append(partStr.ToString());
-            LastEndPoint = segment.GetEndPoint();
 
             base.RenderText(renderInfo);
         }
@@ -145,7 +152,8 @@ namespace NetDataAccess.Base.Common
                     charMaps.Add("ﬃ", "ffi");
                     charMaps.Add("ﬄ", "ffl");
                     charMaps.Add("ﬅ", "st");
-                    charMaps.Add("ﬆ", "st"); 
+                    charMaps.Add("ﬆ", "st");
+                    charMaps.Add("Þ", "fi"); 
                     /*
                     charMaps.Add("/uniFB00", "ff");
                     charMaps.Add("/uniFB01", "fi");

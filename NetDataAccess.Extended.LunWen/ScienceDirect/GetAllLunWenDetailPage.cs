@@ -128,6 +128,10 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                     string references = CommonUtil.StringArrayToString(referenceList.ToArray(), "\r\n");
 
                     HtmlNode pdfDownloadNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"PdfDropDownMenu\"]/a");
+                    if (pdfDownloadNode == null)
+                    {
+                        pdfDownloadNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"PdfDropDownMenu u-padding-s\"]/a");
+                    }
                     bool hasPdf = false;
                     if (pdfDownloadNode != null)
                     {

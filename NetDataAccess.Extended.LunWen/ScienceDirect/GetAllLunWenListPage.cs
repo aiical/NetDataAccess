@@ -34,6 +34,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                 string prefixUrl = this.GetUrlPrefix(pageUrl);
                 String sourceDir = this.RunPage.GetDetailSourceFileDir();
                 string sourceFilePath = this.RunPage.GetFilePath(pageUrl, sourceDir);
+                string journalName = listRow["journalName"];
 
                 HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
                 HtmlNodeCollection allLinkNodes = htmlDoc.DocumentNode.SelectNodes("//a[@class=\"anchor article-content-title u-margin-xs-top u-margin-s-bottom\"]");
@@ -49,6 +50,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                         row.Add("detailPageUrl", url);
                         row.Add("detailPageName", url);
                         row.Add("name", name);
+                        row.Add("journalName", journalName);
                         resultWriter.AddRow(row);
                     }
                 } 
@@ -73,6 +75,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
             resultColumnDic.Add("grabStatus", 3);
             resultColumnDic.Add("giveUpGrab", 4);
             resultColumnDic.Add("name", 5);
+            resultColumnDic.Add("journalName", 6);
             
             ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, null);
             return resultEW;

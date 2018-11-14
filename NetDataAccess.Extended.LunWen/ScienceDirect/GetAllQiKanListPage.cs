@@ -31,12 +31,13 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
             String sourceDir = this.RunPage.GetDetailSourceFileDir();
             string sourceFilePath = this.RunPage.GetFilePath(pageUrl, sourceDir);
             ExcelWriter sourceEW = this.GetExcelWriter(sourceFilePath);
+            string journalName = listRow["journalName"];
 
             while (hasNextPage)
             {
                 pageIndex++;
                 IWebBrowser webBrowser = this.GetPaperListPageUrlsByWebBrowser(pageUrl, pageIndex);
-                this.SavePaperListPageUrls(sourceEW, webBrowser);
+                this.SavePaperListPageUrls(sourceEW, webBrowser, journalName);
                 hasNextPage = this.CheckHasNextPage(webBrowser);
             }
             sourceEW.SaveToDisk();
@@ -74,6 +75,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
             resultColumnDic.Add("cookie", 2);
             resultColumnDic.Add("grabStatus", 3);
             resultColumnDic.Add("giveUpGrab", 4);
+            resultColumnDic.Add("journalName", 5);
             ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, null);
             return resultEW;
         }
@@ -92,6 +94,8 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                 }
                 else
                 {
+                    this.RunPage.ShowTabPage(tabName);
+                    Thread.Sleep(3000);
                     while (!this.CheckAllVolumesExpanded(webBrowser))
                     {
 
@@ -106,7 +110,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
             }
         }
 
-        private void SavePaperListPageUrls(ExcelWriter ew, IWebBrowser webBrowser)
+        private void SavePaperListPageUrls(ExcelWriter ew, IWebBrowser webBrowser, string journalName)
         {
             string html = this.RunPage.InvokeGetPageHtml(webBrowser);
             HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
@@ -121,6 +125,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                     Dictionary<string, string> row = new Dictionary<string, string>();
                     row.Add(SysConfig.DetailPageUrlFieldName, url);
                     row.Add(SysConfig.DetailPageNameFieldName, url);
+                    row.Add("journalName", journalName);
                     ew.AddRow(row);
                 }
             }
