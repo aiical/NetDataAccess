@@ -132,35 +132,411 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
             }
         }
 
+        public List<string> GetDirFileNames(string dir)
+        {
+            string[] fileNames = Directory.GetFiles(dir);
+            List<string> fileNameList = new List<string>();
+            foreach (string fileName in fileNames)
+            {
+                fileNameList.Add(Path.GetFileName(fileName));
+            }
+            return fileNameList;
+        }
+
         public override bool AfterAllGrab(IListSheet listSheet)
         {
+            //this.GetFileInfos(listSheet);
+            this.GetKeywordsInfos(listSheet);
+            return true;
+        }
+        private void GetFileInfos(IListSheet listSheet)
+        {
             string exportDir = this.RunPage.GetExportDir();
-            string exportFilePath = Path.Combine(exportDir, "论文_EBSCO_论文列表页.xlsx");
-            ExcelWriter resultWriter = this.GetExcelWriter(exportFilePath);
+            string exportFilePath = Path.Combine(exportDir, "论文_EBSCO_论文列表.xlsx");
+            ExcelWriter resultWriter = this.GetResultExcelWriter(exportFilePath);
+            String sourceDir = this.RunPage.GetDetailSourceFileDir();
+            List<string> fileNameList = GetDirFileNames(sourceDir);
 
             for (int i = 0; i < listSheet.RowCount; i++)
             {
                 Dictionary<string, string> listRow = listSheet.GetRow(i);
-                string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
-                String sourceDir = this.RunPage.GetDetailSourceFileDir();
-                string sourceFilePath = this.RunPage.GetFilePath(pageUrl, sourceDir);
-                ExcelReader er = new ExcelReader(sourceFilePath);
-                int rowCount = er.GetRowCount();
-                for (int j = 0; j < rowCount; j++)
+                string publicationName = listRow[SysConfig.DetailPageNameFieldName];
+                string moreKeywords = listRow["moreKeywords"];
+                this.RunPage.InvokeAppendLogText("处理期刊, publicationName = " + publicationName + ", " + i.ToString() + "/" + listSheet.RowCount.ToString(), LogLevelType.System, true);
+                foreach (string fileName in fileNameList)
                 {
-                    Dictionary<string, string> resultRow = er.GetFieldValues(j);
-                    resultWriter.AddRow(resultRow);
+                    if (fileName.StartsWith(publicationName + "_"))
+                    {
+                        int year = int.Parse(fileName.Replace(publicationName + "_", ""));
+
+                        string pubYearExcelFilePath = Path.Combine(sourceDir, fileName);
+                        ExcelReader er = new ExcelReader(pubYearExcelFilePath);
+                        int rowCount = er.GetRowCount();
+                        for (int j = 0; j < rowCount; j++)
+                        {
+                            Dictionary<string, string> pubYearRow = er.GetFieldValues(j);
+                            string itemName = pubYearRow["itemName"];
+                            string pubDir = Path.Combine(sourceDir, publicationName);
+                            string itemBaseInfoFilePath = this.RunPage.GetFilePath(itemName, pubDir) + "_baseInfo";
+                            try
+                            {
+                                if (!File.Exists(itemBaseInfoFilePath))
+                                {
+                                    itemBaseInfoFilePath = Path.Combine(pubDir, CommonUtil.ProcessFileName(itemName, "_") + "_baseInfo");
+                                    if (!File.Exists(itemBaseInfoFilePath))
+                                    {
+                                        throw new Exception("不存在文件， itemName =  " + itemName);
+                                    }
+                                }
+                                Dictionary<string, object> fileRow = this.GetFileInfos(itemBaseInfoFilePath, moreKeywords.Length == 0 ? publicationName : moreKeywords);
+                                fileRow.Add("publication", publicationName);
+                                fileRow.Add("year", year);
+                                resultWriter.AddRow(fileRow);
+                            }
+                            catch (Exception ex)
+                            {
+                                this.RunPage.InvokeAppendLogText("错误, " + ex.Message + " itemName = " + itemName, LogLevelType.Error, true);
+                                //throw ex;
+                            }
+                        }
+                    }
                 }
             }
             resultWriter.SaveToDisk();
-            return true;
+        }
+        private void GetKeywordsInfos(IListSheet listSheet)
+        {
+            string exportDir = this.RunPage.GetExportDir();
+            string exportFilePath = Path.Combine(exportDir, "论文_EBSCO_论文关键字.xlsx");
+            ExcelWriter resultWriter = this.GetKeywordsResultExcelWriter(exportFilePath);
+            String sourceDir = this.RunPage.GetDetailSourceFileDir();
+            List<string> fileNameList = GetDirFileNames(sourceDir);
+
+            for (int i = 0; i < listSheet.RowCount; i++)
+            {
+                Dictionary<string, string> listRow = listSheet.GetRow(i);
+                string publicationName = listRow[SysConfig.DetailPageNameFieldName];
+                string moreKeywords = listRow["moreKeywords"];
+                this.RunPage.InvokeAppendLogText("处理期刊关键字, publicationName = " + publicationName + ", " + i.ToString() + "/" + listSheet.RowCount.ToString(), LogLevelType.System, true);
+                foreach (string fileName in fileNameList)
+                {
+                    if (fileName.StartsWith(publicationName + "_"))
+                    {
+                        int year = int.Parse(fileName.Replace(publicationName + "_", ""));
+
+                        string pubYearExcelFilePath = Path.Combine(sourceDir, fileName);
+                        ExcelReader er = new ExcelReader(pubYearExcelFilePath);
+                        int rowCount = er.GetRowCount();
+                        for (int j = 0; j < rowCount; j++)
+                        {
+                            Dictionary<string, string> pubYearRow = er.GetFieldValues(j);
+                            string itemName = pubYearRow["itemName"];
+                            string pubDir = Path.Combine(sourceDir, publicationName);
+                            string itemBaseInfoFilePath = this.RunPage.GetFilePath(itemName, pubDir) + "_baseInfo";
+                            try
+                            {
+                                if (!File.Exists(itemBaseInfoFilePath))
+                                {
+                                    itemBaseInfoFilePath = Path.Combine(pubDir, CommonUtil.ProcessFileName(itemName, "_") + "_baseInfo");
+                                    if (!File.Exists(itemBaseInfoFilePath))
+                                    {
+                                        throw new Exception("不存在文件， itemName =  " + itemName);
+                                    }
+                                }
+                                List<Dictionary<string, object>> fileRows = this.GetKeywordsInfos(itemBaseInfoFilePath, moreKeywords.Length == 0 ? publicationName : moreKeywords);
+                                foreach (Dictionary<string, object> fileRow in fileRows)
+                                {
+                                    fileRow.Add("publication", publicationName);
+                                    fileRow.Add("year", year);
+                                    resultWriter.AddRow(fileRow);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                this.RunPage.InvokeAppendLogText("错误, " + ex.Message + " itemName = " + itemName, LogLevelType.Error, true);
+                                //throw ex;
+                            }
+                        }
+                    }
+                }
+            }
+            resultWriter.SaveToDisk();
         }
 
-        private ExcelWriter GetExcelWriter(string filePath)        
-        { 
+        private Dictionary<string, object> GetFileInfos(string filePath, string publicationNameStr)
+        {
+            string[] publicationNames = publicationNameStr.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+            try
+            {
+                Dictionary<string, object> row = new Dictionary<string, object>();
+                HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                htmlDoc.Load(filePath);
+                HtmlNode fieldParentNode = htmlDoc.DocumentNode.SelectSingleNode("//dl[@id=\"citationFields\"]");
+                HtmlNodeCollection dtNodes = fieldParentNode.SelectNodes("./dt");
+                for (int i = 0; i < dtNodes.Count; i++)
+                {
+                    HtmlNode dtNode = dtNodes[i];
+                    string dtName = CommonUtil.HtmlDecode(dtNode.InnerText).Trim();
+                    if (dtName.Contains("替代标题"))
+                    {
+                        //不处理
+                    }
+                    else if (dtName.Contains("标题:"))
+                    {
+                        HtmlNode ddNode = this.FindDDNode(dtNode);
+                        string title = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+                        row.Add("title", title);
+                    }
+                    else if (dtName.Contains("作者单位"))
+                    {
+                        //不处理
+                    }
+                    else if (dtName.Contains("作者提供的关键字") || dtName.Contains("关键字"))
+                    {
+                        HtmlNode ddNode = this.FindDDNode(dtNode);
+                        List<string> keywordList = new List<string>();
+                        foreach (HtmlNode childNode in ddNode.ChildNodes)
+                        {
+                            if (childNode is HtmlTextNode)
+                            {
+                                string keyword = CommonUtil.HtmlDecode(childNode.InnerText).Trim();
+                                if (keyword.Length > 0)
+                                {
+                                    keywordList.Add(keyword);
+                                }
+                            }
+                        }
+                        row.Add("keywords", CommonUtil.StringArrayToString(keywordList.ToArray(), "; "));
+                    }
+                    else if (dtName.Contains("作者"))
+                    {
+                        HtmlNode ddNode = this.FindDDNode(dtNode);
+                        List<string> authorList = new List<string>();
+                        foreach (HtmlNode childNode in ddNode.ChildNodes)
+                        {
+                            if (childNode is HtmlTextNode)
+                            {
+                                string author = CommonUtil.HtmlDecode(childNode.InnerText).Trim();
+                                if (author.Length > 0)
+                                {
+                                    authorList.Add(author);
+                                }
+                            }
+                        }
+                        row.Add("authors", CommonUtil.StringArrayToString(authorList.ToArray(), "; "));
+                    }
+                    else if (dtName.Contains("来源"))
+                    {
+                        HtmlNode ddNode = this.FindDDNode(dtNode);
+                        string source = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+                        row.Add("source", source);
+
+                        //是否来自于此期刊
+                        bool matchedPublication = false;
+                        foreach (string publicationName in publicationNames)
+                        {
+                            if (source.ToLower().StartsWith(publicationName.ToLower()))
+                            {
+                                matchedPublication = true;
+                            }
+                        }
+                        row.Add("matchedPublication", matchedPublication ? "true" : "false");
+                    }
+                    else if (dtName.Contains("文献类型"))
+                    {
+                        HtmlNode ddNode = this.FindDDNode(dtNode);
+                        string source = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+                        row.Add("documentType", source);
+                    }
+                    else if (dtName.Contains("摘要:") || dtName.Contains("摘要（英语）:"))
+                    {
+                        HtmlNode ddNode = this.FindDDNode(dtNode);
+                        string abstracts = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+                        row.Add("abstract", abstracts);
+                    }
+                }
+                return row;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private List<Dictionary<string, object>> GetKeywordsInfos(string filePath, string publicationNameStr)
+        {
+            string[] publicationNames = publicationNameStr.Split(new string[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
+            try
+            {
+                List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+                HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                htmlDoc.Load(filePath);
+                HtmlNode fieldParentNode = htmlDoc.DocumentNode.SelectSingleNode("//dl[@id=\"citationFields\"]");
+                HtmlNodeCollection dtNodes = fieldParentNode.SelectNodes("./dt");
+
+                for (int i = 0; i < dtNodes.Count; i++)
+                {
+                    HtmlNode dtNode = dtNodes[i];
+                    string dtName = CommonUtil.HtmlDecode(dtNode.InnerText).Trim(); 
+                    if (dtName.Contains("作者提供的关键字") || dtName.Contains("关键字"))
+                    {
+                        HtmlNode ddNode = this.FindDDNode(dtNode); 
+                        foreach (HtmlNode childNode in ddNode.ChildNodes)
+                        {
+                            if (childNode is HtmlTextNode)
+                            {
+                                string keyword = CommonUtil.HtmlDecode(childNode.InnerText).Trim();
+                                if (keyword.Length > 0)
+                                {
+                                    Dictionary<string, object> row = new Dictionary<string, object>();
+                                    row.Add("keyword", keyword);
+                                    rows.Add(row);
+                                }
+                            }
+                        } 
+                    } 
+                }
+
+                foreach (Dictionary<string, object> row in rows)
+                {
+                    try
+                    {
+                        for (int i = 0; i < dtNodes.Count; i++)
+                        {
+                            HtmlNode dtNode = dtNodes[i];
+                            string dtName = CommonUtil.HtmlDecode(dtNode.InnerText).Trim();
+                            if (dtName.Contains("作者提供的关键字") || dtName.Contains("关键字"))
+                            {
+                                //不处理
+                            }
+                            else 
+                            if (dtName.Contains("替代标题"))
+                            {
+                                //不处理
+                            }
+                            else if (dtName.Contains("标题:"))
+                            {
+                                HtmlNode ddNode = this.FindDDNode(dtNode);
+                                string title = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+                                row.Add("title", title);
+                            }
+                            else if (dtName.Contains("作者单位"))
+                            {
+                                //不处理
+                            }
+                            else if (dtName.Contains("作者"))
+                            {
+                                HtmlNode ddNode = this.FindDDNode(dtNode);
+                                List<string> authorList = new List<string>();
+                                foreach (HtmlNode childNode in ddNode.ChildNodes)
+                                {
+                                    if (childNode is HtmlTextNode)
+                                    {
+                                        string author = CommonUtil.HtmlDecode(childNode.InnerText).Trim();
+                                        if (author.Length > 0)
+                                        {
+                                            authorList.Add(author);
+                                        }
+                                    }
+                                }
+                                row.Add("authors", CommonUtil.StringArrayToString(authorList.ToArray(), "; "));
+                            }
+                            else if (dtName.Contains("来源"))
+                            {
+                                HtmlNode ddNode = this.FindDDNode(dtNode);
+                                string source = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+                                row.Add("source", source);
+
+                                //是否来自于此期刊
+                                bool matchedPublication = false;
+                                foreach (string publicationName in publicationNames)
+                                {
+                                    if (source.ToLower().StartsWith(publicationName.ToLower()))
+                                    {
+                                        matchedPublication = true;
+                                    }
+                                }
+                                row.Add("matchedPublication", matchedPublication ? "true" : "false");
+                            }
+                            else if (dtName.Contains("文献类型"))
+                            {
+                                HtmlNode ddNode = this.FindDDNode(dtNode);
+                                string source = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+                                row.Add("documentType", source);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+                }
+                return rows;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        private HtmlNode FindDDNode(HtmlNode dtNode)
+        {
+            HtmlNode nextNode = dtNode.NextSibling;
+            if (nextNode == null)
+            {
+                return null;
+            }
+            else if (nextNode.Name.ToLower() == "dd")
+            {
+                return nextNode;
+            }
+            else
+            {
+                return FindDDNode(nextNode);
+            }
+        }
+
+        private ExcelWriter GetExcelWriter(string filePath)
+        {
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
-            resultColumnDic.Add("itemName", 0); 
+            resultColumnDic.Add("itemName", 0);
             ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, null);
+            return resultEW;
+        }
+
+        private ExcelWriter GetResultExcelWriter(string filePath)
+        {
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("publication", 0);
+            resultColumnDic.Add("year", 1);
+            resultColumnDic.Add("title", 2);
+            resultColumnDic.Add("authors", 3);
+            resultColumnDic.Add("source", 4);
+            resultColumnDic.Add("documentType", 5);
+            resultColumnDic.Add("keywords", 6);
+            resultColumnDic.Add("abstract", 7);
+            resultColumnDic.Add("matchedPublication", 8);
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+            columnFormats.Add("year", "#0");
+            ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, columnFormats);
+            return resultEW;
+        }
+
+        private ExcelWriter GetKeywordsResultExcelWriter(string filePath)
+        {
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("publication", 0);
+            resultColumnDic.Add("year", 1);
+            resultColumnDic.Add("title", 2);
+            resultColumnDic.Add("authors", 3);
+            resultColumnDic.Add("source", 4);
+            resultColumnDic.Add("documentType", 5);
+            resultColumnDic.Add("keyword", 6); 
+            resultColumnDic.Add("matchedPublication", 7);
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+            columnFormats.Add("year", "#0");
+            ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, columnFormats);
             return resultEW;
         } 
 

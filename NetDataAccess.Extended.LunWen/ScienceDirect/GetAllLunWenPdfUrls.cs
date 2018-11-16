@@ -220,7 +220,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                         try
                         {
                             string[] keywordArray = null;
-                            if (!File.Exists(keywordsTextFilePath) || true)
+                            if (!File.Exists(keywordsTextFilePath))
                             {
                                 string allTextFilePath = Path.Combine(textFileDir, "allText.txt");
                                 keywordArray = this.FindKeywords(allTextFilePath);
@@ -259,6 +259,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                             keywordFileRow.Add("year", year);
                             keywordFileRow.Add("pageUrl", pageUrl);
                             keywordFileRow.Add("keywords", allKeywordsStr);
+                            keywordFileRow.Add("abstracts", listRow["abstracts"]);
                             keywordFileRow.Add("keywordsLength", allKeywordsStr.Length);
                             keywordFileRow.Add("txtUrl", keywordsTextFilePath);
                             allFileKeywordsWriter.AddRow(keywordFileRow);
@@ -278,6 +279,7 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
                             keywordFileRow.Add("year", year);
                             keywordFileRow.Add("pageUrl", pageUrl);
                             keywordFileRow.Add("keywords", "");
+                            keywordFileRow.Add("abstracts", listRow["abstracts"]);
                             keywordFileRow.Add("error", ex.Message);
                             keywordFileRow.Add("txtUrl", keywordsTextFilePath);
                             allFileKeywordsWriter.AddRow(keywordFileRow);
@@ -534,10 +536,11 @@ namespace NetDataAccess.Extended.LunWen.ScienceDirect
             resultColumnDic.Add("authors", 3);
             resultColumnDic.Add("year", 4);
             resultColumnDic.Add("keywords", 5);
-            resultColumnDic.Add("error", 6);
-            resultColumnDic.Add("pageUrl", 7);
-            resultColumnDic.Add("txtUrl", 8);
-            resultColumnDic.Add("keywordsLength", 9);
+            resultColumnDic.Add("abstracts", 6);
+            resultColumnDic.Add("error", 7);
+            resultColumnDic.Add("pageUrl", 8);
+            resultColumnDic.Add("txtUrl", 9);
+            resultColumnDic.Add("keywordsLength", 10);
 
             Dictionary<string, string> columnNameToFormats = new Dictionary<string, string>();
             columnNameToFormats.Add("year", "#0");
