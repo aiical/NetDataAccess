@@ -24,9 +24,356 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
     { 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            this.GetRelatedItemPageUrls(listSheet); 
+            //this.GetRelatedItemPageUrls(listSheet);
+
+            this.GetChaoDaiProperties(listSheet);
+
+            this.GetChaoDaiRemainProperties(listSheet);
+
             return true;
         }
+
+        private void GetChaoDaiProperties(IListSheet listSheet)
+        {
+            try
+            {
+                List<string> propertyColumnNames = new List<string>();
+
+                ExcelWriter chaoDaiInfoExcelWriter = this.CreateChaoDaiPropertyListWriter();
+                for (int i = 0; i < listSheet.RowCount; i++)
+                {
+                    Dictionary<string, string> listRow = listSheet.GetRow(i);
+                    bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
+                    string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
+                    string name = listRow["name"];
+                    if (!giveUp)
+                    {
+                        try
+                        {
+                            HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+                            HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
+                            if (dtNodes != null)
+                            {
+                                List<string> oneIChaoDaiProperties = new List<string>();
+                                foreach (HtmlNode dtNode in dtNodes)
+                                {
+                                    string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "");
+                                    string pValue = this.GetNextDDNodeText(dtNode);
+
+                                    int sameNamePKeyCount = 1;
+                                    string newPKey = pKey;
+                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    {
+                                        sameNamePKeyCount++;
+                                        newPKey = pKey + "_" + sameNamePKeyCount.ToString();
+                                    }
+                                    oneIChaoDaiProperties.Add(newPKey);
+
+                                    if (!propertyColumnNames.Contains(newPKey))
+                                    {
+                                        propertyColumnNames.Add(newPKey);
+                                    }
+
+                                    Dictionary<string, string> row = new Dictionary<string, string>();
+
+                                    row.Add("name", name);
+                                    row.Add("pKey", newPKey);
+                                    row.Add("pValue", pValue);
+                                    row.Add("url", pageUrl);
+
+                                    chaoDaiInfoExcelWriter.AddRow(row);
+
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+                chaoDaiInfoExcelWriter.SaveToDisk();
+
+                ExcelWriter chaoDaiColumnPropertyExcelWriter = this.CreateChaoDaiColumnPropertyListWriter(propertyColumnNames);
+                for (int i = 0; i < listSheet.RowCount; i++)
+                {
+                    Dictionary<string, string> listRow = listSheet.GetRow(i);
+                    bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
+                    string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
+                    string name = listRow["name"];
+                    if (!giveUp)
+                    {
+                        try
+                        {
+                            HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+                            HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
+                            Dictionary<string, string> row = new Dictionary<string, string>();
+                            row.Add("name", name);
+                            row.Add("url", pageUrl);
+                            if (dtNodes != null)
+                            {
+                                List<string> oneIChaoDaiProperties = new List<string>();
+                                foreach (HtmlNode dtNode in dtNodes)
+                                {
+                                    string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "");
+                                    string pValue = this.GetNextDDNodeText(dtNode);
+
+                                    int sameNamePKeyCount = 1;
+                                    string newPKey = pKey;
+                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    {
+                                        sameNamePKeyCount++;
+                                        newPKey = pKey + "_" + sameNamePKeyCount.ToString();
+                                    }
+                                    oneIChaoDaiProperties.Add(newPKey);
+
+                                    row.Add(newPKey, pValue);
+                                }
+                            }
+
+                            chaoDaiColumnPropertyExcelWriter.AddRow(row);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+                chaoDaiColumnPropertyExcelWriter.SaveToDisk();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        /// <summary>
+        /// 保留部分属性
+        /// </summary>
+        /// <param name="listSheet"></param>
+        private void GetChaoDaiRemainProperties(IListSheet listSheet)
+        {
+            try
+            {
+                string[] parameters = this.Parameters.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                string columnMapFilePath = parameters[0];
+
+                ExcelReader columnMapER = new ExcelReader(columnMapFilePath, "朝代属性");
+                int rowCount = columnMapER.GetRowCount();
+                Dictionary<string, string> columnAliasToColumns = new Dictionary<string, string>();
+                for (int i = 0; i < rowCount; i++)
+                {
+                    Dictionary<string,string> columnRow = columnMapER.GetFieldValues(i);
+                    string columnName = columnRow["column"].Trim();
+                    columnAliasToColumns.Add(columnName, columnName);
+
+                    string aliasColumnsStr = columnRow["aliasColumns"];
+                    string[] aliasColumns = aliasColumnsStr.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string alias in aliasColumns)
+                    {
+                        columnAliasToColumns.Add(alias.Trim(), columnName);
+                    }
+                }
+
+                List<string> propertyColumnNames = new List<string>();
+
+                ExcelWriter chaoDaiInfoExcelWriter = this.CreateChaoDaiRemainPropertyListWriter();
+                for (int i = 0; i < listSheet.RowCount; i++)
+                {
+                    Dictionary<string, string> listRow = listSheet.GetRow(i);
+                    bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
+                    string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
+                    string name = listRow["name"];
+                    if (!giveUp)
+                    {
+                        try
+                        {
+                            HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+                            HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
+                            if (dtNodes != null)
+                            {
+                                List<string> oneIChaoDaiProperties = new List<string>();
+                                foreach (HtmlNode dtNode in dtNodes)
+                                {
+                                    string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "");
+                                    string pValue = this.GetNextDDNodeText(dtNode);
+
+                                    int sameNamePKeyCount = 1;
+                                    string newPKey = pKey;
+                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    {
+                                        sameNamePKeyCount++;
+                                        newPKey = pKey + "_" + sameNamePKeyCount.ToString();
+                                    }
+                                    oneIChaoDaiProperties.Add(newPKey);
+
+                                    if (!propertyColumnNames.Contains(newPKey) &&  columnAliasToColumns.ContainsValue(newPKey))
+                                    {
+                                        propertyColumnNames.Add(newPKey);
+                                    }
+
+                                    if (columnAliasToColumns.ContainsKey(newPKey))
+                                    {
+                                        string columnName = columnAliasToColumns[newPKey];
+
+                                        Dictionary<string, string> row = new Dictionary<string, string>();
+
+                                        row.Add("name", name);
+                                        row.Add("pKey", columnName);
+                                        row.Add("pValue", pValue);
+                                        row.Add("url", pageUrl);
+
+                                        chaoDaiInfoExcelWriter.AddRow(row);
+                                    }
+
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+                chaoDaiInfoExcelWriter.SaveToDisk();
+
+                ExcelWriter chaoDaiColumnPropertyExcelWriter = this.CreateChaoDaiRemainColumnPropertyListWriter(propertyColumnNames);
+                for (int i = 0; i < listSheet.RowCount; i++)
+                {
+                    Dictionary<string, string> listRow = listSheet.GetRow(i);
+                    bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
+                    string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
+                    string name = listRow["name"];
+                    if (!giveUp)
+                    {
+                        try
+                        {
+                            HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+                            HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
+                            Dictionary<string, string> row = new Dictionary<string, string>();
+                            row.Add("name", name);
+                            row.Add("url", pageUrl);
+                            if (dtNodes != null)
+                            {
+                                List<string> oneIChaoDaiProperties = new List<string>();
+                                foreach (HtmlNode dtNode in dtNodes)
+                                {
+                                    string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "");
+                                    string pValue = this.GetNextDDNodeText(dtNode);
+
+                                    int sameNamePKeyCount = 1;
+                                    string newPKey = pKey;
+                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    {
+                                        sameNamePKeyCount++;
+                                        newPKey = pKey + "_" + sameNamePKeyCount.ToString();
+                                    }
+                                    oneIChaoDaiProperties.Add(newPKey);
+
+                                    if (columnAliasToColumns.ContainsKey(newPKey))
+                                    {
+                                        string columnName = columnAliasToColumns[newPKey];
+                                        if (row.ContainsKey(columnName))
+                                        {
+                                            row[columnName] = row[columnName] + ";" + pValue;
+                                        }
+                                        else
+                                        {
+                                            row.Add(columnName, pValue);
+                                        }
+                                    }
+                                }
+                            }
+
+                            chaoDaiColumnPropertyExcelWriter.AddRow(row);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+                chaoDaiColumnPropertyExcelWriter.SaveToDisk();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private string GetNextDDNodeText(HtmlNode dtNode)
+        {
+            HtmlNode ddNode = dtNode.NextSibling;
+            while (ddNode.Name.ToLower() != "dd")
+            {
+                ddNode = ddNode.NextSibling;
+            }
+            string pValue = CommonUtil.HtmlDecode(ddNode.InnerText).Trim();
+            return pValue;
+        }
+
+        private ExcelWriter CreateChaoDaiPropertyListWriter()
+        {
+            String exportDir = this.RunPage.GetExportDir();
+            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值.xlsx");
+
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("name", 0);
+            resultColumnDic.Add("pKey", 1);
+            resultColumnDic.Add("pValue", 2);
+            resultColumnDic.Add("url", 3);
+            ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
+            return resultEW;
+        }
+
+        private ExcelWriter CreateChaoDaiColumnPropertyListWriter(List<string> propertyColumnNames)
+        {
+            String exportDir = this.RunPage.GetExportDir();
+            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值宽表.xlsx");
+
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("name", 0);
+            resultColumnDic.Add("url", 1);
+            for (int i = 0; i < propertyColumnNames.Count; i++)
+            {
+                resultColumnDic.Add(propertyColumnNames[i], i + 2);
+            }
+            ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
+            return resultEW;
+        }
+
+        private ExcelWriter CreateChaoDaiRemainPropertyListWriter()
+        {
+            String exportDir = this.RunPage.GetExportDir();
+            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值_合并同义属性.xlsx");
+
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("name", 0);
+            resultColumnDic.Add("pKey", 1);
+            resultColumnDic.Add("pValue", 2);
+            resultColumnDic.Add("url", 3);
+            ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
+            return resultEW;
+        }
+
+        private ExcelWriter CreateChaoDaiRemainColumnPropertyListWriter(List<string> propertyColumnNames)
+        {
+            String exportDir = this.RunPage.GetExportDir();
+            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值宽表_合并同义属性.xlsx");
+
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("name", 0);
+            resultColumnDic.Add("url", 1);
+            for (int i = 0; i < propertyColumnNames.Count; i++)
+            {
+                resultColumnDic.Add(propertyColumnNames[i], i + 2);
+            }
+            ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
+            return resultEW;
+        }         
 
         private void GetRelatedItemPageUrls(IListSheet listSheet)
         {

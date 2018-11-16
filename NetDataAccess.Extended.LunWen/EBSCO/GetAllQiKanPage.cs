@@ -145,7 +145,7 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            //this.GetFileInfos(listSheet);
+            this.GetFileInfos(listSheet);
             this.GetKeywordsInfos(listSheet);
             return true;
         }
@@ -388,11 +388,17 @@ namespace NetDataAccess.Extended.LunWen.EBSCO
                             if (childNode is HtmlTextNode)
                             {
                                 string keyword = CommonUtil.HtmlDecode(childNode.InnerText).Trim();
+
+                                //单行keyword也可能带;号，需要处理
                                 if (keyword.Length > 0)
                                 {
-                                    Dictionary<string, object> row = new Dictionary<string, object>();
-                                    row.Add("keyword", keyword);
-                                    rows.Add(row);
+                                    string[] kParts = keyword.Split(new string[] { ";"}, StringSplitOptions.RemoveEmptyEntries);
+                                    foreach (string kPart in kParts)
+                                    {
+                                        Dictionary<string, object> row = new Dictionary<string, object>();
+                                        row.Add("keyword", kPart.Trim());
+                                        rows.Add(row);
+                                    }
                                 }
                             }
                         } 
