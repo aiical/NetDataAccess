@@ -20,32 +20,33 @@ using NetDataAccess.Base.Reader;
 
 namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
 {
-    public class GetChaoDaiPages : ExternalRunWebPage
+    public class GetRenWuPages : ExternalRunWebPage
     { 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
             //this.GetRelatedItemPageUrls(listSheet);
 
-            this.GetChaoDaiProperties(listSheet);
+            //this.GetRenWuProperties(listSheet);
 
-            this.GetChaoDaiRemainProperties(listSheet);
+            this.GetRenWuRemainProperties(listSheet);
 
             return true;
         }
 
-        private void GetChaoDaiProperties(IListSheet listSheet)
+        private void GetRenWuProperties(IListSheet listSheet)
         {
             try
             {
                 List<string> propertyColumnNames = new List<string>();
 
-                ExcelWriter chaoDaiInfoExcelWriter = this.CreateChaoDaiPropertyListWriter();
+                ExcelWriter RenWuInfoExcelWriter = this.CreateRenWuPropertyListWriter();
                 for (int i = 0; i < listSheet.RowCount; i++)
                 {
                     Dictionary<string, string> listRow = listSheet.GetRow(i);
                     bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
                     string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
                     string name = listRow["name"];
+                    string fullName = listRow["fullName"];
                     if (!giveUp)
                     {
                         try
@@ -54,7 +55,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                             HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
                             if (dtNodes != null)
                             {
-                                List<string> oneIChaoDaiProperties = new List<string>();
+                                List<string> oneIRenWuProperties = new List<string>();
                                 foreach (HtmlNode dtNode in dtNodes)
                                 {
                                     string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "").Replace("　", "");
@@ -62,12 +63,12 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
 
                                     int sameNamePKeyCount = 1;
                                     string newPKey = pKey;
-                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    while (oneIRenWuProperties.Contains(newPKey))
                                     {
                                         sameNamePKeyCount++;
                                         newPKey = pKey + "_" + sameNamePKeyCount.ToString();
                                     }
-                                    oneIChaoDaiProperties.Add(newPKey);
+                                    oneIRenWuProperties.Add(newPKey);
 
                                     if (!propertyColumnNames.Contains(newPKey))
                                     {
@@ -77,11 +78,12 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                                     Dictionary<string, string> row = new Dictionary<string, string>();
 
                                     row.Add("name", name);
+                                    row.Add("fullName", fullName);
                                     row.Add("pKey", newPKey);
                                     row.Add("pValue", pValue);
                                     row.Add("url", pageUrl);
 
-                                    chaoDaiInfoExcelWriter.AddRow(row);
+                                    RenWuInfoExcelWriter.AddRow(row);
 
                                 }
                             }
@@ -92,15 +94,16 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                         }
                     }
                 }
-                chaoDaiInfoExcelWriter.SaveToDisk();
+                RenWuInfoExcelWriter.SaveToDisk();
 
-                ExcelWriter chaoDaiColumnPropertyExcelWriter = this.CreateChaoDaiColumnPropertyListWriter(propertyColumnNames);
+                ExcelWriter RenWuColumnPropertyExcelWriter = this.CreateRenWuColumnPropertyListWriter(propertyColumnNames);
                 for (int i = 0; i < listSheet.RowCount; i++)
                 {
                     Dictionary<string, string> listRow = listSheet.GetRow(i);
                     bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
                     string pageUrl = listRow[SysConfig.DetailPageUrlFieldName];
                     string name = listRow["name"];
+                    string fullName = listRow["fullName"];
                     if (!giveUp)
                     {
                         try
@@ -109,10 +112,11 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                             HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
                             Dictionary<string, string> row = new Dictionary<string, string>();
                             row.Add("name", name);
+                            row.Add("fullName", fullName);
                             row.Add("url", pageUrl);
                             if (dtNodes != null)
                             {
-                                List<string> oneIChaoDaiProperties = new List<string>();
+                                List<string> oneIRenWuProperties = new List<string>();
                                 foreach (HtmlNode dtNode in dtNodes)
                                 {
                                     string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "").Replace("　", "");
@@ -120,18 +124,18 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
 
                                     int sameNamePKeyCount = 1;
                                     string newPKey = pKey;
-                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    while (oneIRenWuProperties.Contains(newPKey))
                                     {
                                         sameNamePKeyCount++;
                                         newPKey = pKey + "_" + sameNamePKeyCount.ToString();
                                     }
-                                    oneIChaoDaiProperties.Add(newPKey);
+                                    oneIRenWuProperties.Add(newPKey);
 
                                     row.Add(newPKey, pValue);
                                 }
                             }
 
-                            chaoDaiColumnPropertyExcelWriter.AddRow(row);
+                            RenWuColumnPropertyExcelWriter.AddRow(row);
                         }
                         catch (Exception ex)
                         {
@@ -139,7 +143,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                         }
                     }
                 }
-                chaoDaiColumnPropertyExcelWriter.SaveToDisk();
+                RenWuColumnPropertyExcelWriter.SaveToDisk();
 
             }
             catch (Exception ex)
@@ -153,14 +157,14 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
         /// 保留部分属性
         /// </summary>
         /// <param name="listSheet"></param>
-        private void GetChaoDaiRemainProperties(IListSheet listSheet)
+        private void GetRenWuRemainProperties(IListSheet listSheet)
         {
             try
             {
                 string[] parameters = this.Parameters.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
                 string columnMapFilePath = parameters[0];
 
-                ExcelReader columnMapER = new ExcelReader(columnMapFilePath, "朝代属性");
+                ExcelReader columnMapER = new ExcelReader(columnMapFilePath, "人物属性");
                 int rowCount = columnMapER.GetRowCount();
                 Dictionary<string, string> columnAliasToColumns = new Dictionary<string, string>();
                 for (int i = 0; i < rowCount; i++)
@@ -179,7 +183,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
 
                 List<string> propertyColumnNames = new List<string>();
 
-                ExcelWriter chaoDaiInfoExcelWriter = this.CreateChaoDaiRemainPropertyListWriter();
+                ExcelWriter RenWuInfoExcelWriter = this.CreateRenWuRemainPropertyListWriter();
                 for (int i = 0; i < listSheet.RowCount; i++)
                 {
                     Dictionary<string, string> listRow = listSheet.GetRow(i);
@@ -194,7 +198,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                             HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
                             if (dtNodes != null)
                             {
-                                List<string> oneIChaoDaiProperties = new List<string>();
+                                List<string> oneIRenWuProperties = new List<string>();
                                 foreach (HtmlNode dtNode in dtNodes)
                                 {
                                     string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "").Replace("　", "");
@@ -202,12 +206,12 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
 
                                     int sameNamePKeyCount = 1;
                                     string newPKey = pKey;
-                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    while (oneIRenWuProperties.Contains(newPKey))
                                     {
                                         sameNamePKeyCount++;
                                         newPKey = pKey + "_" + sameNamePKeyCount.ToString();
                                     }
-                                    oneIChaoDaiProperties.Add(newPKey);
+                                    oneIRenWuProperties.Add(newPKey);
 
                                     if (!propertyColumnNames.Contains(newPKey) &&  columnAliasToColumns.ContainsValue(newPKey))
                                     {
@@ -225,7 +229,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                                         row.Add("pValue", pValue);
                                         row.Add("url", pageUrl);
 
-                                        chaoDaiInfoExcelWriter.AddRow(row);
+                                        RenWuInfoExcelWriter.AddRow(row);
                                     }
 
                                 }
@@ -237,9 +241,9 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                         }
                     }
                 }
-                chaoDaiInfoExcelWriter.SaveToDisk();
+                RenWuInfoExcelWriter.SaveToDisk();
 
-                ExcelWriter chaoDaiColumnPropertyExcelWriter = this.CreateChaoDaiRemainColumnPropertyListWriter(propertyColumnNames);
+                ExcelWriter RenWuColumnPropertyExcelWriter = this.CreateRenWuRemainColumnPropertyListWriter(propertyColumnNames);
                 for (int i = 0; i < listSheet.RowCount; i++)
                 {
                     Dictionary<string, string> listRow = listSheet.GetRow(i);
@@ -257,7 +261,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                             row.Add("url", pageUrl);
                             if (dtNodes != null)
                             {
-                                List<string> oneIChaoDaiProperties = new List<string>();
+                                List<string> oneIRenWuProperties = new List<string>();
                                 foreach (HtmlNode dtNode in dtNodes)
                                 {
                                     string pKey = CommonUtil.HtmlDecode(dtNode.InnerText).Trim().Replace(" ", "").Replace(" ", "").Replace("　", "");
@@ -265,12 +269,12 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
 
                                     int sameNamePKeyCount = 1;
                                     string newPKey = pKey;
-                                    while (oneIChaoDaiProperties.Contains(newPKey))
+                                    while (oneIRenWuProperties.Contains(newPKey))
                                     {
                                         sameNamePKeyCount++;
                                         newPKey = pKey + "_" + sameNamePKeyCount.ToString();
                                     }
-                                    oneIChaoDaiProperties.Add(newPKey);
+                                    oneIRenWuProperties.Add(newPKey);
 
                                     if (columnAliasToColumns.ContainsKey(newPKey))
                                     {
@@ -287,7 +291,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                                 }
                             }
 
-                            chaoDaiColumnPropertyExcelWriter.AddRow(row);
+                            RenWuColumnPropertyExcelWriter.AddRow(row);
                         }
                         catch (Exception ex)
                         {
@@ -295,7 +299,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                         }
                     }
                 }
-                chaoDaiColumnPropertyExcelWriter.SaveToDisk();
+                RenWuColumnPropertyExcelWriter.SaveToDisk();
 
             }
             catch (Exception ex)
@@ -315,40 +319,42 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
             return pValue;
         }
 
-        private ExcelWriter CreateChaoDaiPropertyListWriter()
+        private ExcelWriter CreateRenWuPropertyListWriter()
         {
             String exportDir = this.RunPage.GetExportDir();
-            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值.xlsx");
+            string resultFilePath = Path.Combine(exportDir, "百度百科_人物_属性值.xlsx");
 
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
             resultColumnDic.Add("name", 0);
-            resultColumnDic.Add("pKey", 1);
-            resultColumnDic.Add("pValue", 2);
-            resultColumnDic.Add("url", 3);
+            resultColumnDic.Add("fullName", 1);
+            resultColumnDic.Add("pKey", 2);
+            resultColumnDic.Add("pValue", 3);
+            resultColumnDic.Add("url", 4);
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
             return resultEW;
         }
 
-        private ExcelWriter CreateChaoDaiColumnPropertyListWriter(List<string> propertyColumnNames)
+        private ExcelWriter CreateRenWuColumnPropertyListWriter(List<string> propertyColumnNames)
         {
             String exportDir = this.RunPage.GetExportDir();
-            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值宽表.xlsx");
+            string resultFilePath = Path.Combine(exportDir, "百度百科_人物_属性值宽表.xlsx");
 
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
             resultColumnDic.Add("name", 0);
-            resultColumnDic.Add("url", 1);
+            resultColumnDic.Add("fullName", 1);
+            resultColumnDic.Add("url", 2);
             for (int i = 0; i < propertyColumnNames.Count; i++)
             {
-                resultColumnDic.Add(propertyColumnNames[i], i + 2);
+                resultColumnDic.Add(propertyColumnNames[i], i + 3);
             }
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
             return resultEW;
         }
 
-        private ExcelWriter CreateChaoDaiRemainPropertyListWriter()
+        private ExcelWriter CreateRenWuRemainPropertyListWriter()
         {
             String exportDir = this.RunPage.GetExportDir();
-            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值_合并同义属性.xlsx");
+            string resultFilePath = Path.Combine(exportDir, "百度百科_人物_属性值_合并同义属性.xlsx");
 
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
             resultColumnDic.Add("name", 0);
@@ -359,10 +365,10 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
             return resultEW;
         }
 
-        private ExcelWriter CreateChaoDaiRemainColumnPropertyListWriter(List<string> propertyColumnNames)
+        private ExcelWriter CreateRenWuRemainColumnPropertyListWriter(List<string> propertyColumnNames)
         {
             String exportDir = this.RunPage.GetExportDir();
-            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_属性值宽表_合并同义属性.xlsx");
+            string resultFilePath = Path.Combine(exportDir, "百度百科_人物_属性值宽表_合并同义属性.xlsx");
 
             Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
             resultColumnDic.Add("name", 0);

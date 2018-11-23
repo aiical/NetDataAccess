@@ -317,6 +317,7 @@ namespace NetDataAccess.Base.CsvHelper
             }
 
             writer.WriteLine();
+            writer.Flush();
         }
 
         /// <summary>

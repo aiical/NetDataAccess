@@ -24,14 +24,211 @@ namespace NetDataAccess.Extended.LunWen.All
     { 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
+            this.GetYearWordsMatrixCount(listSheet);
+            //this.GetYearWordsCount(listSheet);
+            return true;
+        }
+        private void GetYearWordsMatrixCount(IListSheet listSheet)
+        {
             try
             {
                 string[] parameters = this.Parameters.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-                string allKeywordsFilePaht = parameters[0];
+                string allKeywordsFilePath = parameters[0];
+                string exportDirPath = parameters[2];
+
+
+                ExcelReader er = new ExcelReader(allKeywordsFilePath);
+                int inputRowCount = er.GetRowCount();
+
+
+                List<string> keywordList = new List<string>();
+                Dictionary<int, Dictionary<string, List<string>>> yearSourceWordList = new Dictionary<int, Dictionary<string, List<string>>>();
+                for (int i = 0; i < inputRowCount; i++)
+                {
+                    Dictionary<string, string> row = er.GetFieldValues(i);
+                    string source = row["source"];
+                    int year = int.Parse( row["year"]);
+                    string keyword = row["keyword"];
+
+                    if (!keywordList.Contains(keyword))
+                    {
+                        keywordList.Add(keyword);
+                    }
+
+                    if (!yearSourceWordList.ContainsKey(year))
+                    { 
+                        yearSourceWordList.Add(year, new Dictionary<string, List<string>>());
+                    }
+                    Dictionary<string, List<string>> sourceWordList = yearSourceWordList[year];
+                    if (!sourceWordList.ContainsKey(source))
+                    {
+                        sourceWordList.Add(source, new List<string>());
+                    }
+                    List<string> wordList = sourceWordList[source];
+                    if (!wordList.Contains(keyword))
+                    {
+                        wordList.Add(keyword);
+                    }
+                }
+                 
+                Dictionary<string, Dictionary<string, int>> totalYearMartixDataDic = new Dictionary<string, Dictionary<string, int>>(); 
+
+                foreach (int year in yearSourceWordList.Keys)
+                {
+                    Dictionary<string, Dictionary<string, int>> yearMatrixDataDic = new Dictionary<string, Dictionary<string, int>>(); 
+                    Dictionary<string, List<string>> sourceWordList = yearSourceWordList[year];
+                    foreach (string source in sourceWordList.Keys)
+                    {
+                        List<string> kwList = sourceWordList[source];
+                        for (int i = 0; i < kwList.Count; i++)
+                        {
+                            string kw_i = kwList[i]; 
+                            if (!yearMatrixDataDic.ContainsKey(kw_i))
+                            {
+                                yearMatrixDataDic.Add(kw_i, new Dictionary<string, int>());
+                            }
+                            Dictionary<string, int> iDic = yearMatrixDataDic[kw_i];
+
+                            if (!iDic.ContainsKey(kw_i))
+                            {
+                                iDic.Add(kw_i, 1);
+                            }
+                            else
+                            {
+                                iDic[kw_i] = iDic[kw_i] + 1;
+                            }
+
+                            /*
+                            if (!totalYearMartixDataDic.ContainsKey(kw_i))
+                            {
+                                totalYearMartixDataDic.Add(kw_i, new Dictionary<string, int>());
+                            }
+                            Dictionary<string, int> iTotalDic = totalYearMartixDataDic[kw_i];
+                            if (!iTotalDic.ContainsKey(kw_i))
+                            {
+                                iTotalDic.Add(kw_i, 1);
+                            }
+                            else
+                            {
+                                iTotalDic[kw_i] = iTotalDic[kw_i] + 1;
+                            }
+                             * */
+
+                            for (int j = 0; j < kwList.Count; j++)
+                            {
+                                string kw_j = kwList[j];
+                                if (kw_i != kw_j)
+                                {
+                                    if (!iDic.ContainsKey(kw_j))
+                                    {
+                                        iDic.Add(kw_j, 1);
+                                    }
+                                    else
+                                    {
+                                        iDic[kw_j] = iDic[kw_j] + 1;
+                                    }
+                                    
+                                    /*
+                                    if (!iTotalDic.ContainsKey(kw_j))
+                                    {
+                                        iTotalDic.Add(kw_j, 1);
+                                    }
+                                    else
+                                    {
+                                        iTotalDic[kw_i] = iTotalDic[kw_j] + 1;
+                                    }
+                                     */
+                                }
+                            }
+                        }
+                    }
+                     
+                    CsvWriter resultWriter = this.GetMatrixCsvWriter(exportDirPath, year, keywordList); 
+
+                    for (int i = 0; i < keywordList.Count; i++)
+                    {
+                        Dictionary<string, string> matrixRow = new Dictionary<string, string>();
+                        string kw_i = keywordList[i];
+                        matrixRow["keywordMatrix"] = kw_i;
+                        Dictionary<string, int> iMatrixDataDic = yearMatrixDataDic.ContainsKey(kw_i) ? yearMatrixDataDic[kw_i] : null;
+                        for (int j = 0; j < keywordList.Count; j++)
+                        {
+                            string kw_j = keywordList[j];
+                            if (iMatrixDataDic == null)
+                            {
+                                matrixRow.Add(kw_j, "0");
+                            }
+                            else
+                            {
+                                matrixRow.Add(kw_j, iMatrixDataDic.ContainsKey(kw_j) ? iMatrixDataDic[kw_j].ToString() : "0");
+                            }
+                        }
+                        resultWriter.AddRow(matrixRow);
+                    }
+                    resultWriter.SaveToDisk(); 
+
+                    foreach (string kw_i in yearMatrixDataDic.Keys)
+                    {
+                        if (!totalYearMartixDataDic.ContainsKey(kw_i))
+                        {
+                            totalYearMartixDataDic.Add(kw_i, new Dictionary<string, int>());
+                        }
+                        Dictionary<string, int> iTotalDataDic = totalYearMartixDataDic[kw_i];
+                        Dictionary<string, int> iDataDic = yearMatrixDataDic[kw_i];
+                        foreach (string kw_j in iDataDic.Keys)
+                        {
+                            if (!iTotalDataDic.ContainsKey(kw_j))
+                            {
+                                iTotalDataDic.Add(kw_j, iDataDic[kw_j]);
+                            }
+                            else
+                            {
+                                iTotalDataDic[kw_j] = iTotalDataDic[kw_j] + iDataDic[kw_j];
+                            }
+                        }
+                    }
+                }
+
+                CsvWriter totalRresultWriter = this.GetMatrixCsvWriter(exportDirPath, 0, keywordList);
+
+                for (int i = 0; i < keywordList.Count; i++)
+                {
+                    Dictionary<string, string> matrixRow = new Dictionary<string, string>();
+                    string kw_i = keywordList[i];
+                    matrixRow["keywordMatrix"] = kw_i; 
+                    Dictionary<string, int> iMatrixDataDic = totalYearMartixDataDic.ContainsKey(kw_i) ? totalYearMartixDataDic[kw_i] : null;
+                    for (int j = 0; j < keywordList.Count; j++)
+                    {
+                        string kw_j = keywordList[j];
+                        if (iMatrixDataDic == null)
+                        {
+                            matrixRow.Add(kw_j, "0");
+                        }
+                        else
+                        {
+                            matrixRow.Add(kw_j, iMatrixDataDic.ContainsKey(kw_j) ? iMatrixDataDic[kw_j].ToString() : "0");
+                        }
+                    }
+                    totalRresultWriter.AddRow(matrixRow);
+                }
+                totalRresultWriter.SaveToDisk();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void GetYearWordsCount(IListSheet listSheet)
+        {
+            try
+            {
+                string[] parameters = this.Parameters.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                string allKeywordsFilePath = parameters[0];
                 string exportFilePath = parameters[1];
 
 
-                ExcelReader er = new ExcelReader(allKeywordsFilePaht);
+                ExcelReader er = new ExcelReader(allKeywordsFilePath);
                 int inputRowCount = er.GetRowCount();
 
                 Dictionary<int, Dictionary<string, int>> allYearDic = new Dictionary<int, Dictionary<string, int>>();
@@ -119,12 +316,41 @@ namespace NetDataAccess.Extended.LunWen.All
                     resultWriter.AddRow(resultRow);
                 }
                 resultWriter.SaveToDisk();
-                return true;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+        }
+
+        private CsvWriter GetMatrixCsvWriter(string exportDirPath, int year, List<string> keywordList)
+        {
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+            resultColumnDic.Add("keywordMatrix", 0);
+            for (int i = 0; i < keywordList.Count; i++)
+            {
+                resultColumnDic.Add(keywordList[i].ToString(), i + 1);
+                columnFormats.Add(keywordList[i].ToString(), "#0");
+            }
+            string filePath = Path.Combine(exportDirPath, year + ".csv");
+            CsvWriter resultEW = new CsvWriter(filePath, resultColumnDic);
+            return resultEW;
+        }
+
+        private  ExcelWriter GetMatrixExcelWriter(string exportDirPath, int year, List<string> keywordList)
+        {
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            Dictionary<string, string> columnFormats = new Dictionary<string, string>();
+            resultColumnDic.Add("keywordMatrix", 0);
+            for (int i = 0; i < keywordList.Count; i++)
+            {
+                resultColumnDic.Add(keywordList[i].ToString(), i + 1);
+                columnFormats.Add(keywordList[i].ToString(), "#0");
+            }
+            string filePath = Path.Combine(exportDirPath, year + ".xlsx");
+            ExcelWriter resultEW = new ExcelWriter(filePath, "List", resultColumnDic, columnFormats);
+            return resultEW;
         }
 
         private ExcelWriter GetExcelWriter(string filePath, List<int> years)
