@@ -24,7 +24,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
     { 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            //this.GetRelatedItemPageUrls(listSheet);
+            this.GetRelatedItemPageUrls(listSheet);
 
             this.GetChaoDaiProperties(listSheet);
 

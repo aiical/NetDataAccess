@@ -24,11 +24,11 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
     { 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            //this.GetRelatedItemPageUrls(listSheet);
+            this.GetRelatedItemPageUrls(listSheet);
 
             //this.GetRenWuProperties(listSheet);
 
-            this.GetRenWuRemainProperties(listSheet);
+            //this.GetRenWuRemainProperties(listSheet);
 
             return true;
         }

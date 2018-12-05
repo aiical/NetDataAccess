@@ -45,3 +45,5 @@
 *.pdb
 *.pdb
 NetDataAccess/bin/Debug
+*.pak
+NetDataAccess.Extended.Anjuke/NetDataAccess/bin
