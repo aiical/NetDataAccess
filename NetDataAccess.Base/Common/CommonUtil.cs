@@ -293,5 +293,17 @@ namespace NetDataAccess.Base.Common
             return destString;
         }
         #endregion
+
+        #region 判断是否为汉字
+        /// <summary>
+        /// 用 正则表达式 判断字符是不是汉字
+        /// </summary>
+        /// <param name="text">待判断字符或字符串</param>
+        /// <returns>真：是汉字；假：不是</returns>
+        public static bool CheckStringChineseReg(string text)
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(text, @"[\u4e00-\u9fbb]+$");
+        }
+        #endregion
     }
 }

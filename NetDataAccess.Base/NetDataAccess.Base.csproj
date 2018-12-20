@@ -44,6 +44,9 @@
     <Reference Include="CefSharp.WinForms">
       <HintPath>..\..\..\Code\OCRTool\TestChromium\bin\Debug\CefSharp.WinForms.dll</HintPath>
     </Reference>
+    <Reference Include="ChineseConverter">
+      <HintPath>D:\Download\简繁体中文转换DLL\简繁体中文转换DLL\ChineseConverter.dll</HintPath>
+    </Reference>
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\NetDataAccess\bin\Debug\HtmlAgilityPack.dll</HintPath>
     </Reference>
@@ -107,6 +110,7 @@
     <Compile Include="Browser\ChromiumRunWebBrowser.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Common\CharProcessor.cs" />
     <Compile Include="Common\CommonUtil.cs" />
     <Compile Include="Common\EmptyFileException.cs" />
     <Compile Include="Common\FileHelper.cs" />

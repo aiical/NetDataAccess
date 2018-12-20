@@ -1,0 +1,9 @@
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x64\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\liblept168.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\x86\libtesseract302.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.GuoXueDaShi.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Files\Extended\NetDataAccess.Extended.GuoXueDaShi.pdb
+E:\Github\NetDataAccess\NetDataAccess.Extended.GuoXueDaShi\obj\Debug\NetDataAccess.Extended.GuoXueDaShi.csprojResolveAssemblyReference.cache
+E:\Github\NetDataAccess\NetDataAccess.Extended.GuoXueDaShi\obj\Debug\NetDataAccess.Extended.GuoXueDaShi.dll
+E:\Github\NetDataAccess\NetDataAccess.Extended.GuoXueDaShi\obj\Debug\NetDataAccess.Extended.GuoXueDaShi.pdb

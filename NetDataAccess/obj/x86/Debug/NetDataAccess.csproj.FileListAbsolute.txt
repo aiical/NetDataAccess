@@ -76,3 +76,4 @@ E:\Github\NetDataAccess\NetDataAccess\obj\x86\Debug\NetDataAccess.csproj.Generat
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\CefSharp.Core.dll
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\CefSharp.dll
 E:\Github\NetDataAccess\NetDataAccess\bin\Debug\CefSharp.WinForms.dll
+E:\Github\NetDataAccess\NetDataAccess\bin\Debug\ChineseConverter.dll

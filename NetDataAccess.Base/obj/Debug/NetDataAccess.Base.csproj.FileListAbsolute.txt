@@ -28,3 +28,4 @@ E:\Github\NetDataAccess\NetDataAccess.Base\obj\Debug\NetDataAccess.Base.pdb
 E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\CefSharp.Core.dll
 E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\CefSharp.dll
 E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\CefSharp.WinForms.dll
+E:\Github\NetDataAccess\NetDataAccess.Base\bin\Debug\ChineseConverter.dll
