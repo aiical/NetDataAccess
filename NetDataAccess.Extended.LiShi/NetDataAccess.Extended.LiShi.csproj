@@ -82,9 +82,12 @@
     <Compile Include="BaiDuBaiKe\GetRenWuPages.cs" />
     <Compile Include="BaiDuBaiKe\GetBaiKeItemTags.cs" />
     <Compile Include="BaiDuBaiKe\GetBaiKeTagRelateMatrix.cs" />
+    <Compile Include="BaiDuBaiKe\GetZhongGuoLiShiShiJianPage.cs" />
     <Compile Include="BaiDuBaiKe\ProcessBaiKeItemLinkageResult.cs" />
     <Compile Include="BaiDuBaiKe\GetBaiKePropertyRelateMatrix.cs" />
     <Compile Include="BaiDuBaiKe\GetBaiKePTsRelateMatrix.cs" />
+    <Compile Include="BaiDuBaiKeRenWu\GetLiShiRenWuShiDaiInfo.cs" />
+    <Compile Include="BaiDuBaiKeRenWu\ProcessLiShiRenWuShiDaiInfo.cs" />
     <Compile Include="LiShiZhiJia\GetAllRenWuListPageUrls.cs" />
     <Compile Include="LiShiZhiJia\GetAllRenWuListPages.cs" />
     <Compile Include="LiShiZhiJia\GetAllRenWuDetailPages.cs" />

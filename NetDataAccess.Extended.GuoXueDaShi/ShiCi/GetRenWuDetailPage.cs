@@ -24,8 +24,15 @@ namespace NetDataAccess.Extended.GuoXueDaShi.ShiCi
     {
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            this.GetRenWuInfos(listSheet);
-            this.GetShiCiDetailPageUrls(listSheet);
+            try
+            {
+                this.GetRenWuInfos(listSheet);
+                this.GetShiCiDetailPageUrls(listSheet);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             return true;
         }
 
@@ -38,20 +45,26 @@ namespace NetDataAccess.Extended.GuoXueDaShi.ShiCi
             {
                 Dictionary<string, string> listRow = listSheet.GetRow(i);
                 HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+                try
+                {
+                    HtmlNode mainInfoNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"info_txt2 clearfix\"]");
+                    HtmlNode titleNode = mainInfoNode.SelectSingleNode("./h2");
+                    string renWuTitle = CommonUtil.HtmlDecode(titleNode.InnerText).Trim();
+                    HtmlNode descriptionNode = mainInfoNode.SelectSingleNode("./p");
+                    string description = descriptionNode == null ? "" : CommonUtil.HtmlDecode(descriptionNode.InnerText).Trim();
 
-                HtmlNode mainInfoNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"info_txt2 clearfix\"]");
-                HtmlNode titleNode = mainInfoNode.SelectSingleNode("./h2");
-                string renWuTitle = CommonUtil.HtmlDecode(titleNode.InnerText).Trim();
-                HtmlNode descriptionNode = mainInfoNode.SelectSingleNode("./p");
-                string description = descriptionNode == null ? "" : CommonUtil.HtmlDecode(descriptionNode.InnerText).Trim();
-
-                Dictionary<string, string> resultRow = new Dictionary<string, string>(); 
-                resultRow.Add("人物", listRow["renWu"]);
-                resultRow.Add("时代", listRow["shiDai"]);
-                resultRow.Add("人物页面标题", renWuTitle);
-                resultRow.Add("简介", description);
-                resultRow.Add("url", listRow[SysConfig.DetailPageUrlFieldName]);
-                resultEW.AddRow(resultRow);
+                    Dictionary<string, string> resultRow = new Dictionary<string, string>();
+                    resultRow.Add("人物", listRow["renWu"]);
+                    resultRow.Add("时代", listRow["shiDai"]);
+                    resultRow.Add("人物页面标题", renWuTitle);
+                    resultRow.Add("简介", description);
+                    resultRow.Add("url", listRow[SysConfig.DetailPageUrlFieldName]);
+                    resultEW.AddRow(resultRow);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
             }
 
             resultEW.SaveToDisk();

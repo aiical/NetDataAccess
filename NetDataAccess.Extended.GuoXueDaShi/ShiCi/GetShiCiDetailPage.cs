@@ -20,7 +20,7 @@ using NetDataAccess.Base.Reader;
 
 namespace NetDataAccess.Extended.GuoXueDaShi.ShiCi
 {
-    public class GetShiCiDetailPage : ExternalRunWebPage
+    public class GetShiShuMuLuPage : ExternalRunWebPage
     {
         public override bool AfterAllGrab(IListSheet listSheet)
         {

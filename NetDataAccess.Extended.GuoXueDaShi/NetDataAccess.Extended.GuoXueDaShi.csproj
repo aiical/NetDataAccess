@@ -87,6 +87,8 @@
     <Compile Include="ShiCi\GetRenWuListPage.cs" />
     <Compile Include="ShiCi\GetRenWuDetailPage.cs" />
     <Compile Include="ShiCi\GetShiCiDetailPage.cs" />
+    <Compile Include="ZhengShi\GetShiShuListPage.cs" />
+    <Compile Include="ZhengShi\GetShiShuMuLuPage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NetDataAccess.AppAccessBase\NetDataAccess.AppAccessBase.csproj">
