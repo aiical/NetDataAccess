@@ -81,25 +81,35 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                         resultRow.Add("summaryYearBegin", yearParts == null ? "" : yearParts[0]);
                         resultRow.Add("summaryYearEnd", yearParts == null ? "" : yearParts[1]);
 
-                        string birthInfo = this.GetBirthTextFromSummary(summaryInfo);
+                        string birthInfo = this.GetFormattedTimeInfo(this.GetBirthTextFromSummary(summaryInfo));
                         resultRow.Add("birthInfo", birthInfo);
 
                         string summaryShiDai= CommonUtil.StringArrayToString(this.GetShiDai(new List<string>() { sourceRow["summaryInfo"] }, shiDaiDic), ";");
                         resultRow.Add("summaryShiDai", summaryShiDai);
 
-                        string propertyYearBegin = "";
+                        List<string> propertyYearBeginList = new List<string>();
                         foreach (string beginProperty in this.YearBeginPropertyList)
                         {
-
+                            string beginPropertyValue = sourceRow[beginProperty];
+                            string formattedTime = this.GetFormattedTimeInfo(beginPropertyValue);
+                            if (formattedTime.Length > 0)
+                            {
+                                propertyYearBeginList.Add(formattedTime);
+                            }
                         }
-                        resultRow.Add("propertyYearBegin", propertyYearBegin);
+                        resultRow.Add("propertyYearBegin", CommonUtil.StringArrayToString(propertyYearBeginList.ToArray(), ";"));
 
-                        string propertyYearEnd = "";
+                        List<string> propertyYearEndList = new List<string>();
                         foreach (string endProperty in this.YearEndPropertyList)
                         {
-
+                            string endPropertyValue = sourceRow[endProperty];
+                            string formattedTime = this.GetFormattedTimeInfo(endPropertyValue);
+                            if (formattedTime.Length > 0)
+                            {
+                                propertyYearEndList.Add(formattedTime);
+                            }
                         }
-                        resultRow.Add("propertyYearEnd", propertyYearEnd);
+                        resultRow.Add("propertyYearEnd", CommonUtil.StringArrayToString(propertyYearEndList.ToArray(), ";")); 
 
 
                         List<string> propertyTexts = new List<string>();
@@ -134,7 +144,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             {
                 if (this._YearBeginEndSpliter == null)
                 {
-                    this._YearBeginEndSpliter = new string[] { "----", "--", "——", "~", "一", "～", "-", "—" };
+                    this._YearBeginEndSpliter = new string[] { "----", "--", "——", "~", "一", "～", "-", "—", "－", "─", "至" };
                 }
                 return this._YearBeginEndSpliter;
             }
@@ -143,19 +153,175 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
         {
             if (yearInfo.Length > 0)
             {
-                string[] yearParts = yearInfo.Split(this.YearBeginEndSpliter, StringSplitOptions.RemoveEmptyEntries);
+                string[] yearParts = yearInfo.Split(this.YearBeginEndSpliter, StringSplitOptions.None);
                 if (yearParts.Length == 2)
                 {
                     string[] formattedYearParts = new string[2];
                     for (int i = 0; i < yearParts.Length; i++)
                     {
-                        formattedYearParts[i] = yearParts[i].Trim();
+                        formattedYearParts[i] = this.GetFormattedTimeInfo(yearParts[i]);
                     }
 
                     return formattedYearParts;
                 }                
             }
             return null;
+        }
+
+        private string GetFormattedTimeInfo(string timeStr)
+        {
+            if (timeStr.Length > 0)
+            {
+                StringBuilder resultStr = new StringBuilder();
+
+                Dictionary<string,string> checkStrDic = new Dictionary<string,string>();
+                checkStrDic.Add("约","约");
+                checkStrDic.Add("公元前", "前");
+                checkStrDic.Add("初", "");
+                checkStrDic.Add("公元", "");
+                checkStrDic.Add("前", "前");
+                checkStrDic.Add("农历" ,"农历");
+                foreach (string checkStr in checkStrDic.Keys)
+                {
+                    if (timeStr.Contains(checkStr))
+                    {
+                        timeStr = timeStr.Replace(checkStr, "");
+                        string subStr = checkStrDic[checkStr];
+                        if (subStr.Length > 0)
+                        {
+                            resultStr.Append("|" + subStr + "|");
+                        }
+                    }
+                }
+
+                string[] removeStrs = new string[] { "?", "？" };
+                foreach (string removeStr in removeStrs)
+                {
+                    if (timeStr.Contains(removeStr))
+                    {
+                        timeStr = timeStr.Replace(removeStr, "");
+                    }
+                }
+
+                Dictionary<string, string> chineseToNumDic = new Dictionary<string, string>();
+                chineseToNumDic.Add("１", "1");
+                chineseToNumDic.Add("２", "2");
+                chineseToNumDic.Add("３", "3");
+                chineseToNumDic.Add("４", "4");
+                chineseToNumDic.Add("５", "5");
+                chineseToNumDic.Add("６", "6");
+                chineseToNumDic.Add("７", "7");
+                chineseToNumDic.Add("８", "8");
+                chineseToNumDic.Add("９", "9");
+                chineseToNumDic.Add("０", "0");
+                chineseToNumDic.Add("一", "1");
+                chineseToNumDic.Add("二", "2");
+                chineseToNumDic.Add("三", "3");
+                chineseToNumDic.Add("四", "4");
+                chineseToNumDic.Add("五", "5");
+                chineseToNumDic.Add("六", "6");
+                chineseToNumDic.Add("七", "7");
+                chineseToNumDic.Add("八", "8");
+                chineseToNumDic.Add("九", "9");
+                chineseToNumDic.Add("零", "0");
+                chineseToNumDic.Add("〇", "0");
+                chineseToNumDic.Add("寒月", "10月");
+                chineseToNumDic.Add("冬月", "11月");
+                chineseToNumDic.Add("腊月", "12月");
+                chineseToNumDic.Add("正月", "1月");
+                foreach (string chinese in chineseToNumDic.Keys)
+                {
+                    timeStr = timeStr.Replace(chinese, chineseToNumDic[chinese]);
+                }
+                
+                //处理“十”
+                int tenStrIndex = timeStr.IndexOf("十");
+                while (tenStrIndex > -1)
+                {
+                    if (tenStrIndex == 0)
+                    {
+                        timeStr = "1" + timeStr.Substring(tenStrIndex + 1);
+                    }
+                    else 
+                    {
+                        char preChar = timeStr[tenStrIndex-1];
+                        if (preChar >= '0' && preChar <= '9')
+                        {
+                            timeStr = timeStr.Substring(0, tenStrIndex) + timeStr.Substring(tenStrIndex + 1);
+                        }
+                        else
+                        {
+                            timeStr = timeStr.Substring(0, tenStrIndex) + "1" + timeStr.Substring(tenStrIndex + 1);
+                        }
+                    }
+                    tenStrIndex = timeStr.IndexOf("十");
+                }
+
+                int yearCharIndex = timeStr.IndexOf("年");
+                if (yearCharIndex > -1)
+                {
+                    int tempIndex = yearCharIndex-1;
+                    while (tempIndex > -1)
+                    {
+                        char tempChar = timeStr[tempIndex];
+                        if (tempChar >= '0' && tempChar <= '9')
+                        {
+                            tempIndex = tempIndex - 1;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    timeStr = timeStr.Substring(tempIndex + 1);
+                }
+                if (timeStr.Contains("."))
+                {
+                    string[] timePartStrs = timeStr.Split(new string[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+                    if (timePartStrs.Length > 0)
+                    {
+                        resultStr.Append("|" + timePartStrs[0] + "年|");
+                    }
+                    if (timePartStrs.Length > 1)
+                    {
+                        resultStr.Append("|" + timePartStrs[1] + "月|");
+                    }
+                    if (timePartStrs.Length > 2)
+                    {
+                        resultStr.Append("|" + timePartStrs[2] + "日|");
+                    }
+                }
+                else
+                {
+                    List<string> spliterStrs = new List<string>() { "年", "月", "日" };
+                    foreach (string spliterStr in spliterStrs)
+                    {
+                        int num = 0;
+                        if (timeStr.Contains(spliterStr))
+                        {
+                            string[] yearSplitParts = timeStr.Split(new string[] { spliterStr }, StringSplitOptions.None);
+                            if (int.TryParse(yearSplitParts[0], out num))
+                            {
+                                resultStr.Append("|" + num.ToString() + spliterStr + "|");
+                            }
+                            timeStr = yearSplitParts.Length > 1 ? yearSplitParts[1] : "";
+                        }
+                        else
+                        {
+                            if (int.TryParse(timeStr, out num))
+                            {
+                                resultStr.Append("|" + num.ToString() + spliterStr + "|");
+                                break;
+                            }
+                        }
+                    }
+                }
+                return resultStr.ToString();
+            }
+            else
+            {
+                return "";
+            }
         }
 
         private string[] GetShiDai(List<string> sourceTextList, Dictionary<string, int[]> shiDaiDic)
@@ -274,6 +440,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             textSplitSymbolDic.Add(',', true);
             textSplitSymbolDic.Add('。', true);
             textSplitSymbolDic.Add('，', true);
+            textSplitSymbolDic.Add('、', true);
             textSplitSymbolDic.Add('\n', true);
 
 
@@ -399,7 +566,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             resultColumnDic.Add("summaryInfo", 11);
             for (int i = 0; i < this.ShiDaiPropertyList.Count; i++)
             {
-                resultColumnDic.Add(this.ShiDaiPropertyList[i], 11 + i);
+                resultColumnDic.Add(this.ShiDaiPropertyList[i], 12 + i);
             }
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
             return resultEW;
