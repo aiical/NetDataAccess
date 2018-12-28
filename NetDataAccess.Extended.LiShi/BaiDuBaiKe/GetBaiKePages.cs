@@ -24,10 +24,11 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
     {
         public override bool AfterAllGrab(IListSheet listSheet)
         {
-            this.GetRelatedItemPageUrls(listSheet);
+            //this.GetRelatedItemPageUrls(listSheet);
             //this.GetItemTags(listSheet);
             //this.GetItemProperties(listSheet);
-            this.GetItemPropertiesAndTags(listSheet);
+            //this.GetItemPropertiesAndTags(listSheet);
+            this.GetItemVoteUrls(listSheet);
             return true;
         }
 
@@ -350,6 +351,89 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
         }
 
 
+        private void GetItemVoteUrls(IListSheet listSheet)
+        {
+            string sourceDir = this.RunPage.GetDetailSourceFileDir();
+
+            int rowCount = 0;
+            ExcelWriter ptEW = null;
+
+            Dictionary<string, bool> itemMaps = new Dictionary<string, bool>();
+            int fileIndex = 0;
+            int succeedCount = 0;
+
+            for (int i = 0; i < listSheet.RowCount; i++)
+            {
+                Dictionary<string, string> listRow = listSheet.GetRow(i);
+                bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
+                string fromItemUrl = listRow[SysConfig.DetailPageUrlFieldName];
+
+                if (!giveUp)
+                {
+                    try
+                    {
+                        string localFilePath = this.RunPage.GetFilePath(fromItemUrl, sourceDir);
+                        string html = FileHelper.GetTextFromFile(localFilePath, Encoding.UTF8);
+                        if (!html.Contains("您所访问的页面不存在"))
+                        {
+                            HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                            htmlDoc.LoadHtml(html);
+                            HtmlNode titleNode = htmlDoc.DocumentNode.SelectSingleNode("//dd[@class=\"lemmaWgt-lemmaTitle-title\"]/h1");
+                            if (titleNode == null)
+                            {
+                                this.RunPage.InvokeAppendLogText("此词条不存在,百度没有收录, pageUrl = " + fromItemUrl, LogLevelType.Error, true);
+                            }
+                            else
+                            {
+                                string fromItemName = CommonUtil.HtmlDecode(titleNode.InnerText).Trim();
+
+                                HtmlNode itemBaseInfoNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"lemmaWgt-promotion-rightPreciseAd\"]");
+                                string fromItemId = itemBaseInfoNode.GetAttributeValue("data-lemmaid", "");
+                                string fromItemTitle = itemBaseInfoNode.GetAttributeValue("data-lemmatitle", "");
+
+                                string url = "https://baike.baidu.com/api/wikiui/sharecounter?lemmaId=" + fromItemId + "&method=get";
+
+                                if (!itemMaps.ContainsKey(fromItemId))
+                                {
+                                    itemMaps.Add(fromItemId, true);
+                                    succeedCount++;
+                                    rowCount++;
+                                    if (rowCount > 500000 || ptEW == null)
+                                    {
+                                        if (ptEW != null)
+                                        {
+                                            ptEW.SaveToDisk();
+                                        }
+                                        fileIndex++;
+                                        ptEW = this.CreateItemVoteUrlWriter(fileIndex);
+                                    }
+
+                                    Dictionary<string, string> newRow = new Dictionary<string, string>();
+                                    newRow.Add("detailPageUrl", url);
+                                    newRow.Add("detailPageName", url);
+                                    newRow.Add("itemId", fromItemId);
+                                    newRow.Add("itemName", fromItemTitle);
+                                    ptEW.AddRow(newRow);
+                                }
+                                else
+                                {
+                                    this.RunPage.InvokeAppendLogText("(成功解析：" + succeedCount.ToString() + "个，正在处理第" + (i + 1).ToString() + "个)放弃解析此页, 已经解析过此页, pageUrl = " + fromItemUrl, LogLevelType.Error, true);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.RunPage.InvokeAppendLogText(ex.Message + ". 解析出错， pageUrl = " + fromItemUrl, LogLevelType.Error, true);
+                        throw ex;
+                    }
+                }
+            }
+
+            ptEW.SaveToDisk();
+        }
+
+
         private string GetNextDDNodeText(HtmlNode dtNode)
         {
             HtmlNode ddNode = dtNode.NextSibling;
@@ -540,6 +624,22 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
             resultColumnDic.Add("itemId", 1);
             resultColumnDic.Add("itemName", 2);
             resultColumnDic.Add("tags", 3);
+            ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
+            return resultEW;
+        }
+        private ExcelWriter CreateItemVoteUrlWriter(int fileIndex)
+        {
+            String exportDir = this.RunPage.GetExportDir();
+            string resultFilePath = Path.Combine(exportDir, "百度百科_词条_Votes" + fileIndex.ToString() + ".xlsx");
+
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("detailPageUrl", 0);
+            resultColumnDic.Add("detailPageName", 1);
+            resultColumnDic.Add("cookie", 2);
+            resultColumnDic.Add("grabStatus", 3);
+            resultColumnDic.Add("giveUpGrab", 4);
+            resultColumnDic.Add("itemId", 5);
+            resultColumnDic.Add("itemName", 6);
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
             return resultEW;
         }

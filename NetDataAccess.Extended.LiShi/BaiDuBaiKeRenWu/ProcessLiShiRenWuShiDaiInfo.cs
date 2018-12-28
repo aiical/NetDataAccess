@@ -70,46 +70,74 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                         resultRow.Add("itemId", sourceRow["itemId"]);
                         resultRow.Add("itemName", sourceRow["itemName"]);
 
-                        
+
                         string summaryInfo = sourceRow["summaryInfo"];
                         resultRow.Add("summaryInfo", summaryInfo);
 
-                        string beginEndYearStr = this.GetBeginEndYearTextFromSummary(summaryInfo);
-                        resultRow.Add("summaryYear", beginEndYearStr);
+                        string beginEndYearStr = this.GetBeginEndDateTextFromSummary(summaryInfo);
+                        resultRow.Add("summaryDate", beginEndYearStr);
 
-                        string[] yearParts = this.SplitBeginEndYearStr(beginEndYearStr);
-                        resultRow.Add("summaryYearBegin", yearParts == null ? "" : yearParts[0]);
-                        resultRow.Add("summaryYearEnd", yearParts == null ? "" : yearParts[1]);
+                        string[] dateParts = this.SplitBeginEndDateStr(beginEndYearStr);
+                        resultRow.Add("summaryDateBegin", dateParts == null ? "" : dateParts[0]);
+                        resultRow.Add("summaryDateEnd", dateParts == null || dateParts.Length == 1 ? "" : dateParts[1]);
+
+                        Nullable<int> summaryYearBegin = dateParts == null ? null : (Nullable<int>)this.GetYear(dateParts[0]);
+                        resultRow.Add("summaryYearBegin", summaryYearBegin == null ? "" : summaryYearBegin.ToString());
+
+                        Nullable<int> summaryYearEnd = dateParts == null || dateParts.Length == 1 ? null : (Nullable<int>)this.GetYear(dateParts[1]);
+                        resultRow.Add("summaryYearEnd", summaryYearEnd == null ? "" : summaryYearEnd.ToString());
 
                         string birthInfo = this.GetFormattedTimeInfo(this.GetBirthTextFromSummary(summaryInfo));
                         resultRow.Add("birthInfo", birthInfo);
 
-                        string summaryShiDai= CommonUtil.StringArrayToString(this.GetShiDai(new List<string>() { sourceRow["summaryInfo"] }, shiDaiDic), ";");
+                        Nullable<int> birthYear = birthInfo.Length == 0 ? null : (Nullable<int>)this.GetYear(birthInfo);
+                        resultRow.Add("birthYear", birthYear == null ? "" : birthYear.ToString());
+
+                        string[] summaryShiDaiArray = this.GetShiDai(new List<string>() { sourceRow["summaryInfo"] }, shiDaiDic);
+                        string summaryShiDai = summaryShiDaiArray.Length == 0 ? "" : summaryShiDaiArray[0];// CommonUtil.StringArrayToString(summaryShiDaiArray, ";");
                         resultRow.Add("summaryShiDai", summaryShiDai);
 
+                        List<Nullable<int>> propertyYearList = new List<Nullable<int>>();
+
+                        List<string> propertyDateBeginList = new List<string>();
                         List<string> propertyYearBeginList = new List<string>();
-                        foreach (string beginProperty in this.YearBeginPropertyList)
+                        foreach (string beginProperty in this.DateBeginPropertyList)
                         {
                             string beginPropertyValue = sourceRow[beginProperty];
                             string formattedTime = this.GetFormattedTimeInfo(beginPropertyValue);
                             if (formattedTime.Length > 0)
                             {
-                                propertyYearBeginList.Add(formattedTime);
+                                propertyDateBeginList.Add(formattedTime);
+                                Nullable<int> year = this.GetYear(formattedTime);
+                                if (year != null)
+                                {
+                                    propertyYearBeginList.Add(year.ToString());
+                                    propertyYearList.Add(year);
+                                }
                             }
                         }
+                        resultRow.Add("propertyDateBegin", CommonUtil.StringArrayToString(propertyDateBeginList.ToArray(), ";"));
                         resultRow.Add("propertyYearBegin", CommonUtil.StringArrayToString(propertyYearBeginList.ToArray(), ";"));
 
+                        List<string> propertyDateEndList = new List<string>();
                         List<string> propertyYearEndList = new List<string>();
-                        foreach (string endProperty in this.YearEndPropertyList)
+                        foreach (string endProperty in this.DateEndPropertyList)
                         {
                             string endPropertyValue = sourceRow[endProperty];
                             string formattedTime = this.GetFormattedTimeInfo(endPropertyValue);
                             if (formattedTime.Length > 0)
                             {
-                                propertyYearEndList.Add(formattedTime);
+                                propertyDateEndList.Add(formattedTime);
+                                Nullable<int> year = this.GetYear(formattedTime);
+                                if (year != null)
+                                {
+                                    propertyYearEndList.Add(year.ToString());
+                                    propertyYearList.Add(year);
+                                }
                             }
                         }
-                        resultRow.Add("propertyYearEnd", CommonUtil.StringArrayToString(propertyYearEndList.ToArray(), ";")); 
+                        resultRow.Add("propertyDateEnd", CommonUtil.StringArrayToString(propertyDateEndList.ToArray(), ";"));
+                        resultRow.Add("propertyYearEnd", CommonUtil.StringArrayToString(propertyYearEndList.ToArray(), ";"));
 
 
                         List<string> propertyTexts = new List<string>();
@@ -120,7 +148,61 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                             propertyTexts.Add(propertyText);
                         }
 
-                        resultRow.Add("propertyShiDai", CommonUtil.StringArrayToString(this.GetShiDai(propertyTexts, shiDaiDic), ";")); 
+                        string[] propertyShiDaiArray = this.GetShiDai(propertyTexts, shiDaiDic);
+                        string propertyShiDai = propertyShiDaiArray == null || propertyShiDaiArray.Length == 0 ? "" : propertyShiDaiArray[0];
+                        resultRow.Add("propertyShiDai", propertyShiDai);
+
+                        string shiDai = propertyShiDai.Length != 0 ? propertyShiDai : summaryShiDai;
+                        if (shiDai.Length > 0)
+                        {
+                            int[] shiDaiBeginEndYear = this.GetShiDaiBeginEndYear(shiDai, shiDaiDic);
+                            Nullable<bool> summaryYearInScope = this.CheckInScope(new Nullable<int>[] { summaryYearBegin, summaryYearEnd, birthYear }, shiDaiBeginEndYear);
+
+                            resultRow.Add("summaryYearInScope", summaryYearInScope == null ? "" : ((bool)summaryYearInScope ? "1" : "0"));
+                        }
+
+                        string propertyYearMatchedShiDai = this.MatchShiDai(propertyYearList, shiDaiDic);
+                        resultRow.Add("propertyYearMatchedShiDai", propertyYearMatchedShiDai);
+
+                        Nullable<int> beginYear = null;
+                        Nullable<int> endYear = null;
+                        if ((propertyYearBeginList != null && propertyYearBeginList.Count > 0) || summaryYearBegin != null || birthYear != null)
+                        {
+                            if (propertyYearEndList != null && propertyYearBeginList.Count > 0)
+                            {
+                                beginYear = int.Parse(propertyYearBeginList[0]);
+                            }
+                            else if (birthYear != null)
+                            {
+                                beginYear = birthYear;
+                            }
+                            else
+                            {
+                                beginYear = summaryYearBegin;
+                            }
+                        }
+                        if ((propertyYearEndList != null && propertyYearEndList.Count > 0) || summaryYearEnd != null)
+                        {
+                            if (propertyYearEndList != null && propertyYearEndList.Count > 0)
+                            {
+                                endYear = int.Parse(propertyYearEndList[0]);
+                            }
+                            else
+                            {
+                                endYear = summaryYearEnd;
+                            }
+                        }
+                        if (beginYear == null && endYear == null&& shiDai.Length>0)
+                        {
+                            int[] shiDaiYears = shiDaiDic[shiDai];
+                            beginYear = shiDaiYears[0];
+                            endYear = shiDaiYears[1];
+                        }
+
+                        resultRow.Add("beginYear", beginYear.ToString());
+                        resultRow.Add("endYear", endYear.ToString());
+
+
                         resultWriter.AddRow(resultRow);
                     }
                     catch (Exception ex)
@@ -137,33 +219,103 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             }
         }
 
-        private string[] _YearBeginEndSpliter = null;
-        private string[] YearBeginEndSpliter
+        private Nullable<bool> CheckInScope(Nullable<int>[] years, int[] scope)
+        {
+            Nullable<bool> isInScope = null;
+            if (years != null && scope != null && scope.Length != 0)
+            {
+                foreach (Nullable<int> year in years)
+                {
+                    if (year == null)
+                    {
+                        //不做处理
+                    }
+                    else
+                    {
+                        //允许100年的误差
+                        if (scope[0] < year + 100 && scope[1] > year - 100)
+                        {
+                            isInScope = true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return isInScope;
+        }
+
+        private Nullable<int> GetYear(string formatedDateDescription)
+        {
+            if (formatedDateDescription.Length > 0)
+            {
+                string[] partDateStrs = formatedDateDescription.Split(new string[] { "||" }, StringSplitOptions.RemoveEmptyEntries);
+                int year = 0;
+                bool isBC = false;
+                foreach (string partDateStr in partDateStrs)
+                {
+                    string p = partDateStr.Replace("|", "");
+                    if (p == "前")
+                    {
+                        isBC = true;
+                    }
+                    else if (p.Contains("年"))
+                    {
+                        string yearStr = p.Replace("年", "").Trim();
+                        int.TryParse(yearStr, out year);
+                    }
+                }
+                return year == 0 ? null : (Nullable<int>)(isBC ? (0 - year) : year);
+            }
+            return null;
+        }
+
+        private int[] GetShiDaiBeginEndYear(string shiDai,Dictionary<string,int[]> shiDaiDic)
+        {
+            if (shiDai.Length > 0)
+            {
+                if (shiDaiDic.ContainsKey(shiDai))
+                {
+                    return shiDaiDic[shiDai];
+                }
+            }
+            return null;
+        }
+
+        private string[] _DateBeginEndSpliter = null;
+        private string[] DateBeginEndSpliter
         {
             get
             {
-                if (this._YearBeginEndSpliter == null)
+                if (this._DateBeginEndSpliter == null)
                 {
-                    this._YearBeginEndSpliter = new string[] { "----", "--", "——", "~", "一", "～", "-", "—", "－", "─", "至" };
+                    this._DateBeginEndSpliter = new string[] { "----", "--", "——", "~", "一", "～", "-", "—", "－", "─", "―", "至" };
                 }
-                return this._YearBeginEndSpliter;
+                return this._DateBeginEndSpliter;
             }
         }
-        private string[] SplitBeginEndYearStr(string yearInfo)
+        private string[] SplitBeginEndDateStr(string yearInfo)
         {
             if (yearInfo.Length > 0)
             {
-                string[] yearParts = yearInfo.Split(this.YearBeginEndSpliter, StringSplitOptions.None);
-                if (yearParts.Length == 2)
+                string[] dateParts = yearInfo.Split(this.DateBeginEndSpliter, StringSplitOptions.None);
+                if (dateParts.Length == 2)
                 {
                     string[] formattedYearParts = new string[2];
-                    for (int i = 0; i < yearParts.Length; i++)
+                    for (int i = 0; i < dateParts.Length; i++)
                     {
-                        formattedYearParts[i] = this.GetFormattedTimeInfo(yearParts[i]);
+                        formattedYearParts[i] = this.GetFormattedTimeInfo(dateParts[i]);
                     }
 
                     return formattedYearParts;
-                }                
+                }
+                else
+                {
+                    string[] formattedDateParts = new string[1] { this.GetFormattedTimeInfo(dateParts[0]) };
+                    return formattedDateParts;
+                }
             }
             return null;
         }
@@ -225,6 +377,8 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                 chineseToNumDic.Add("九", "9");
                 chineseToNumDic.Add("零", "0");
                 chineseToNumDic.Add("〇", "0");
+                chineseToNumDic.Add("o", "0");
+                chineseToNumDic.Add("O", "0");
                 chineseToNumDic.Add("寒月", "10月");
                 chineseToNumDic.Add("冬月", "11月");
                 chineseToNumDic.Add("腊月", "12月");
@@ -275,9 +429,10 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                     }
                     timeStr = timeStr.Substring(tempIndex + 1);
                 }
-                if (timeStr.Contains("."))
+
+                if (timeStr.Contains(".") || timeStr.Contains("．") || timeStr.Contains("-"))
                 {
-                    string[] timePartStrs = timeStr.Split(new string[] { "." }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] timePartStrs = timeStr.Split(new string[] { ".", "．", "-" }, StringSplitOptions.RemoveEmptyEntries);
                     if (timePartStrs.Length > 0)
                     {
                         resultStr.Append("|" + timePartStrs[0] + "年|");
@@ -326,7 +481,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
 
         private string[] GetShiDai(List<string> sourceTextList, Dictionary<string, int[]> shiDaiDic)
         {
-            Dictionary<string, bool> matchedShiDaiDic = new Dictionary<string,bool>();
+            Dictionary<string, bool> matchedShiDaiDic = new Dictionary<string, bool>();
             foreach (string sourceText in sourceTextList)
             {
                 if (sourceText.Length > 0)
@@ -340,12 +495,31 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                     }
                 }
             }
-            List<string> matchedShiDaiList= new List<string>();
+            List<string> matchedShiDaiList = new List<string>();
             foreach (string shiDai in matchedShiDaiDic.Keys)
             {
                 matchedShiDaiList.Add(shiDai);
             }
             return matchedShiDaiList.ToArray();
+        }
+        private string MatchShiDai(List<Nullable<int>> yearList, Dictionary<string, int[]> shiDaiDic)
+        {
+            foreach (Nullable<int> year in yearList)
+            {
+                if (year != null)
+                {
+                    int yearInt = (int)year;
+                    foreach (string shiDai in shiDaiDic.Keys)
+                    {
+                        int[] scope = shiDaiDic[shiDai];
+                        if (yearInt >= scope[0] && yearInt <= scope[1])
+                        {
+                            return shiDai;
+                        }
+                    }
+                }
+            }
+            return "";
         }
 
         private string ProcessDataText(string sourceText)
@@ -369,7 +543,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             return sourceText;
         }
 
-        private string GetBeginEndYearTextFromSummary(string summaryText)
+        private string GetBeginEndDateTextFromSummary(string summaryText)
         {
             int summaryLength = summaryText.Length;
             int checkIndex = 0;
@@ -396,15 +570,15 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                     {
                         matchedEndIndex = checkIndex;
                         inMatched = false;
-                        string yearText = summaryText.Substring(matchedBeginIndex + 1, matchedEndIndex - matchedBeginIndex - 1);
+                        string dateText = summaryText.Substring(matchedBeginIndex + 1, matchedEndIndex - matchedBeginIndex - 1);
                         bool got = false;
-                        string[] partYearTexts = yearText.Split(splitSymbolArray, StringSplitOptions.RemoveEmptyEntries);
-                        for (int i = 0; i < partYearTexts.Length; i++)
+                        string[] partDateTexts = dateText.Split(splitSymbolArray, StringSplitOptions.RemoveEmptyEntries);
+                        for (int i = 0; i < partDateTexts.Length; i++)
                         {
-                            string partYearText = partYearTexts[i];
-                            if (partYearText.Length > 2 && Regex.IsMatch(partYearText, ".*[0-9]|[0-9].*"))
+                            string partDateText = partDateTexts[i];
+                            if (partDateText.Length > 2 && Regex.IsMatch(partDateText, ".*[0-9]|[0-9].*"))
                             {
-                                return partYearText;
+                                return partDateText;
                             }
                         }
                         if (!got)
@@ -428,11 +602,18 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             return "";
         }
         private string GetBirthTextFromSummary(string summaryText)
-        { 
+        {
+            List<string> removeChars = new List<string>() { " ", "　"};
+            foreach (string removeChar in removeChars)
+            {
+                summaryText = summaryText.Replace(removeChar, "");
+            }
+            
             List<string> birthTextList = new List<string>() { };
             birthTextList.Add("年出生");
             birthTextList.Add("月出生");
             birthTextList.Add("日出生");
+            birthTextList.Add("出生");
             birthTextList.Add("年生");
             birthTextList.Add("月生");
             birthTextList.Add("日生");
@@ -447,10 +628,10 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             foreach (string birthText in birthTextList)
             {
                 int partBeginIndex = -1;
-                int yearTextBeginIndex = summaryText.IndexOf(birthText);
-                if (yearTextBeginIndex > -1)
+                int dateTextBeginIndex = summaryText.IndexOf(birthText);
+                if (dateTextBeginIndex > -1)
                 {
-                    for (int i = yearTextBeginIndex - 1; i >= 0; i--)
+                    for (int i = dateTextBeginIndex - 1; i >= 0; i--)
                     {
                         char checkChar = summaryText[i];
                         if (textSplitSymbolDic.ContainsKey(checkChar))
@@ -459,7 +640,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                             break;
                         }
                     }
-                    return summaryText.Substring(partBeginIndex + 1, yearTextBeginIndex - partBeginIndex - 1).Trim()+ birthText;
+                    return summaryText.Substring(partBeginIndex + 1, dateTextBeginIndex - partBeginIndex - 1).Trim()+ birthText;
                 }
             }
             return "";
@@ -502,34 +683,34 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
                 return this._ShiDaiPropertyList;
             }
         }
-        private List<string> _YearBeginPropertyList = null;
-        private List<string> YearBeginPropertyList
+        private List<string> _DateBeginPropertyList = null;
+        private List<string> DateBeginPropertyList
         {
             get
             {
-                if (this._YearBeginPropertyList == null)
+                if (this._DateBeginPropertyList == null)
                 {
-                    this._YearBeginPropertyList = new List<string>() { 
+                    this._DateBeginPropertyList = new List<string>() { 
                         "出生日期",
                         "出生时间"};
                 }
-                return this._YearBeginPropertyList;
+                return this._DateBeginPropertyList;
             }
         }
-        private List<string> _YearEndPropertyList = null;
-        private List<string> YearEndPropertyList
+        private List<string> _DateEndPropertyList = null;
+        private List<string> DateEndPropertyList
         {
             get
             {
-                if (this._YearEndPropertyList == null)
+                if (this._DateEndPropertyList == null)
                 {
-                    this._YearEndPropertyList = new List<string>() { 
+                    this._DateEndPropertyList = new List<string>() { 
                         "去世日期",
                         "去世时间", 
                         "逝世日期", 
                         "逝世时间" };
                 }
-                return this._YearEndPropertyList;
+                return this._DateEndPropertyList;
             }
         }
         private Dictionary<string, string> _ShiDaiPropertyDic = null;
@@ -555,18 +736,27 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKeRenWu
             resultColumnDic.Add("url", 0);
             resultColumnDic.Add("itemId", 1);
             resultColumnDic.Add("itemName", 2);
-            resultColumnDic.Add("summaryYear", 3);
-            resultColumnDic.Add("summaryYearBegin", 4);
-            resultColumnDic.Add("summaryYearEnd", 5);
-            resultColumnDic.Add("birthInfo", 6);
-            resultColumnDic.Add("summaryShiDai", 7);
-            resultColumnDic.Add("propertyYearBegin", 8);
-            resultColumnDic.Add("propertyYearEnd", 9);
-            resultColumnDic.Add("propertyShiDai", 10);
-            resultColumnDic.Add("summaryInfo", 11);
+            resultColumnDic.Add("summaryDate", 3);
+            resultColumnDic.Add("summaryDateBegin", 4);
+            resultColumnDic.Add("summaryDateEnd", 5);
+            resultColumnDic.Add("summaryYearBegin", 6);
+            resultColumnDic.Add("summaryYearEnd", 7);
+            resultColumnDic.Add("birthInfo", 8);
+            resultColumnDic.Add("birthYear", 9);
+            resultColumnDic.Add("summaryShiDai", 10);
+            resultColumnDic.Add("propertyDateBegin", 11);
+            resultColumnDic.Add("propertyDateEnd", 12);
+            resultColumnDic.Add("propertyYearBegin", 13);
+            resultColumnDic.Add("propertyYearEnd", 14);
+            resultColumnDic.Add("propertyShiDai", 15);
+            resultColumnDic.Add("summaryInfo", 16);
+            resultColumnDic.Add("summaryYearInScope", 17);
+            resultColumnDic.Add("propertyYearMatchedShiDai", 18);
+            resultColumnDic.Add("beginYear", 19);
+            resultColumnDic.Add("endYear", 20);
             for (int i = 0; i < this.ShiDaiPropertyList.Count; i++)
             {
-                resultColumnDic.Add(this.ShiDaiPropertyList[i], 12 + i);
+                resultColumnDic.Add(this.ShiDaiPropertyList[i], 21 + i);
             }
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
             return resultEW;

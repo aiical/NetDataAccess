@@ -24,6 +24,8 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
     { 
         public override bool AfterAllGrab(IListSheet listSheet)
         {
+            this.GetItemBaseInfos(listSheet);
+
             this.GetRelatedItemPageUrls(listSheet);
 
             this.GetChaoDaiProperties(listSheet);
@@ -31,6 +33,107 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
             this.GetChaoDaiRemainProperties(listSheet);
 
             return true;
+        }
+
+
+
+        private void GetItemBaseInfos(IListSheet listSheet)
+        {
+            string sourceDir = this.RunPage.GetDetailSourceFileDir();
+
+            int rowCount = 0;
+            ExcelWriter baseInfoEW = null;
+
+            Dictionary<string, bool> itemMaps = new Dictionary<string, bool>();
+            int fileIndex = 0;
+
+            for (int i = 0; i < listSheet.RowCount; i++)
+            {
+                Dictionary<string, string> listRow = listSheet.GetRow(i);
+                bool giveUp = "Y".Equals(listRow[SysConfig.GiveUpGrabFieldName]);
+                string itemUrl = listRow[SysConfig.DetailPageUrlFieldName];
+                if (!giveUp)
+                {
+                    try
+                    {
+                        string localFilePath = this.RunPage.GetFilePath(itemUrl, sourceDir);
+                        string html = FileHelper.GetTextFromFile(localFilePath, Encoding.UTF8);
+                        if (!html.Contains("您所访问的页面不存在"))
+                        {
+                            HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
+                            htmlDoc.LoadHtml(html);
+                            HtmlNode titleNode = htmlDoc.DocumentNode.SelectSingleNode("//dd[@class=\"lemmaWgt-lemmaTitle-title\"]/h1");
+                            if (titleNode == null)
+                            {
+                                this.RunPage.InvokeAppendLogText("此词条不存在,百度没有收录, pageUrl = " + itemUrl, LogLevelType.Error, true);
+                            }
+                            else
+                            {
+                                string fromItemName = CommonUtil.HtmlDecode(titleNode.InnerText).Trim();
+
+                                HtmlNode itemBaseInfoNode = htmlDoc.DocumentNode.SelectSingleNode("//div[@class=\"lemmaWgt-promotion-rightPreciseAd\"]");
+                                string itemId = itemBaseInfoNode.GetAttributeValue("data-lemmaid", "");
+                                string itemTitle = itemBaseInfoNode.GetAttributeValue("data-lemmatitle", "");
+
+                                HtmlNodeCollection summaryInfoNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"lemma-summary\"]/div[@class=\"para\"]");
+                                StringBuilder summaryStrBuilder = new StringBuilder();
+                                if (summaryInfoNodes != null)
+                                {
+                                    foreach (HtmlNode summaryInfoNode in summaryInfoNodes)
+                                    {
+                                        summaryStrBuilder.AppendLine(CommonUtil.HtmlDecode(summaryInfoNode.InnerText).Trim());
+                                    }
+                                }
+
+
+                                if (!itemMaps.ContainsKey(itemId))
+                                {
+                                    itemMaps.Add(itemId, true);
+                                    HtmlNodeCollection tagNodes = htmlDoc.DocumentNode.SelectNodes("//dd[@id=\"open-tag-item\"]/span[@class=\"taglist\"]");
+                                    List<string> tagList = new List<string>();
+                                    if (tagNodes != null)
+                                    {
+                                        foreach (HtmlNode tagNode in tagNodes)
+                                        {
+                                            tagList.Add(CommonUtil.HtmlDecode(tagNode.InnerText).Trim());
+                                        }
+                                    }
+
+                                    rowCount++;
+                                    if (rowCount > 500000 || baseInfoEW == null)
+                                    {
+                                        if (baseInfoEW != null)
+                                        {
+                                            baseInfoEW.SaveToDisk();
+                                        }
+                                        fileIndex++;
+                                        baseInfoEW = this.CreateItemBaseInfoWriter(fileIndex);
+                                    }
+
+                                    Dictionary<string, string> newRow = new Dictionary<string, string>();
+                                    newRow.Add("url", itemUrl);
+                                    newRow.Add("itemId", itemId);
+                                    newRow.Add("itemName", itemTitle);
+                                    newRow.Add("summaryInfo", summaryStrBuilder.ToString().Trim()); 
+                                    baseInfoEW.AddRow(newRow);
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            this.RunPage.InvokeAppendLogText("放弃解析此页, 所访问的页面不存在, pageUrl = " + itemUrl, LogLevelType.Error, true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.RunPage.InvokeAppendLogText(ex.Message + ". 解析出错， pageUrl = " + itemUrl, LogLevelType.Error, true);
+                        throw ex;
+                    }
+                }
+            }
+
+            baseInfoEW.SaveToDisk();
         }
 
         private void GetChaoDaiProperties(IListSheet listSheet)
@@ -51,6 +154,7 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
                         try
                         {
                             HtmlAgilityPack.HtmlDocument htmlDoc = this.RunPage.GetLocalHtmlDocument(listSheet, i);
+
                             HtmlNodeCollection dtNodes = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"basic-info cmn-clearfix\"]/dl/dt");
                             if (dtNodes != null)
                             {
@@ -525,6 +629,20 @@ namespace NetDataAccess.Extended.LiShi.BaiDuBaiKe
             resultColumnDic.Add("giveUpGrab", 4);
             resultColumnDic.Add("itemId", 5);
             resultColumnDic.Add("itemName", 6);
+            ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
+            return resultEW;
+        }
+
+        private ExcelWriter CreateItemBaseInfoWriter(int fileIndex)
+        {
+            String exportDir = this.RunPage.GetExportDir();
+            string resultFilePath = Path.Combine(exportDir, "百度百科_朝代_基本信息_" + fileIndex.ToString() + ".xlsx");
+
+            Dictionary<string, int> resultColumnDic = new Dictionary<string, int>();
+            resultColumnDic.Add("url", 0);
+            resultColumnDic.Add("itemId", 1);
+            resultColumnDic.Add("itemName", 2);
+            resultColumnDic.Add("summaryInfo", 3); 
             ExcelWriter resultEW = new ExcelWriter(resultFilePath, "List", resultColumnDic, null);
             return resultEW;
         }         
